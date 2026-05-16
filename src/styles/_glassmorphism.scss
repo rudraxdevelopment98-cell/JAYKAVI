@@ -1,0 +1,26 @@
+@mixin glass(
+  $blur: var(--glass-blur),
+  $bg: var(--glass-bg),
+  $border: var(--glass-border)
+) {
+  background: $bg;
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+  border: 1px solid $border;
+  box-shadow:
+    0 4px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+@mixin glass-card {
+  @include glass;
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+@mixin glass-nav {
+  background: var(--glass-nav-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--glass-border);
+}

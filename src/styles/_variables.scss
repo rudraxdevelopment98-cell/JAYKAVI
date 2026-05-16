@@ -1,0 +1,25 @@
+// Motion tokens
+$duration-fast: 150ms;
+$duration-base: 300ms;
+$duration-slow: 600ms;
+$duration-cinematic: 1200ms;
+
+$ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+$ease-snap: cubic-bezier(0.4, 0, 0.2, 1);
+$ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+$ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
+
+// Z-index scale
+$z-base: 1;
+$z-raised: 10;
+$z-overlay: 100;
+$z-modal: 200;
+$z-nav: 300;
+$z-toast: 400;
+
+// Breakpoints (matching Tailwind)
+$bp-sm: 640px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+$bp-xl: 1280px;
+$bp-2xl: 1536px;
