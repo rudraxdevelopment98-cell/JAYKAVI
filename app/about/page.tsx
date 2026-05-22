@@ -4,8 +4,8 @@ import { FadeUp } from '@/components/Reveal';
 
 export const metadata: Metadata = { title: 'About — JAYKAVI' };
 
-export default function AboutPage() {
-  const l = getLyricist();
+export default async function AboutPage() {
+  const l = await getLyricist();
   return (
     <div style={{ padding: '16vh 6vw 9vh', maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 2 }}>
       <FadeUp>

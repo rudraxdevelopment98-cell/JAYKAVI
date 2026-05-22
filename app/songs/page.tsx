@@ -5,9 +5,8 @@ import SongArchive from '@/components/SongArchive';
 
 export const metadata: Metadata = { title: 'Songs — JAYKAVI', description: 'The complete archive of songs written by JAYKAVI.' };
 
-export default function SongsPage() {
-  const songs = getAllSongs();
-  const facets = getFacets();
+export default async function SongsPage() {
+  const [songs, facets] = await Promise.all([getAllSongs(), getFacets()]);
 
   return (
     <div style={{ padding: '16vh 6vw 9vh', position: 'relative', zIndex: 2 }}>

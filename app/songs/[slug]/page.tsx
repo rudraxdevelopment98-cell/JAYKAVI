@@ -4,12 +4,13 @@ import Link from 'next/link';
 import { getAllSongs, getSongBySlug, getCollectionById } from '@/lib/data';
 import PlatformLinkButtons from '@/components/PlatformLinkButtons';
 
-export function generateStaticParams() {
-  return getAllSongs().map((s) => ({ slug: s.slug }));
+export async function generateStaticParams() {
+  const songs = await getAllSongs();
+  return songs.map((s) => ({ slug: s.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const song = getSongBySlug(params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const song = await getSongBySlug(params.slug);
   if (!song) return { title: 'Song not found' };
   const desc = song.lyrics ? song.lyrics.slice(0, 150) : `${song.title} — written by ${song.lyricist}`;
   return {
@@ -19,12 +20,15 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   };
 }
 
-export default function SongDetail({ params }: { params: { slug: string } }) {
-  const song = getSongBySlug(params.slug);
+export default async function SongDetail({ params }: { params: { slug: string } }) {
+  const song = await getSongBySlug(params.slug);
   if (!song) notFound();
 
-  const collection = getCollectionById(song.collectionId);
-  const related = getAllSongs()
+  const [collection, all] = await Promise.all([
+    getCollectionById(song.collectionId),
+    getAllSongs(),
+  ]);
+  const related = all
     .filter((s) => s.id !== song.id && (
       s.collectionId === song.collectionId && song.collectionId ||
       s.performingSingers.some((p) => song.performingSingers.includes(p))

@@ -4,9 +4,8 @@ import { FadeUp } from '@/components/Reveal';
 
 export const metadata: Metadata = { title: 'Journey — JAYKAVI' };
 
-export default function JourneyPage() {
-  const milestones = getJourney();
-  const l = getLyricist();
+export default async function JourneyPage() {
+  const [milestones, l] = await Promise.all([getJourney(), getLyricist()]);
 
   return (
     <div style={{ padding: '16vh 6vw 9vh', position: 'relative', zIndex: 2 }}>

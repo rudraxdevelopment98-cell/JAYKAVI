@@ -9,17 +9,18 @@ import SmoothScroll from '@/components/SmoothScroll';
 const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', display: 'swap' });
 const hanken = Hanken_Grotesk({ subsets: ['latin'], variable: '--font-hanken', display: 'swap' });
 
-const l = getLyricist();
-
-export const metadata: Metadata = {
-  title: `${l.displayName ?? l.name} — ${l.tagline}`,
-  description: l.bio,
-  openGraph: {
-    title: `${l.displayName ?? l.name}`,
-    description: l.tagline,
-    type: 'website',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const l = await getLyricist();
+  return {
+    title: `${l.displayName ?? l.name} — ${l.tagline}`,
+    description: l.bio,
+    openGraph: {
+      title: `${l.displayName ?? l.name}`,
+      description: l.tagline,
+      type: 'website',
+    },
+  };
+}
 
 // Inline script: set theme before paint to avoid flash
 const themeScript = `

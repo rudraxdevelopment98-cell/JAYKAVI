@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import { getLyricist, getSocial } from '@/lib/data';
 
-export default function Footer() {
-  const l = getLyricist();
-  const social = getSocial();
+export default async function Footer() {
+  const [l, social] = await Promise.all([getLyricist(), getSocial()]);
   const socialEntries = Object.entries(social).filter(([, v]) => v && v.startsWith('http'));
 
   return (

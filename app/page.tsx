@@ -5,11 +5,16 @@ import HorizontalScrollRow from '@/components/HorizontalScrollRow';
 import SectionHead from '@/components/SectionHead';
 import { FadeUp } from '@/components/Reveal';
 
-export default function Home() {
-  const l = getLyricist();
-  const trending = getTrendingSongs();
-  const top = getTopSongs(10).filter((s) => s.viewCount > 0);
-  const journey = getJourney().slice(0, 4);
+export default async function Home() {
+  const [l, trendingAll, topAll, journeyAll] = await Promise.all([
+    getLyricist(),
+    getTrendingSongs(),
+    getTopSongs(10),
+    getJourney(),
+  ]);
+  const trending = trendingAll;
+  const top = topAll.filter((s) => s.viewCount > 0);
+  const journey = journeyAll.slice(0, 4);
 
   return (
     <>
