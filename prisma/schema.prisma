@@ -145,3 +145,50 @@ model JourneyMilestone {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
+
+// ----------------------------- HARVESTER -----------------------------
+
+// Singleton: harvester configuration (editable from admin UI).
+model HarvestConfig {
+  id                Int      @id @default(1)
+  ownChannels       String[] @default([])
+  searchTerms       String[] @default([])
+  creditMustContain String[] @default([])
+  knownSingers      String[] @default([])
+  maxResultsPerTerm Int      @default(100)
+  updatedAt         DateTime @updatedAt
+}
+
+// One row per harvest run.
+model HarvestRun {
+  id         String             @id @default(cuid())
+  startedAt  DateTime           @default(now())
+  finishedAt DateTime?
+  status     String             @default("running") // running | done | error
+  scanned    Int                @default(0)
+  newFound   Int                @default(0)
+  approved   Int                @default(0)
+  errorMsg   String?
+  candidates HarvestCandidate[]
+}
+
+// Each YouTube video surfaced by a run — awaiting admin review.
+model HarvestCandidate {
+  id           String     @id @default(cuid())
+  runId        String
+  run          HarvestRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  youtubeId    String
+  rawTitle     String
+  cleanTitle   String
+  channelTitle String?
+  description  String     @default("")
+  thumbnailUrl String?
+  viewCount    Int?
+  releaseYear  Int?
+  singerGuess  String?
+  status       String     @default("pending") // pending | approved | rejected | duplicate
+  songId       String?    // set when approved -> links to created Song
+  createdAt    DateTime   @default(now())
+
+  @@unique([youtubeId]) // one candidate per video, ever
+}
