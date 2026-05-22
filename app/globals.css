@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0A0A0B;
+  --panel: rgba(28, 28, 34, 0.55);
+  --panel-solid: #14141a;
+  --text: #F4F1EA;
+  --muted: #9A95A8;
+  --line: rgba(255, 255, 255, 0.08);
+  --accent: #22E1E1;
+  --glow: 0 0 60px rgba(91, 42, 134, 0.45);
+  --hero-grad:
+    radial-gradient(120% 90% at 70% 10%, rgba(91,42,134,.55), transparent 55%),
+    radial-gradient(90% 80% at 15% 30%, rgba(45,107,255,.35), transparent 60%),
+    radial-gradient(70% 70% at 50% 100%, rgba(34,225,225,.18), transparent 55%);
+}
+
+[data-theme='light'] {
+  --bg: #FAF7F2;
+  --panel: rgba(255, 255, 255, 0.6);
+  --panel-solid: #FFFFFF;
+  --text: #2B2B2B;
+  --muted: #6B6457;
+  --line: rgba(43, 43, 43, 0.1);
+  --accent: #C9A961;
+  --glow: 0 20px 60px rgba(201, 169, 97, 0.25);
+  --hero-grad:
+    radial-gradient(120% 90% at 70% 10%, rgba(201,169,97,.28), transparent 55%),
+    radial-gradient(90% 80% at 15% 30%, rgba(237,227,212,.9), transparent 60%),
+    radial-gradient(70% 70% at 50% 100%, rgba(245,239,230,.8), transparent 55%);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-hanken), system-ui, sans-serif;
+  margin: 0;
+  overflow-x: hidden;
+  transition: background .6s ease, color .6s ease;
+  min-height: 100vh;
+}
+
+/* grain overlay */
+body::before {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: .04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.font-serif { font-family: var(--font-fraunces), Georgia, serif; }
+
+a { color: inherit; }
+
+.glass {
+  background: var(--panel);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--line);
+}
+.text-muted { color: var(--muted); }
+.accent { color: var(--accent); }
+
+::-webkit-scrollbar { height: 8px; width: 8px; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 10px; }
+
+.gradient-text {
+  background: linear-gradient(100deg, var(--accent), #2D6BFF, #5B2A86);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

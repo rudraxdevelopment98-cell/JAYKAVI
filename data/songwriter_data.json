@@ -1,0 +1,227 @@
+{
+  "lyricist": {
+    "name": "Jayesh Prajapati",
+    "penName": "JAYKAVI",
+    "displayName": "Jayesh Prajapati \"JAYKAVI\"",
+    "creditVariants": [
+      "JAYKAVI",
+      "JAYESH PRAJAPATI",
+      "JAYESH PRAJAPATI (JAYKAVI)"
+    ],
+    "title": "Lok Sahityakar • Song Writer • Lyricist (Gujarati Folk)",
+    "tagline": "Voice of Gujarati folk — 1400+ songs, sung across the land.",
+    "bornPlace": "Jangar, Amreli, Gujarat, India",
+    "basedIn": "Ahmedabad, Gujarat, India",
+    "languages": [
+      "Gujarati"
+    ],
+    "genres": [
+      "Lok Geet (folk song)",
+      "Dayro",
+      "Garba",
+      "Bhajan",
+      "Devotional / Chhand"
+    ],
+    "careerStartYear": 2000,
+    "stats": {
+      "songsWritten": "1400+",
+      "songsPublishedOnStreaming": "700+"
+    },
+    "bio": "Jayesh Prajapati, known by his pen name JAYKAVI, is a Gujarati Lok Sahityakar (folk litterateur), songwriter and lyricist from Ahmedabad, born in the village of Jangar in Amreli district. Rooted in Gujarat's living folk traditions — Dayro, Lok Geet and Garba — he began writing songs around the year 2000 and has since penned over 1,400 songs. More than 700 of his works are available on YouTube and other streaming platforms, performed by many of Gujarat's most loved voices.",
+    "philosophy": "",
+    "awards": [],
+    "press": [],
+    "birthDate": "1978-09-18"
+  },
+  "contact": {
+    "public": {
+      "useContactForm": true,
+      "showEmailPublicly": false,
+      "social": {
+        "instagram": "https://www.instagram.com/jayeshprajapati_official/",
+        "instagramSecondary": "@jaykavi_official",
+        "youtube": "",
+        "spotify": "",
+        "jiosaavn": ""
+      }
+    },
+    "private": {
+      "_note": "NOT for public display. Stored for the owner/admin only. Do not render on any public page.",
+      "email": "jayeshprajapati446@gmail.com",
+      "phone": "+91 8160207300"
+    }
+  },
+  "singers": [
+    {
+      "id": "singer-geeta-rabari",
+      "name": "Geeta Rabari",
+      "photoUrl": null,
+      "bio": null
+    },
+    {
+      "id": "singer-kinjal-dave",
+      "name": "Kinjal Dave",
+      "photoUrl": null,
+      "bio": null
+    },
+    {
+      "id": "singer-birju-barot",
+      "name": "Birju Barot",
+      "photoUrl": null,
+      "bio": null
+    },
+    {
+      "id": "singer-yogita-patel",
+      "name": "Yogita Patel",
+      "photoUrl": null,
+      "bio": null
+    },
+    {
+      "id": "singer-alpa-patel",
+      "name": "Alpa Patel",
+      "photoUrl": null,
+      "bio": null
+    },
+    {
+      "id": "singer-jigrra",
+      "name": "Jigrra",
+      "photoUrl": null,
+      "bio": null
+    },
+    {
+      "id": "singer-aishwarya-majmudar",
+      "name": "Aishwarya Majmudar",
+      "photoUrl": null,
+      "bio": null
+    }
+  ],
+  "collections": [],
+  "songs": [
+    {
+      "id": "song-kana-ne-joya",
+      "slug": "kana-ne-joya",
+      "title": "Kana Ne Joya",
+      "altTitles": [],
+      "lyricist": "Jayesh Prajapati \"JAYKAVI\"",
+      "performingSingers": [],
+      "composer": null,
+      "collectionId": null,
+      "language": "Gujarati",
+      "genre": [
+        "Lok Geet"
+      ],
+      "mood": [
+        "Devotional"
+      ],
+      "releaseYear": null,
+      "artworkUrl": "",
+      "lyrics": "",
+      "lyricsTranslations": [],
+      "platformLinks": [],
+      "viewCount": 0,
+      "isTrending": true,
+      "embed": {
+        "youtubeId": null,
+        "spotifyTrackId": null
+      }
+    },
+    {
+      "id": "song-mogal-ne-roj-bolavu-chu",
+      "slug": "mogal-ne-roj-bolavu-chu",
+      "title": "Mogal Ne Roj Bolavu Chu",
+      "altTitles": [],
+      "lyricist": "Jayesh Prajapati \"JAYKAVI\"",
+      "performingSingers": [],
+      "composer": null,
+      "collectionId": null,
+      "language": "Gujarati",
+      "genre": [
+        "Lok Geet"
+      ],
+      "mood": [
+        "Devotional"
+      ],
+      "releaseYear": null,
+      "artworkUrl": "",
+      "lyrics": "",
+      "lyricsTranslations": [],
+      "platformLinks": [],
+      "viewCount": 0,
+      "isTrending": true,
+      "embed": {
+        "youtubeId": null,
+        "spotifyTrackId": null
+      }
+    },
+    {
+      "id": "song-radhe-radhe-govinda",
+      "slug": "radhe-radhe-govinda",
+      "title": "Radhe Radhe Govinda",
+      "altTitles": [],
+      "lyricist": "Jayesh Prajapati \"JAYKAVI\"",
+      "performingSingers": [],
+      "composer": null,
+      "collectionId": null,
+      "language": "Gujarati",
+      "genre": [
+        "Bhajan"
+      ],
+      "mood": [
+        "Devotional"
+      ],
+      "releaseYear": null,
+      "artworkUrl": "",
+      "lyrics": "",
+      "lyricsTranslations": [],
+      "platformLinks": [],
+      "viewCount": 0,
+      "isTrending": true,
+      "embed": {
+        "youtubeId": null,
+        "spotifyTrackId": null
+      }
+    }
+  ],
+  "journey": [
+    {
+      "id": "milestone-birth",
+      "year": 1978,
+      "title": "Born in Jangar, Amreli",
+      "description": "Born on 18 September 1978 in the village of Jangar, Amreli district, Gujarat — the soil of folk tradition that would shape his voice.",
+      "imageUrl": null,
+      "relatedSongIds": []
+    },
+    {
+      "id": "milestone-roots",
+      "year": null,
+      "title": "Rooted in Gujarati folk",
+      "description": "Immersed in Gujarat's living folk forms — Dayro, Lok Geet and Garba — performing and absorbing the tradition.",
+      "imageUrl": null,
+      "relatedSongIds": []
+    },
+    {
+      "id": "milestone-first-songs",
+      "year": 2000,
+      "title": "Began writing songs",
+      "description": "Around the year 2000, started writing his own lyrics, beginning a journey that would span over 1,400 songs.",
+      "imageUrl": null,
+      "relatedSongIds": []
+    },
+    {
+      "id": "milestone-streaming",
+      "year": null,
+      "title": "700+ songs reach the world",
+      "description": "Over 700 of his songs published on YouTube and streaming platforms, performed by leading Gujarati singers including Geeta Rabari, Kinjal Dave, Birju Barot, Yogita Patel, Alpa Patel, Jigrra and Aishwarya Majmudar.",
+      "imageUrl": null,
+      "relatedSongIds": []
+    },
+    {
+      "id": "milestone-present",
+      "year": null,
+      "title": "1400+ songs and counting",
+      "description": "Today, JAYKAVI continues to write — a prolific voice of contemporary Gujarati folk.",
+      "imageUrl": null,
+      "relatedSongIds": []
+    }
+  ]
+}
