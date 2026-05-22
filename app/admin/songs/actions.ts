@@ -1,0 +1,209 @@
+'use server';
+
+import { auth } from '@/auth';
+import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+
+function assertAdmin(s: any) {
+  if (!s || !s.isAdmin) throw new Error('Unauthorized');
+}
+function str(v: FormDataEntryValue | null): string {
+  return typeof v === 'string' ? v.trim() : '';
+}
+function strOrNull(v: FormDataEntryValue | null): string | null {
+  const s = str(v);
+  return s === '' ? null : s;
+}
+function intOrNull(v: FormDataEntryValue | null): number | null {
+  const s = str(v);
+  if (!s) return null;
+  const n = parseInt(s, 10);
+  return Number.isFinite(n) ? n : null;
+}
+function csv(v: FormDataEntryValue | null): string[] {
+  if (typeof v !== 'string') return [];
+  return v.split(',').map((s) => s.trim()).filter(Boolean);
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 80)
+    .replace(/^-+|-+$/g, '');
+}
+
+interface PlatformLinkInput {
+  platform: string;
+  url: string;
+  isPrimary: boolean;
+}
+
+interface TranslationInput {
+  language: string;
+  text: string;
+}
+
+function parseJsonField<T>(v: FormDataEntryValue | null): T[] {
+  if (typeof v !== 'string' || !v.trim()) return [];
+  try {
+    const parsed = JSON.parse(v);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+async function uniqueSlug(base: string, excludeId?: string): Promise<string> {
+  let slug = base;
+  let i = 0;
+  while (true) {
+    const existing = await prisma.song.findUnique({ where: { slug } });
+    if (!existing || existing.id === excludeId) return slug;
+    i++;
+    slug = `${base}-${i}`;
+  }
+}
+
+interface SongPayload {
+  title: string;
+  slug: string;
+  altTitles: string[];
+  lyricistCredit: string;
+  composer: string | null;
+  collectionId: string | null;
+  language: string;
+  genre: string[];
+  mood: string[];
+  releaseYear: number | null;
+  artworkUrl: string | null;
+  lyrics: string;
+  viewCount: number;
+  isTrending: boolean;
+  youtubeId: string | null;
+  spotifyTrackId: string | null;
+}
+
+function buildPayload(formData: FormData): SongPayload & {
+  singerIds: string[];
+  platformLinks: PlatformLinkInput[];
+  lyricsTranslations: TranslationInput[];
+} {
+  const title = str(formData.get('title'));
+  return {
+    title,
+    slug: str(formData.get('slug')) || slugify(title),
+    altTitles: csv(formData.get('altTitles')),
+    lyricistCredit: str(formData.get('lyricistCredit')) || 'Jayesh Prajapati "JAYKAVI"',
+    composer: strOrNull(formData.get('composer')),
+    collectionId: strOrNull(formData.get('collectionId')),
+    language: str(formData.get('language')) || 'Gujarati',
+    genre: csv(formData.get('genre')),
+    mood: csv(formData.get('mood')),
+    releaseYear: intOrNull(formData.get('releaseYear')),
+    artworkUrl: strOrNull(formData.get('artworkUrl')),
+    lyrics: str(formData.get('lyrics')),
+    viewCount: intOrNull(formData.get('viewCount')) ?? 0,
+    isTrending: formData.get('isTrending') === 'on',
+    youtubeId: strOrNull(formData.get('youtubeId')),
+    spotifyTrackId: strOrNull(formData.get('spotifyTrackId')),
+    singerIds: csv(formData.get('singerIds')),
+    platformLinks: parseJsonField<PlatformLinkInput>(formData.get('platformLinks')),
+    lyricsTranslations: parseJsonField<TranslationInput>(formData.get('lyricsTranslations')),
+  };
+}
+
+export async function createSong(formData: FormData) {
+  assertAdmin(await auth());
+  const p = buildPayload(formData);
+  if (!p.title) throw new Error('Title is required');
+
+  const slug = await uniqueSlug(p.slug);
+
+  const song = await prisma.song.create({
+    data: {
+      title: p.title,
+      slug,
+      altTitles: p.altTitles,
+      lyricistCredit: p.lyricistCredit,
+      composer: p.composer,
+      collectionId: p.collectionId,
+      language: p.language,
+      genre: p.genre,
+      mood: p.mood,
+      releaseYear: p.releaseYear,
+      artworkUrl: p.artworkUrl,
+      lyrics: p.lyrics,
+      viewCount: p.viewCount,
+      isTrending: p.isTrending,
+      youtubeId: p.youtubeId,
+      spotifyTrackId: p.spotifyTrackId,
+      singers: {
+        create: p.singerIds.map((singerId) => ({ singerId })),
+      },
+      platformLinks: { create: p.platformLinks },
+      lyricsTranslations: { create: p.lyricsTranslations },
+    },
+  });
+
+  revalidatePath('/admin/songs');
+  redirect(`/admin/songs/${song.id}`);
+}
+
+export async function updateSong(id: string, formData: FormData) {
+  assertAdmin(await auth());
+  const p = buildPayload(formData);
+  if (!p.title) throw new Error('Title is required');
+
+  const slug = await uniqueSlug(p.slug, id);
+
+  await prisma.$transaction([
+    prisma.song.update({
+      where: { id },
+      data: {
+        title: p.title,
+        slug,
+        altTitles: p.altTitles,
+        lyricistCredit: p.lyricistCredit,
+        composer: p.composer,
+        collectionId: p.collectionId,
+        language: p.language,
+        genre: p.genre,
+        mood: p.mood,
+        releaseYear: p.releaseYear,
+        artworkUrl: p.artworkUrl,
+        lyrics: p.lyrics,
+        viewCount: p.viewCount,
+        isTrending: p.isTrending,
+        youtubeId: p.youtubeId,
+        spotifyTrackId: p.spotifyTrackId,
+      },
+    }),
+    prisma.songSinger.deleteMany({ where: { songId: id } }),
+    prisma.platformLink.deleteMany({ where: { songId: id } }),
+    prisma.lyricsTranslation.deleteMany({ where: { songId: id } }),
+    ...p.singerIds.map((singerId) =>
+      prisma.songSinger.create({ data: { songId: id, singerId } })
+    ),
+    ...p.platformLinks.map((l) =>
+      prisma.platformLink.create({ data: { songId: id, ...l } })
+    ),
+    ...p.lyricsTranslations.map((t) =>
+      prisma.lyricsTranslation.create({ data: { songId: id, ...t } })
+    ),
+  ]);
+
+  revalidatePath('/admin/songs');
+  revalidatePath(`/admin/songs/${id}`);
+  revalidatePath('/songs');
+}
+
+export async function deleteSong(id: string) {
+  assertAdmin(await auth());
+  await prisma.song.delete({ where: { id } });
+  revalidatePath('/admin/songs');
+  redirect('/admin/songs');
+}
