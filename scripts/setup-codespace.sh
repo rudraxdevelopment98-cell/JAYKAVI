@@ -14,7 +14,7 @@ fi
 cat > .env <<'ENVEOF'
 AUTH_SECRET=jncFrPpv6bL9xCF3FsyGfbSOmvgjmpHJIjIq7Y12MRU=
 AUTH_TRUST_HOST=true
-ADMIN_EMAILS=kuldeepjotaniya83@gmail.com
+ADMIN_EMAILS=kuldeepjotaniya83@gmail.com,rudraxdevelopment98@gmail.com,jayeshprajapati446@gmail.com
 DATABASE_URL=postgresql://neondb_owner:npg_Pnj8pq3HKaiC@ep-misty-morning-apgjxze8-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
 GOOGLE_CLIENT_ID=REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET=REPLACE_WITH_YOUR_GOOGLE_CLIENT_SECRET
