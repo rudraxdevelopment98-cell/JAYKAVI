@@ -1,0 +1,147 @@
+// JAYKAVI — site database schema
+// Mirrors the existing songwriter_data.json structure.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------------- SINGLETON CONFIG --------------------------
+
+// Singleton: there is exactly one Lyricist row (the artist profile).
+model Lyricist {
+  id                         Int      @id @default(1)
+  name                       String
+  penName                    String?
+  displayName                String?
+  creditVariants             String[] @default([])
+  title                      String?
+  tagline                    String
+  bornPlace                  String?
+  basedIn                    String?
+  birthDate                  String?
+  languages                  String[] @default([])
+  genres                     String[] @default([])
+  careerStartYear            Int?
+  songsWritten               String?
+  songsPublishedOnStreaming  String?
+  bio                        String
+  philosophy                 String?
+  awards                     String[] @default([])
+  press                      String[] @default([])
+  updatedAt                  DateTime @updatedAt
+}
+
+// Singleton: there is exactly one Contact row.
+model Contact {
+  id                  Int      @id @default(1)
+  useContactForm      Boolean  @default(true)
+  showEmailPublicly   Boolean  @default(false)
+  instagram           String?
+  instagramSecondary  String?
+  youtube             String?
+  spotify             String?
+  jiosaavn            String?
+  privateEmail        String?
+  privatePhone        String?
+  privateNote         String?
+  updatedAt           DateTime @updatedAt
+}
+
+// ------------------------------ CONTENT ------------------------------
+
+model Singer {
+  id        String   @id @default(cuid())
+  legacyId  String?  @unique
+  name      String
+  photoUrl  String?
+  bio       String?
+  sortOrder Int      @default(0)
+  songs     SongSinger[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Collection {
+  id          String   @id @default(cuid())
+  legacyId    String?  @unique
+  slug        String   @unique
+  title       String
+  description String
+  coverUrl    String?
+  year        Int?
+  songs       Song[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Song {
+  id                 String              @id @default(cuid())
+  legacyId           String?             @unique
+  slug               String              @unique
+  title              String
+  altTitles          String[]            @default([])
+  lyricistCredit     String
+  composer           String?
+  collectionId       String?
+  collection         Collection?         @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  language           String
+  genre              String[]            @default([])
+  mood               String[]            @default([])
+  releaseYear        Int?
+  artworkUrl         String?
+  lyrics             String              @default("")
+  viewCount          Int                 @default(0)
+  isTrending         Boolean             @default(false)
+  youtubeId          String?
+  spotifyTrackId     String?
+  platformLinks      PlatformLink[]
+  lyricsTranslations LyricsTranslation[]
+  singers            SongSinger[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+// Join table: a Song has many performing Singers.
+model SongSinger {
+  songId   String
+  singerId String
+  song     Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
+  singer   Singer @relation(fields: [singerId], references: [id], onDelete: Cascade)
+
+  @@id([songId, singerId])
+}
+
+model PlatformLink {
+  id        String  @id @default(cuid())
+  songId    String
+  song      Song    @relation(fields: [songId], references: [id], onDelete: Cascade)
+  platform  String
+  url       String
+  isPrimary Boolean @default(false)
+}
+
+model LyricsTranslation {
+  id       String @id @default(cuid())
+  songId   String
+  song     Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
+  language String
+  text     String
+}
+
+model JourneyMilestone {
+  id             String   @id @default(cuid())
+  legacyId       String?  @unique
+  year           Int?
+  title          String
+  description    String
+  imageUrl       String?
+  relatedSongIds String[] @default([])
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
