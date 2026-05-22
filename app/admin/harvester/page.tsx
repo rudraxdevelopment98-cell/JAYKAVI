@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import RunButton from './RunButton';
 import CandidateCard from './CandidateCard';
+import ImportExcelButton from './ImportExcelButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +54,7 @@ export default async function HarvesterPage() {
       )}
 
       {/* Run button + config summary */}
-      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-6">
+      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-4">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className="font-medium mb-1">Start a new harvest</div>
@@ -65,6 +66,16 @@ export default async function HarvesterPage() {
           </div>
           <RunButton hasApiKey={hasApiKey} />
         </div>
+      </div>
+
+      {/* Excel import */}
+      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-6">
+        <div className="font-medium mb-1">Import from Excel</div>
+        <p className="text-sm text-neutral-400 mb-3">
+          Upload a spreadsheet with columns: <code className="text-neutral-300">Title · Channel · Published · Views · Link · Source</code>.
+          All rows are added as pending candidates for you to review.
+        </p>
+        <ImportExcelButton />
       </div>
 
       {/* Pending review queue */}

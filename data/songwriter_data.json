@@ -93,10 +93,131 @@
       "name": "Aishwarya Majmudar",
       "photoUrl": null,
       "bio": null
+    },
+    {
+      "id": "singer-harpalsinh-gohil",
+      "name": "Harpalsinh Gohil",
+      "photoUrl": null,
+      "bio": null
     }
   ],
   "collections": [],
   "songs": [
+    {
+      "id": "song-dhany-saurashtr-dharni",
+      "slug": "dhany-saurashtr-dharni",
+      "title": "Dhany Saurashtr Dharni",
+      "altTitles": ["ધન્ય સૌરાષ્ટ્ર ધરણી", "DHANY SAURASHTR DHARNI"],
+      "lyricist": "Jayesh Prajapati \"JAYKAVI\"",
+      "performingSingers": [],
+      "composer": null,
+      "collectionId": null,
+      "language": "Gujarati",
+      "genre": ["Lok Geet"],
+      "mood": ["Patriotic"],
+      "releaseYear": 2021,
+      "artworkUrl": "",
+      "lyrics": "",
+      "lyricsTranslations": [],
+      "platformLinks": [
+        { "platform": "YouTube", "url": "https://youtube.com/watch?v=sh-XazTILHw", "isPrimary": true }
+      ],
+      "viewCount": 835,
+      "isTrending": false,
+      "embed": { "youtubeId": "sh-XazTILHw", "spotifyTrackId": null }
+    },
+    {
+      "id": "song-bhimnu-abhiman",
+      "slug": "bhimnu-abhiman",
+      "title": "Bhimnu Abhiman",
+      "altTitles": ["ભીમનું અભિમાન", "LOK VARTA - BHIMNU ABHIMAN"],
+      "lyricist": "Jayesh Prajapati \"JAYKAVI\"",
+      "performingSingers": [],
+      "composer": null,
+      "collectionId": null,
+      "language": "Gujarati",
+      "genre": ["Lok Varta", "Dayro"],
+      "mood": ["Inspirational"],
+      "releaseYear": 2021,
+      "artworkUrl": "",
+      "lyrics": "",
+      "lyricsTranslations": [],
+      "platformLinks": [
+        { "platform": "YouTube", "url": "https://youtube.com/watch?v=zIFrdoztJ9c", "isPrimary": true }
+      ],
+      "viewCount": 263,
+      "isTrending": false,
+      "embed": { "youtubeId": "zIFrdoztJ9c", "spotifyTrackId": null }
+    },
+    {
+      "id": "song-dikri-vahali-ke-daru",
+      "slug": "dikri-vahali-ke-daru",
+      "title": "Dikri Vahali Ke Daru?",
+      "altTitles": ["દીકરી વ્હાલી કે દારૂ?"],
+      "lyricist": "Jayesh Prajapati \"JAYKAVI\"",
+      "performingSingers": [],
+      "composer": null,
+      "collectionId": null,
+      "language": "Gujarati",
+      "genre": ["Lok Geet"],
+      "mood": ["Social", "Emotional"],
+      "releaseYear": 2021,
+      "artworkUrl": "",
+      "lyrics": "",
+      "lyricsTranslations": [],
+      "platformLinks": [
+        { "platform": "YouTube", "url": "https://youtube.com/watch?v=mkDrsAQoHCQ", "isPrimary": true }
+      ],
+      "viewCount": 575,
+      "isTrending": false,
+      "embed": { "youtubeId": "mkDrsAQoHCQ", "spotifyTrackId": null }
+    },
+    {
+      "id": "song-daneshvari-karnnno-adbhut-prashang",
+      "slug": "daneshvari-karnno-adbhut-prashang",
+      "title": "Daneshvari Karnno Adbhut Prashang",
+      "altTitles": ["દાનેશ્વરી કર્ણનો અદભુત પ્રસંગ"],
+      "lyricist": "Jayesh Prajapati \"JAYKAVI\"",
+      "performingSingers": [],
+      "composer": null,
+      "collectionId": null,
+      "language": "Gujarati",
+      "genre": ["Lok Katha", "Dayro"],
+      "mood": ["Inspirational"],
+      "releaseYear": 2021,
+      "artworkUrl": "",
+      "lyrics": "",
+      "lyricsTranslations": [],
+      "platformLinks": [
+        { "platform": "YouTube", "url": "https://youtube.com/watch?v=_myetbUTv14", "isPrimary": true }
+      ],
+      "viewCount": 221,
+      "isTrending": false,
+      "embed": { "youtubeId": "_myetbUTv14", "spotifyTrackId": null }
+    },
+    {
+      "id": "song-mogal-ne-sambharu",
+      "slug": "mogal-ne-sambharu",
+      "title": "Mogal Ne Sambharu",
+      "altTitles": ["MOGAL NE SAMBHARU"],
+      "lyricist": "Jayesh Prajapati \"JAYKAVI\"",
+      "performingSingers": ["Harpalsinh Gohil"],
+      "composer": null,
+      "collectionId": null,
+      "language": "Gujarati",
+      "genre": ["Bhajan", "Devotional"],
+      "mood": ["Devotional"],
+      "releaseYear": 2019,
+      "artworkUrl": "",
+      "lyrics": "",
+      "lyricsTranslations": [],
+      "platformLinks": [
+        { "platform": "YouTube", "url": "https://youtube.com/watch?v=aS2QylVQ-z8", "isPrimary": true }
+      ],
+      "viewCount": 627,
+      "isTrending": false,
+      "embed": { "youtubeId": "aS2QylVQ-z8", "spotifyTrackId": null }
+    },
     {
       "id": "song-kana-ne-joya",
       "slug": "kana-ne-joya",
