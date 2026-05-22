@@ -1,7 +1,17 @@
 import { PrismaClient } from '@prisma/client';
+import { neon } from '@neondatabase/serverless';
+import { PrismaNeonHTTP } from '@prisma/adapter-neon';
 import data from '../data/songwriter_data.json';
 
-const prisma = new PrismaClient();
+function makePrisma(): PrismaClient {
+  const url = process.env.DATABASE_URL;
+  if (!url) return new PrismaClient();
+  const client = neon(url);
+  const adapter = new PrismaNeonHTTP(client);
+  return new PrismaClient({ adapter });
+}
+
+const prisma = makePrisma();
 
 type RawJson = typeof data;
 
