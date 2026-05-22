@@ -1,0 +1,21 @@
+{
+  "name": "JAYKAVI Dev",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "postCreateCommand": "npm install && bash scripts/setup-codespace.sh || true",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "JAYKAVI Site",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["esbenp.prettier-vscode", "bradlc.vscode-tailwindcss"],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
+    }
+  }
+}

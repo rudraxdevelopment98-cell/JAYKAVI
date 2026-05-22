@@ -6,9 +6,13 @@ export default async function LoginPage({
 }: {
   searchParams: { callbackUrl?: string; error?: string };
 }) {
-  const session = await auth();
-  if (session && (session as any).isAdmin) {
-    redirect(searchParams.callbackUrl ?? '/admin');
+  try {
+    const session = await auth();
+    if (session && (session as any).isAdmin) {
+      redirect(searchParams.callbackUrl ?? '/admin');
+    }
+  } catch {
+    // AUTH_SECRET not set or auth misconfigured — still show the login UI
   }
 
   return (

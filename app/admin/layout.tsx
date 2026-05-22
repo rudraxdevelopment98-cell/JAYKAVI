@@ -18,11 +18,10 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-  // Login page handles its own auth UI; middleware guards everything else.
-  // Render layout for logged-in admins only.
+  let session: any = null;
+  try { session = await auth(); } catch { /* AUTH_SECRET missing in dev */ }
   if (!session) return <>{children}</>;
-  if (!(session as any).isAdmin) redirect('/admin/login');
+  if (!session.isAdmin) redirect('/admin/login');
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
