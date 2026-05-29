@@ -18,7 +18,30 @@ export default function RunButton({ hasApiKey }: { hasApiKey: boolean }) {
     setResult(null);
     try {
       const res = await fetch('/api/harvest', { method: 'POST' });
-      const data = await res.json();
+      const text = await res.text();
+
+      // The server can occasionally return an empty body or an HTML error
+      // page (e.g. on a timeout). Handle that gracefully instead of crashing
+      // with "Unexpected end of JSON input".
+      let data: any = null;
+      if (text) {
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = null;
+        }
+      }
+
+      if (!data) {
+        setResult(
+          res.ok
+            ? 'The harvest is still running on the server. Give it a minute, then refresh this page to see new candidates.'
+            : `Server error (${res.status}). The harvest may have taken too long. Try again, or use "Import from Excel" instead.`
+        );
+        setState('error');
+        return;
+      }
+
       if (data.error) {
         setResult(data.error);
         setState('error');

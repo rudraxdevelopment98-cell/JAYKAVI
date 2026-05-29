@@ -32,7 +32,7 @@ export async function runHarvest(): Promise<HarvestResult> {
         'Geeta Rabari', 'Kinjal Dave', 'Birju Barot',
         'Yogita Patel', 'Alpa Patel', 'Jigrra', 'Aishwarya Majmudar',
       ],
-      maxResultsPerTerm: 100,
+      maxResultsPerTerm: 50,
     },
   });
 

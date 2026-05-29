@@ -16,6 +16,14 @@ export async function POST() {
       { status: 400 }
     );
   }
-  const result = await runHarvest();
-  return NextResponse.json(result);
+  try {
+    const result = await runHarvest();
+    return NextResponse.json(result);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json(
+      { error: `Harvest failed: ${msg}` },
+      { status: 500 }
+    );
+  }
 }
