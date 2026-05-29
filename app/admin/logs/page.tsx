@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 
 async function getRecentLogs() {
-  const since = new Date(Date.now() - 48 * 60 * 60 * 1000);
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   try {
     return await prisma.activityLog.findMany({
       where: { createdAt: { gte: since } },
@@ -39,13 +39,14 @@ export default async function ActivityLogPage() {
     <div className="max-w-4xl">
       <h1 className="text-3xl font-semibold">Activity Log</h1>
       <p className="text-neutral-400 mt-1 mb-6 text-sm">
-        Sign-ins and content changes from the last 48 hours
+        Sign-ins and content changes from the last 7 days
         {logs.length > 0 && <> · {logs.length} event{logs.length !== 1 ? 's' : ''}</>}.
+        Older entries are removed automatically to save storage.
       </p>
 
       {logs.length === 0 ? (
         <div className="px-5 py-10 bg-neutral-900/60 border border-neutral-800 rounded-xl text-center text-neutral-400">
-          No activity in the last 48 hours.
+          No activity in the last 7 days.
         </div>
       ) : (
         <div className="space-y-2">

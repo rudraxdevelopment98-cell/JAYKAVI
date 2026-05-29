@@ -21,6 +21,12 @@ export async function logActivity(entry: ActivityEntry): Promise<void> {
         detail: entry.detail ?? null,
       },
     });
+    // Occasionally prune old entries (≈1 in 25 writes) so the table stays
+    // small without adding a delete query to every single action.
+    if (Math.random() < 0.04) {
+      const { pruneOldLogs } = await import('./backup');
+      await pruneOldLogs();
+    }
   } catch {
     /* ignore — never let logging failures surface to the user */
   }

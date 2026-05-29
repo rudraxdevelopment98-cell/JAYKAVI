@@ -226,6 +226,19 @@ model ActivityLog {
   @@index([createdAt])
 }
 
+// ------------------------------- BACKUP ---------------------------------
+
+// Singleton: the latest full-content backup, overwritten on every run
+// (weekly via cron, or manually from the admin panel). Stored as JSON text
+// so it stays a single, bounded row.
+model Backup {
+  id        Int      @id @default(1)
+  data      String // JSON snapshot of all content
+  itemCount Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // ----------------------------- CONTACT MESSAGES -------------------------
 
 model ContactMessage {
