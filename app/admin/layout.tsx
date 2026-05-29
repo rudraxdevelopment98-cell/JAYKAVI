@@ -12,6 +12,7 @@ const NAV = [
   { href: '/admin/songs', label: 'Songs' },
   { href: '/admin/journey', label: 'Journey' },
   { href: '/admin/harvester', label: '🎬 Song Harvester' },
+  { href: '/admin/admins', label: '👤 Admins' },
 ];
 
 export default async function AdminLayout({

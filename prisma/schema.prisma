@@ -195,6 +195,21 @@ model HarvestCandidate {
   @@unique([youtubeId]) // one candidate per video, ever
 }
 
+// ------------------------------- ADMINS ---------------------------------
+
+// Admin users manageable from the admin panel.
+// The emails listed in the ADMIN_EMAILS env var are always admins too
+// (permanent owners that cannot be removed from the UI).
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("Admin")
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // ----------------------------- CONTACT MESSAGES -------------------------
 
 model ContactMessage {
