@@ -1,10 +1,14 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, lazy, Suspense } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '@/components/atoms/Button';
 import { useMouseParallax } from '@/hooks/useMouseParallax';
 import Link from 'next/link';
+
+const ParticleField = lazy(() =>
+  import('@/components/canvas/ParticleField').then((m) => ({ default: m.ParticleField }))
+);
 
 export function HeroCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -21,12 +25,17 @@ export function HeroCanvas() {
       ref={containerRef}
       className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden"
     >
+      {/* Three.js particle field */}
+      <Suspense fallback={null}>
+        <ParticleField className="absolute inset-0 z-0 w-full h-full" />
+      </Suspense>
+
       {/* Animated gradient background */}
       <motion.div
         className="absolute inset-0 z-0"
         style={{ y }}
       >
-        <div className="absolute inset-0 bg-[var(--color-bg-primary)]" />
+        <div className="absolute inset-0 bg-[var(--color-bg-primary)] opacity-60" />
         {/* Hero gradient glow */}
         <div className="absolute inset-0" style={{ background: 'var(--gradient-hero)' }} />
         {/* Ambient orbs */}

@@ -1,30 +1,39 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from '@/hooks/useInView';
 import { staggerContainer, scaleIn } from '@/lib/animations/variants';
+import { urlForImage } from '@/lib/sanity/client';
+import type { GalleryItem } from '@/types/content';
 
-const ARTWORKS = Array.from({ length: 16 }, (_, i) => ({
-  id: String(i + 1),
+const ACCENTS = ['#7c3aed', '#c9a84c', '#a8c5da', '#8b1a1a', '#00e5ff', '#7c3aed', '#c9a84c', '#a8c5da'];
+
+// Placeholder items when no Sanity data
+const PLACEHOLDER: Partial<GalleryItem>[] = Array.from({ length: 16 }, (_, i) => ({
+  _id: String(i + 1),
   title: ['Luminance Study I', 'Nocturnal Forms', 'The Weight of Light', 'Echoing Planes', 'Threshold', 'Still Life with Shadows', 'Chromatic Dissolution', 'Form & Void', 'The Architecture of Silence', 'Temporal Drift', 'Spectral Residue', 'Untitled #7', 'Passage', 'Resonance', 'The Observer', 'Liminal Space'][i],
   medium: ['Digital Photography', 'Oil on Canvas', 'Video Installation', 'Mixed Media', 'Silver Gelatin', 'Digital Painting', 'Screen Print', 'Sculpture', 'Photography', 'Projection Art', 'Collage', 'Ink on Paper', 'Photography', 'Video', 'Digital', 'Mixed'][i],
   year: 2020 + (i % 5),
-  aspect: [1, 1.5, 0.75, 1, 1.2, 0.8, 1, 1.5, 0.9, 1, 1.3, 0.7, 1, 1.1, 0.85, 1][i],
-  accent: ['#7c3aed', '#c9a84c', '#a8c5da', '#8b1a1a', '#00e5ff', '#7c3aed', '#c9a84c', '#a8c5da'][i % 8],
+  slug: { current: `artwork-${i + 1}` },
 }));
 
-export function GalleryPage() {
-  const [selected, setSelected] = useState<(typeof ARTWORKS)[0] | null>(null);
+interface GalleryPageProps {
+  items?: GalleryItem[];
+}
+
+export function GalleryPage({ items }: GalleryPageProps) {
+  const [selected, setSelected] = useState<Partial<GalleryItem> | null>(null);
   const { ref, inView } = useInView(0.05);
+
+  const allItems = items && items.length > 0 ? items : (PLACEHOLDER as GalleryItem[]);
 
   return (
     <div className="min-h-screen">
       {/* Hero */}
       <section className="py-24 lg:py-36 border-b border-[var(--color-border)] relative overflow-hidden">
-        <div className="absolute inset-0"
-          style={{ background: 'var(--gradient-hero)' }}
-        />
+        <div className="absolute inset-0" style={{ background: 'var(--gradient-hero)' }} />
         <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative">
           <motion.p
             initial={{ opacity: 0 }}
@@ -60,30 +69,43 @@ export function GalleryPage() {
           variants={staggerContainer}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4"
+          className="columns-2 md:columns-3 lg:columns-4 gap-4 [column-gap:1rem]"
         >
-          {ARTWORKS.map((art) => (
+          {allItems.map((art, i) => (
             <motion.div
-              key={art.id}
+              key={art._id}
               variants={scaleIn}
-              className="break-inside-avoid cursor-pointer group"
+              className="break-inside-avoid mb-4 cursor-pointer group"
               onClick={() => setSelected(art)}
             >
-              <div
-                className="relative rounded-xl overflow-hidden bg-[var(--color-bg-card)] w-full"
-                style={{ paddingBottom: `${(1 / art.aspect) * 100}%` }}
-              >
-                <div className="absolute inset-0">
-                  <div
-                    className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-500"
-                    style={{ background: `radial-gradient(ellipse at 40% 30%, ${art.accent} 0%, transparent 70%)` }}
+              <div className="relative rounded-xl overflow-hidden bg-[var(--color-bg-card)]">
+                {art.image ? (
+                  <Image
+                    src={urlForImage(art.image, 600, 80)}
+                    alt={art.title ?? ''}
+                    width={600}
+                    height={0}
+                    style={{ width: '100%', height: 'auto' }}
+                    className="transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30 flex items-center justify-center">
-                    <span className="text-white/80 text-xs tracking-widest uppercase">View</span>
+                ) : (
+                  <div
+                    className="w-full"
+                    style={{ paddingBottom: `${60 + (i % 4) * 15}%`, position: 'relative' }}
+                  >
+                    <div className="absolute inset-0">
+                      <div
+                        className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-500"
+                        style={{ background: `radial-gradient(ellipse at 40% 30%, ${ACCENTS[i % ACCENTS.length]} 0%, transparent 70%)` }}
+                      />
+                    </div>
                   </div>
+                )}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30 flex items-center justify-center">
+                  <span className="text-white/80 text-xs tracking-widest uppercase">View</span>
                 </div>
               </div>
-              <div className="mt-2 px-1">
+              <div className="mt-2 px-0.5">
                 <p className="text-sm text-[var(--color-text-primary)] leading-snug">{art.title}</p>
                 <p className="text-xs text-[var(--color-text-muted)]">{art.medium} · {art.year}</p>
               </div>
@@ -104,23 +126,24 @@ export function GalleryPage() {
           >
             <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" />
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
               className="relative max-w-2xl w-full z-10"
             >
-              <div
-                className="rounded-2xl overflow-hidden bg-[var(--color-bg-card)] w-full"
-                style={{ paddingBottom: `${(1 / selected.aspect) * 100}%`, position: 'relative' }}
-              >
-                <div className="absolute inset-0">
-                  <div
-                    className="absolute inset-0"
-                    style={{ background: `radial-gradient(ellipse at 40% 30%, ${selected.accent}40 0%, transparent 70%)` }}
+              <div className="rounded-2xl overflow-hidden bg-[var(--color-bg-card)] relative aspect-square">
+                {selected.image ? (
+                  <Image
+                    src={urlForImage(selected.image, 800, 90)}
+                    alt={selected.title ?? ''}
+                    fill
+                    className="object-contain"
                   />
-                </div>
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent-purple)]/30 to-[var(--color-bg-card)]" />
+                )}
               </div>
               <div className="mt-4">
                 <h2
@@ -130,10 +153,15 @@ export function GalleryPage() {
                   {selected.title}
                 </h2>
                 <p className="text-sm text-white/50 mt-1">{selected.medium} · {selected.year}</p>
+                {selected.artistStatement && (
+                  <p className="text-sm text-white/60 mt-3 leading-relaxed italic">
+                    "{selected.artistStatement}"
+                  </p>
+                )}
               </div>
               <button
                 onClick={() => setSelected(null)}
-                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-white/60 hover:text-white"
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition-colors"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M18 6 6 18M6 6l12 12" />

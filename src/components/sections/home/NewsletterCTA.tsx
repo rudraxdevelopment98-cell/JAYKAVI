@@ -15,8 +15,16 @@ export function NewsletterCTA() {
     e.preventDefault();
     if (!email) return;
     setStatus('loading');
-    await new Promise((r) => setTimeout(r, 1200));
-    setStatus('success');
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      setStatus(res.ok ? 'success' : 'error');
+    } catch {
+      setStatus('error');
+    }
   };
 
   return (

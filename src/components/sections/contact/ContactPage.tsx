@@ -36,8 +36,12 @@ export function ContactPage() {
     useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { inquiryType: 'general' } });
 
   const onSubmit = async (data: FormData) => {
-    await new Promise((r) => setTimeout(r, 1500));
-    setSubmitted(true);
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (res.ok) setSubmitted(true);
   };
 
   const selectedType = watch('inquiryType');
