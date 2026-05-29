@@ -5,7 +5,7 @@ import { useState, useRef } from 'react';
 interface Props {
   value: string;
   onChange: (url: string) => void;
-  folder: 'singers' | 'songs' | 'journey' | 'misc';
+  folder: 'singers' | 'songs' | 'journey' | 'blog' | 'misc';
   label?: string;
   aspectRatio?: 'square' | 'video' | 'auto';
 }

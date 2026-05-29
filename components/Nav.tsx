@@ -10,6 +10,7 @@ const links = [
   { href: '/journey', label: 'Journey' },
   { href: '/songs', label: 'Songs' },
   { href: '/lyrics', label: 'Lyrics' },
+  { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },
 ];
 

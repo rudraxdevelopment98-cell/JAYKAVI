@@ -26,6 +26,7 @@ export async function createBackup(): Promise<{ itemCount: number; createdAt: Da
     collections,
     songs,
     journey,
+    posts,
     harvestConfig,
     adminUsers,
   ] = await Promise.all([
@@ -37,6 +38,7 @@ export async function createBackup(): Promise<{ itemCount: number; createdAt: Da
       include: { singers: true, platformLinks: true, lyricsTranslations: true },
     }),
     prisma.journeyMilestone.findMany(),
+    prisma.post.findMany(),
     prisma.harvestConfig.findFirst(),
     prisma.adminUser.findMany(),
   ]);
@@ -50,12 +52,13 @@ export async function createBackup(): Promise<{ itemCount: number; createdAt: Da
     collections,
     songs,
     journey,
+    posts,
     harvestConfig,
     adminUsers,
   };
 
   const itemCount =
-    singers.length + collections.length + songs.length + journey.length;
+    singers.length + collections.length + songs.length + journey.length + posts.length;
 
   const data = JSON.stringify(snapshot);
   const now = new Date();
@@ -74,6 +77,7 @@ export interface RestoreResult {
   collections: number;
   songs: number;
   journey: number;
+  posts: number;
 }
 
 // Restore all content from the stored backup snapshot.
@@ -91,6 +95,7 @@ export async function restoreFromBackup(): Promise<RestoreResult> {
     await tx.singer.deleteMany();
     await tx.collection.deleteMany();
     await tx.journeyMilestone.deleteMany();
+    await tx.post.deleteMany();
 
     // --- singletons ---
     if (snap.lyricist) {
@@ -154,6 +159,12 @@ export async function restoreFromBackup(): Promise<RestoreResult> {
       const { updatedAt, createdAt, ...rest } = m;
       await tx.journeyMilestone.create({ data: rest });
     }
+
+    // --- posts ---
+    for (const p of snap.posts ?? []) {
+      const { updatedAt, ...rest } = p;
+      await tx.post.create({ data: rest });
+    }
   }, { timeout: 30000 });
 
   return {
@@ -161,5 +172,6 @@ export async function restoreFromBackup(): Promise<RestoreResult> {
     collections: (snap.collections ?? []).length,
     songs: (snap.songs ?? []).length,
     journey: (snap.journey ?? []).length,
+    posts: (snap.posts ?? []).length,
   };
 }

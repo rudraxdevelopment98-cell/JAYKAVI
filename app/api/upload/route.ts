@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 
-const VALID_FOLDERS: UploadFolder[] = ['singers', 'songs', 'journey', 'misc'];
+const VALID_FOLDERS: UploadFolder[] = ['singers', 'songs', 'journey', 'blog', 'misc'];
 
 export async function POST(req: Request) {
   const session = await auth();

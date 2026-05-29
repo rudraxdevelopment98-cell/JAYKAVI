@@ -19,7 +19,7 @@ export async function POST() {
       action: 'update',
       entity: 'Backup',
       label: `restore`,
-      detail: `${result.songs} songs, ${result.singers} singers, ${result.collections} collections, ${result.journey} journey milestones`,
+      detail: `${result.songs} songs, ${result.singers} singers, ${result.collections} collections, ${result.journey} journey, ${result.posts} posts`,
     });
     return NextResponse.json({ ok: true, ...result });
   } catch (err) {

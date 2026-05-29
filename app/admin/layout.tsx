@@ -12,6 +12,7 @@ const NAV = [
   { href: '/admin/collections', label: 'Collections' },
   { href: '/admin/songs', label: 'Songs' },
   { href: '/admin/journey', label: 'Journey' },
+  { href: '/admin/blog', label: '📝 Blog' },
   { href: '/admin/harvester', label: '🎬 Song Harvester' },
   { href: '/admin/admins', label: '👤 Admins' },
   { href: '/admin/logs', label: '📜 Activity Log' },

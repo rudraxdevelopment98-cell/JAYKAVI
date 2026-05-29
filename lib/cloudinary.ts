@@ -9,7 +9,7 @@ cloudinary.config({
 
 export { cloudinary };
 
-export type UploadFolder = 'singers' | 'songs' | 'journey' | 'misc';
+export type UploadFolder = 'singers' | 'songs' | 'journey' | 'blog' | 'misc';
 
 export async function uploadBuffer(
   buffer: Buffer,
