@@ -24,7 +24,7 @@ export default async function AdminLayout({
   if (!session.isAdmin) redirect('/admin/login');
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-neutral-950 text-neutral-100 pt-20">
       <div className="flex">
         <aside className="w-64 min-h-screen border-r border-neutral-800 bg-neutral-900/50 p-6">
           <div className="mb-8">

@@ -25,9 +25,6 @@ export default function Nav() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // The admin panel has its own layout; never overlay the public nav on it.
-  if (pathname?.startsWith('/admin')) return null;
-
   return (
     <nav
       style={{
