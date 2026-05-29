@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Song } from '@/lib/types';
@@ -9,6 +9,167 @@ interface Facets {
   languages: string[]; genres: string[]; moods: string[];
   years: number[]; singers: string[]; platforms: string[];
 }
+
+// ---- FilterDropdown ----
+
+interface DropdownOption {
+  value: string;
+  label: string;
+}
+
+interface FilterDropdownProps {
+  value: string;
+  options: DropdownOption[];
+  onChange: (val: string) => void;
+  placeholder?: string;
+}
+
+function FilterDropdown({ value, options, onChange, placeholder = 'All' }: FilterDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const selectedLabel = options.find((o) => o.value === value)?.label ?? placeholder;
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [open]);
+
+  const handleSelect = useCallback((val: string) => {
+    onChange(val);
+    setOpen(false);
+  }, [onChange]);
+
+  const triggerStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    background: 'var(--panel-solid)',
+    color: 'var(--text)',
+    border: '1px solid var(--line)',
+    borderRadius: 100,
+    padding: '9px 16px',
+    fontSize: '.85rem',
+    cursor: 'pointer',
+    userSelect: 'none',
+    whiteSpace: 'nowrap',
+    outline: 'none',
+  };
+
+  const panelStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 'calc(100% + 6px)',
+    left: 0,
+    minWidth: '100%',
+    background: 'var(--panel)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid var(--line)',
+    borderRadius: 12,
+    boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+    zIndex: 50,
+    maxHeight: open ? 260 : 0,
+    overflowY: 'auto',
+    opacity: open ? 1 : 0,
+    transition: 'max-height 0.22s ease, opacity 0.18s ease',
+    pointerEvents: open ? 'auto' : 'none',
+  };
+
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        style={triggerStyle}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+      >
+        {selectedLabel}
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{
+            opacity: 0.6,
+            transition: 'transform 0.2s',
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+          }}
+          aria-hidden="true"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      <div style={panelStyle} role="listbox">
+        {options.map((opt) => {
+          const isSelected = opt.value === value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              role="option"
+              aria-selected={isSelected}
+              onClick={() => handleSelect(opt.value)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+                width: '100%',
+                padding: '9px 14px',
+                fontSize: '.85rem',
+                background: 'transparent',
+                color: isSelected ? 'var(--accent)' : 'var(--text)',
+                border: 'none',
+                cursor: 'pointer',
+                textAlign: 'left',
+                whiteSpace: 'nowrap',
+                transition: 'background 0.12s',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'color-mix(in srgb, var(--accent) 15%, transparent)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+              }}
+            >
+              <span>{opt.label}</span>
+              {isSelected && (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ---- SongArchive ----
 
 export default function SongArchive({ songs, facets }: { songs: Song[]; facets: Facets }) {
   const router = useRouter();
@@ -63,6 +224,28 @@ export default function SongArchive({ songs, facets }: { songs: Song[]; facets: 
     borderRadius: 100, padding: '9px 16px', fontSize: '.85rem', cursor: 'pointer',
   };
 
+  const singerOptions: DropdownOption[] = [
+    { value: '', label: 'All singers' },
+    ...facets.singers.map((s) => ({ value: s, label: s })),
+  ];
+
+  const genreOptions: DropdownOption[] = [
+    { value: '', label: 'All genres' },
+    ...facets.genres.map((g) => ({ value: g, label: g })),
+  ];
+
+  const yearOptions: DropdownOption[] = [
+    { value: '', label: 'All years' },
+    ...facets.years.map((y) => ({ value: String(y), label: String(y) })),
+  ];
+
+  const sortOptions: DropdownOption[] = [
+    { value: 'most-viewed', label: 'Most viewed' },
+    { value: 'newest', label: 'Newest' },
+    { value: 'oldest', label: 'Oldest' },
+    { value: 'az', label: 'A–Z' },
+  ];
+
   return (
     <div>
       {/* search + filters */}
@@ -72,26 +255,32 @@ export default function SongArchive({ songs, facets }: { songs: Song[]; facets: 
           placeholder="Search title, singer, or lyrics…"
           style={{ ...selectStyle, flex: '1 1 260px', minWidth: 200, cursor: 'text' }}
         />
-        <select value={singer} onChange={(e) => setParam('singer', e.target.value || null)} style={selectStyle}>
-          <option value="">All singers</option>
-          {facets.singers.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <select value={genre} onChange={(e) => setParam('genre', e.target.value || null)} style={selectStyle}>
-          <option value="">All genres</option>
-          {facets.genres.map((g) => <option key={g} value={g}>{g}</option>)}
-        </select>
+        <FilterDropdown
+          value={singer}
+          options={singerOptions}
+          onChange={(val) => setParam('singer', val || null)}
+          placeholder="All singers"
+        />
+        <FilterDropdown
+          value={genre}
+          options={genreOptions}
+          onChange={(val) => setParam('genre', val || null)}
+          placeholder="All genres"
+        />
         {facets.years.length > 0 && (
-          <select value={year} onChange={(e) => setParam('year', e.target.value || null)} style={selectStyle}>
-            <option value="">All years</option>
-            {facets.years.map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
+          <FilterDropdown
+            value={year}
+            options={yearOptions}
+            onChange={(val) => setParam('year', val || null)}
+            placeholder="All years"
+          />
         )}
-        <select value={sort} onChange={(e) => setParam('sort', e.target.value)} style={selectStyle}>
-          <option value="most-viewed">Most viewed</option>
-          <option value="newest">Newest</option>
-          <option value="oldest">Oldest</option>
-          <option value="az">A–Z</option>
-        </select>
+        <FilterDropdown
+          value={sort}
+          options={sortOptions}
+          onChange={(val) => setParam('sort', val)}
+          placeholder="Sort"
+        />
         <div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>
           <button onClick={() => setParam('view', 'grid')} style={{ ...selectStyle, opacity: view === 'grid' ? 1 : .5 }}>Grid</button>
           <button onClick={() => setParam('view', 'list')} style={{ ...selectStyle, opacity: view === 'list' ? 1 : .5 }}>List</button>
