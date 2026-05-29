@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { createBackup, pruneOldLogs, LOG_RETENTION_DAYS } from '@/lib/backup';
 import { logActivity } from '@/lib/activity';
 import { revalidatePath } from 'next/cache';
+import RestoreButton from './RestoreButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,7 +65,7 @@ export default async function BackupPage() {
         )}
       </div>
 
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-3 flex-wrap mb-6">
         <form action={runBackupNow}>
           <button
             type="submit"
@@ -83,6 +84,17 @@ export default async function BackupPage() {
           </a>
         )}
       </div>
+
+      {backup && (
+        <div className="space-y-2 mb-4">
+          <p className="text-sm font-medium text-neutral-300">Restore</p>
+          <p className="text-sm text-neutral-400">
+            Replace all current content with the snapshot above. Admin accounts are never touched.
+            A confirmation step is required before anything is changed.
+          </p>
+          <RestoreButton />
+        </div>
+      )}
 
       <p className="text-xs text-neutral-600 mt-8">
         Activity-log entries older than {LOG_RETENTION_DAYS} days are cleared during each backup to
