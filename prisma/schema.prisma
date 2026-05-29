@@ -153,6 +153,7 @@ model JourneyMilestone {
 model HarvestConfig {
   id                Int      @id @default(1)
   ownChannels       String[] @default([])
+  searchChannels    String[] @default([])
   searchTerms       String[] @default([])
   creditMustContain String[] @default([])
   knownSingers      String[] @default([])

@@ -46,6 +46,22 @@ export default async function HarvestConfigPage() {
         </div>
 
         <div>
+          <label className={labelCls}>Search channels (one per line)</label>
+          <textarea
+            name="searchChannels"
+            rows={4}
+            defaultValue={(cfg?.searchChannels ?? []).join('\n')}
+            className={inputCls}
+            placeholder={"https://www.youtube.com/@SomeMusicChannel\nUCxxxxxxxxxxxxxxxxxxxxxx"}
+          />
+          <p className="text-xs text-neutral-500 mt-1">
+            These are <strong>third-party channels</strong> (record labels, music companies, fan pages) that publish
+            JAYKAVI songs. The harvester will scan their uploads and keep only videos that pass the
+            "Credit must contain" filter — so you still get only JAYKAVI-credited songs.
+          </p>
+        </div>
+
+        <div>
           <label className={labelCls}>Search terms (one per line)</label>
           <textarea
             name="searchTerms"

@@ -128,6 +128,7 @@ export async function saveHarvestConfig(formData: FormData) {
     where: { id: 1 },
     update: {
       ownChannels: lines('ownChannels'),
+      searchChannels: lines('searchChannels'),
       searchTerms: lines('searchTerms'),
       creditMustContain: lines('creditMustContain'),
       knownSingers: lines('knownSingers'),
@@ -136,6 +137,7 @@ export async function saveHarvestConfig(formData: FormData) {
     create: {
       id: 1,
       ownChannels: lines('ownChannels'),
+      searchChannels: lines('searchChannels'),
       searchTerms: lines('searchTerms'),
       creditMustContain: lines('creditMustContain'),
       knownSingers: lines('knownSingers'),

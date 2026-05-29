@@ -53,6 +53,16 @@ export async function runHarvest(): Promise<HarvestResult> {
       candidateIds.push(...ids);
     }
 
+    // Search channels — third-party channels; videos are filtered by creditMustContain
+    for (const ch of (cfg as any).searchChannels ?? []) {
+      const channelId = await resolveChannelId(ch);
+      if (!channelId) continue;
+      const playlist = await getUploadsPlaylist(channelId);
+      if (!playlist) continue;
+      const ids = await videoIdsFromPlaylist(playlist, cfg.maxResultsPerTerm);
+      candidateIds.push(...ids);
+    }
+
     for (const term of cfg.searchTerms) {
       const ids = await videoIdsFromSearch(term, cfg.maxResultsPerTerm);
       candidateIds.push(...ids);
