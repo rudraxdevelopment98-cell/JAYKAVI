@@ -12,3 +12,6 @@ prisma/dev.db-journal
 
 # Next/TS build info
 tsconfig.tsbuildinfo
+
+# Claude Code local settings / agent worktrees
+.claude/
