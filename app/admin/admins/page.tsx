@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { ADMIN_SECTIONS } from '@/lib/permissions';
+import { logActivity } from '@/lib/activity';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +41,13 @@ async function addAdmin(formData: FormData) {
     update: { name, role, note, permissions },
     create: { email, name, role, note, permissions },
   });
+  await logActivity({
+    actorEmail: session.user?.email,
+    action: 'create',
+    entity: 'Admin',
+    label: email,
+    detail: `permissions: ${permissions.join(', ') || 'none'}`,
+  });
   revalidatePath('/admin/admins');
 }
 
@@ -54,7 +62,17 @@ async function updateAdmin(formData: FormData) {
   const note = (formData.get('note') as string || '').trim() || null;
   const permissions = formData.getAll('permissions').map(String).filter(Boolean);
 
-  await prisma.adminUser.update({ where: { id }, data: { name, role, note, permissions } });
+  const updated = await prisma.adminUser.update({
+    where: { id },
+    data: { name, role, note, permissions },
+  });
+  await logActivity({
+    actorEmail: session.user?.email,
+    action: 'update',
+    entity: 'Admin',
+    label: updated.email,
+    detail: `permissions: ${permissions.join(', ') || 'none'}`,
+  });
   revalidatePath('/admin/admins');
 }
 
@@ -63,7 +81,14 @@ async function removeAdmin(formData: FormData) {
   const session = await auth();
   if (!session || !(session as any).isAdmin) throw new Error('Unauthorized');
   const id = formData.get('id') as string;
+  const existing = await prisma.adminUser.findUnique({ where: { id }, select: { email: true } });
   await prisma.adminUser.delete({ where: { id } });
+  await logActivity({
+    actorEmail: session.user?.email,
+    action: 'delete',
+    entity: 'Admin',
+    label: existing?.email ?? id,
+  });
   revalidatePath('/admin/admins');
 }
 

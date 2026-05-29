@@ -69,7 +69,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async signIn({ user }) {
       // Runs in the Node runtime — safe to query the database here.
-      return await isAllowedAdmin(user.email);
+      const allowed = await isAllowedAdmin(user.email);
+      if (allowed) {
+        try {
+          const { logActivity } = await import('@/lib/activity');
+          await logActivity({
+            actorEmail: user.email,
+            action: 'login',
+            entity: 'Auth',
+            label: user.name ?? user.email,
+          });
+        } catch { /* never block sign-in on logging */ }
+      }
+      return allowed;
     },
     async jwt({ token, user }) {
       // On initial sign-in the user already passed the signIn() gate above,

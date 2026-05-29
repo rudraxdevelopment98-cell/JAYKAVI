@@ -2,6 +2,7 @@
 
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { logActivity } from '@/lib/activity';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -117,7 +118,8 @@ function buildPayload(formData: FormData): SongPayload & {
 }
 
 export async function createSong(formData: FormData) {
-  assertAdmin(await auth());
+  const session = await auth();
+  assertAdmin(session);
   const p = buildPayload(formData);
   if (!p.title) throw new Error('Title is required');
 
@@ -149,12 +151,20 @@ export async function createSong(formData: FormData) {
     },
   });
 
+  await logActivity({
+    actorEmail: session?.user?.email,
+    action: 'create',
+    entity: 'Song',
+    label: song.title,
+  });
+
   revalidatePath('/admin/songs');
   redirect(`/admin/songs/${song.id}`);
 }
 
 export async function updateSong(id: string, formData: FormData) {
-  assertAdmin(await auth());
+  const session = await auth();
+  assertAdmin(session);
   const p = buildPayload(formData);
   if (!p.title) throw new Error('Title is required');
 
@@ -196,6 +206,13 @@ export async function updateSong(id: string, formData: FormData) {
     ),
   ]);
 
+  await logActivity({
+    actorEmail: session?.user?.email,
+    action: 'update',
+    entity: 'Song',
+    label: p.title,
+  });
+
   revalidatePath('/admin/songs');
   revalidatePath(`/admin/songs/${id}`);
   revalidatePath('/songs');
@@ -203,8 +220,16 @@ export async function updateSong(id: string, formData: FormData) {
 }
 
 export async function deleteSong(id: string) {
-  assertAdmin(await auth());
+  const session = await auth();
+  assertAdmin(session);
+  const existing = await prisma.song.findUnique({ where: { id }, select: { title: true } });
   await prisma.song.delete({ where: { id } });
+  await logActivity({
+    actorEmail: session?.user?.email,
+    action: 'delete',
+    entity: 'Song',
+    label: existing?.title ?? id,
+  });
   revalidatePath('/admin/songs');
   redirect('/admin/songs');
 }

@@ -211,6 +211,21 @@ model AdminUser {
   updatedAt   DateTime @updatedAt
 }
 
+// ----------------------------- ACTIVITY LOG -----------------------------
+
+// Audit trail of admin sign-ins and content changes.
+model ActivityLog {
+  id         String   @id @default(cuid())
+  actorEmail String? // who did it
+  action     String // login | create | update | delete
+  entity     String // Song | Singer | Admin | Config | Auth | ...
+  label      String? // human-readable name of the affected item
+  detail     String? // optional extra context
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 // ----------------------------- CONTACT MESSAGES -------------------------
 
 model ContactMessage {
