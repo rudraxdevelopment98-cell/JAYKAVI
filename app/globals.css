@@ -17,6 +17,22 @@
     radial-gradient(70% 70% at 50% 100%, rgba(34,225,225,.18), transparent 55%);
 }
 
+/* Explicit dark rule so toggling back from light never relies on :root fallback */
+[data-theme='dark'] {
+  --bg: #0A0A0B;
+  --panel: rgba(28, 28, 34, 0.55);
+  --panel-solid: #14141a;
+  --text: #F4F1EA;
+  --muted: #9A95A8;
+  --line: rgba(255, 255, 255, 0.08);
+  --accent: #22E1E1;
+  --glow: 0 0 60px rgba(91, 42, 134, 0.45);
+  --hero-grad:
+    radial-gradient(120% 90% at 70% 10%, rgba(91,42,134,.55), transparent 55%),
+    radial-gradient(90% 80% at 15% 30%, rgba(45,107,255,.35), transparent 60%),
+    radial-gradient(70% 70% at 50% 100%, rgba(34,225,225,.18), transparent 55%);
+}
+
 [data-theme='light'] {
   --bg: #FAF7F2;
   --panel: rgba(255, 255, 255, 0.6);

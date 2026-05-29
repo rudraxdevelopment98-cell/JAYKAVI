@@ -17,10 +17,10 @@ export default async function EditSingerPage({ params }: { params: { id: string 
   return (
     <div className="max-w-xl">
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/singers" className="text-sm text-neutral-400 hover:text-white">
+        <Link href="/admin/singers" className="text-sm text-neutral-400 hover:text-white flex-shrink-0">
           ← Singers
         </Link>
-        <h1 className="text-3xl font-semibold truncate">{singer.name}</h1>
+        <h1 className="text-3xl font-semibold truncate min-w-0 flex-1">{singer.name}</h1>
       </div>
 
       <SingerForm

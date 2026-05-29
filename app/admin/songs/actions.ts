@@ -199,6 +199,7 @@ export async function updateSong(id: string, formData: FormData) {
   revalidatePath('/admin/songs');
   revalidatePath(`/admin/songs/${id}`);
   revalidatePath('/songs');
+  redirect('/admin/songs');
 }
 
 export async function deleteSong(id: string) {

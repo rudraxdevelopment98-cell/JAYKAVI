@@ -48,6 +48,7 @@ export async function updateSinger(id: string, formData: FormData) {
   });
   revalidatePath('/admin/singers');
   revalidatePath(`/admin/singers/${id}`);
+  redirect('/admin/singers');
 }
 
 export async function deleteSinger(id: string) {

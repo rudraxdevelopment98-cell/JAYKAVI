@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { getAllSongs, getSongBySlug, getCollectionById } from '@/lib/data';
 import PlatformLinkButtons from '@/components/PlatformLinkButtons';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateStaticParams() {
   const songs = await getAllSongs();
   return songs.map((s) => ({ slug: s.slug }));
