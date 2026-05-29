@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
+import { ADMIN_SECTIONS } from '@/lib/permissions';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,14 +30,15 @@ async function addAdmin(formData: FormData) {
   const name = (formData.get('name') as string || '').trim() || null;
   const role = (formData.get('role') as string || '').trim() || 'Admin';
   const note = (formData.get('note') as string || '').trim() || null;
+  const permissions = formData.getAll('permissions').map(String).filter(Boolean);
 
   if (!email || !email.includes('@')) return;
   if (getEnvAdmins().includes(email)) return; // already a permanent owner
 
   await prisma.adminUser.upsert({
     where: { email },
-    update: { name, role, note },
-    create: { email, name, role, note },
+    update: { name, role, note, permissions },
+    create: { email, name, role, note, permissions },
   });
   revalidatePath('/admin/admins');
 }
@@ -50,8 +52,9 @@ async function updateAdmin(formData: FormData) {
   const name = (formData.get('name') as string || '').trim() || null;
   const role = (formData.get('role') as string || '').trim() || 'Admin';
   const note = (formData.get('note') as string || '').trim() || null;
+  const permissions = formData.getAll('permissions').map(String).filter(Boolean);
 
-  await prisma.adminUser.update({ where: { id }, data: { name, role, note } });
+  await prisma.adminUser.update({ where: { id }, data: { name, role, note, permissions } });
   revalidatePath('/admin/admins');
 }
 
@@ -153,6 +156,29 @@ export default async function AdminAdminsPage() {
                     placeholder="e.g. manages song uploads"
                   />
                 </div>
+                <div>
+                  <label className={labelCls}>Allowed sections</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
+                    {ADMIN_SECTIONS.map((s) => (
+                      <label
+                        key={s.key}
+                        className="flex items-center gap-2 text-sm text-neutral-300 px-2 py-1.5 rounded-md border border-neutral-800 bg-neutral-900/40 cursor-pointer hover:border-neutral-600"
+                      >
+                        <input
+                          type="checkbox"
+                          name="permissions"
+                          value={s.key}
+                          defaultChecked={(a.permissions ?? []).includes(s.key)}
+                          className="accent-amber-500"
+                        />
+                        {s.label}
+                      </label>
+                    ))}
+                  </div>
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Unchecked sections are hidden and blocked for this admin.
+                  </p>
+                </div>
                 <div className="flex items-center gap-2">
                   <button
                     type="submit"
@@ -208,6 +234,28 @@ export default async function AdminAdminsPage() {
         <div>
           <label className={labelCls}>Note</label>
           <input name="note" className={inputCls} placeholder="optional" />
+        </div>
+        <div>
+          <label className={labelCls}>Allowed sections</label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
+            {ADMIN_SECTIONS.map((s) => (
+              <label
+                key={s.key}
+                className="flex items-center gap-2 text-sm text-neutral-300 px-2 py-1.5 rounded-md border border-neutral-800 bg-neutral-900/40 cursor-pointer hover:border-neutral-600"
+              >
+                <input
+                  type="checkbox"
+                  name="permissions"
+                  value={s.key}
+                  className="accent-amber-500"
+                />
+                {s.label}
+              </label>
+            ))}
+          </div>
+          <p className="text-xs text-neutral-500 mt-1">
+            Pick which sections this admin can open. Leave all unchecked for dashboard-only access.
+          </p>
         </div>
         <button
           type="submit"

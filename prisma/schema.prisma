@@ -201,13 +201,14 @@ model HarvestCandidate {
 // The emails listed in the ADMIN_EMAILS env var are always admins too
 // (permanent owners that cannot be removed from the UI).
 model AdminUser {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  role      String   @default("Admin")
-  note      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String?
+  role        String   @default("Admin")
+  note        String?
+  permissions String[] @default([]) // section keys this admin may edit; see lib/permissions.ts
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // ----------------------------- CONTACT MESSAGES -------------------------

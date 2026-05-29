@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import { auth } from '@/auth';
+import { ADMIN_SECTIONS, permissionForPath, hasPermission } from '@/lib/permissions';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,18 +15,39 @@ async function getCounts() {
   return { singers, collections, songs, journey };
 }
 
-export default async function AdminDashboard() {
+export default async function AdminDashboard({
+  searchParams,
+}: {
+  searchParams?: { denied?: string };
+}) {
   const counts = await getCounts();
+  const session: any = await auth();
+  const perms: string[] = session?.permissions ?? [];
+  const allowed = (href: string) => {
+    const req = permissionForPath(href);
+    return req === null || hasPermission(perms, req);
+  };
+
+  const deniedKey = searchParams?.denied;
+  const deniedLabel = deniedKey
+    ? ADMIN_SECTIONS.find((s) => s.key === deniedKey)?.label ?? deniedKey
+    : null;
 
   const tiles = [
     { label: 'Songs', value: counts.songs, href: '/admin/songs' },
     { label: 'Singers', value: counts.singers, href: '/admin/singers' },
     { label: 'Collections', value: counts.collections, href: '/admin/collections' },
     { label: 'Journey events', value: counts.journey, href: '/admin/journey' },
-  ];
+  ].filter((t) => allowed(t.href));
 
   return (
     <div>
+      {deniedLabel && (
+        <div className="mb-6 p-4 rounded-xl border border-amber-900/60 bg-amber-950/30 text-amber-200 text-sm">
+          You don't have permission to open <strong>{deniedLabel}</strong>. Ask an owner to grant
+          you access on the Admins page.
+        </div>
+      )}
       <h1 className="text-3xl font-semibold mb-2">Dashboard</h1>
       <p className="text-neutral-400 mb-8">
         Manage all dynamic content for the JAYKAVI site.
@@ -46,9 +69,15 @@ export default async function AdminDashboard() {
       <div className="mt-10 p-6 bg-neutral-900/60 border border-neutral-800 rounded-xl">
         <h2 className="font-semibold mb-2">Quick actions</h2>
         <ul className="text-sm text-neutral-300 space-y-1">
-          <li>· <Link href="/admin/profile" className="underline hover:text-white">Edit artist profile</Link></li>
-          <li>· <Link href="/admin/contact" className="underline hover:text-white">Update contact & social links</Link></li>
-          <li>· <Link href="/admin/songs" className="underline hover:text-white">Manage songs</Link></li>
+          {allowed('/admin/profile') && (
+            <li>· <Link href="/admin/profile" className="underline hover:text-white">Edit artist profile</Link></li>
+          )}
+          {allowed('/admin/contact') && (
+            <li>· <Link href="/admin/contact" className="underline hover:text-white">Update contact & social links</Link></li>
+          )}
+          {allowed('/admin/songs') && (
+            <li>· <Link href="/admin/songs" className="underline hover:text-white">Manage songs</Link></li>
+          )}
         </ul>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { auth, signOut } from '@/auth';
 import { redirect } from 'next/navigation';
+import { permissionForPath, hasPermission } from '@/lib/permissions';
 
 const NAV = [
   { href: '/admin', label: 'Dashboard' },
@@ -25,6 +26,13 @@ export default async function AdminLayout({
   if (!session) return <>{children}</>;
   if (!session.isAdmin) redirect('/admin/login');
 
+  // Only show sidebar items this admin is allowed to open.
+  const perms: string[] = session.permissions ?? [];
+  const navItems = NAV.filter((item) => {
+    const required = permissionForPath(item.href);
+    return required === null || hasPermission(perms, required);
+  });
+
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 pt-20">
       <div className="flex">
@@ -38,7 +46,7 @@ export default async function AdminLayout({
           </div>
 
           <nav className="space-y-1">
-            {NAV.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

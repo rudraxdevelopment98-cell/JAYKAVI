@@ -37,6 +37,23 @@ export async function isAllowedAdmin(email?: string | null): Promise<boolean> {
   }
 }
 
+// Resolve the permission set for an email. Env owners get full access ('all').
+// Node-runtime only — queries Prisma.
+export async function getPermissionsForEmail(email?: string | null): Promise<string[]> {
+  if (!email) return [];
+  if (isEnvAdmin(email)) return ['all'];
+  try {
+    const { prisma } = await import('@/lib/prisma');
+    const found = await prisma.adminUser.findUnique({
+      where: { email: email.toLowerCase() },
+      select: { permissions: true },
+    });
+    return found?.permissions ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   providers: [
@@ -56,14 +73,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async jwt({ token, user }) {
       // On initial sign-in the user already passed the signIn() gate above,
-      // so they are an admin. Persist that on the token (edge-safe: no DB call).
-      if (user) token.isAdmin = true;
-      // Env owners are always admins, even on older tokens.
-      if (isEnvAdmin(token.email as string | undefined)) token.isAdmin = true;
+      // so they are an admin. Load their permissions once here (Node runtime)
+      // and persist on the token (edge middleware stays DB-free).
+      if (user) {
+        token.isAdmin = true;
+        token.permissions = await getPermissionsForEmail(token.email as string | undefined);
+      }
+      // Env owners are always full admins, even on older tokens.
+      if (isEnvAdmin(token.email as string | undefined)) {
+        token.isAdmin = true;
+        token.permissions = ['all'];
+      }
       return token;
     },
     async session({ session, token }) {
       (session as any).isAdmin = token.isAdmin ?? false;
+      (session as any).permissions = (token as any).permissions ?? [];
       return session;
     },
   },
