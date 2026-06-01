@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { auth, signOut } from '@/auth';
 import { redirect } from 'next/navigation';
 import { permissionForPath, hasPermission } from '@/lib/permissions';
+import AdminThemeToggle from './_components/AdminThemeToggle';
 
 const NAV = [
   { href: '/admin', label: 'Dashboard' },
@@ -37,7 +38,7 @@ export default async function AdminLayout({
   });
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 pt-20">
+    <div className="admin-shell min-h-screen bg-neutral-950 text-neutral-100 pt-20">
       <div className="flex">
         <aside className="w-64 min-h-screen border-r border-neutral-800 bg-neutral-900/50 p-6">
           <div className="mb-8">
@@ -60,20 +61,22 @@ export default async function AdminLayout({
             ))}
           </nav>
 
-          <form
-            action={async () => {
-              'use server';
-              await signOut({ redirectTo: '/admin/login' });
-            }}
-            className="mt-8"
-          >
-            <button
-              type="submit"
-              className="w-full px-3 py-2 text-left text-sm text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 rounded-md transition"
+          <div className="mt-8 space-y-1">
+            <AdminThemeToggle />
+            <form
+              action={async () => {
+                'use server';
+                await signOut({ redirectTo: '/admin/login' });
+              }}
             >
-              Sign out
-            </button>
-          </form>
+              <button
+                type="submit"
+                className="w-full px-3 py-2 text-left text-sm text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 rounded-md transition"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
         </aside>
 
         <main className="flex-1 p-8">{children}</main>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import ImageUpload from '../_components/ImageUpload';
+import LyricsEditor from './LyricsEditor';
 
 const PLATFORMS = [
   'youtube',
@@ -373,13 +374,7 @@ export default function SongForm({
       {/* Lyrics */}
       <section className="space-y-3">
         <h2 className="text-lg font-medium text-neutral-200">Lyrics</h2>
-        <textarea
-          name="lyrics"
-          defaultValue={initial?.lyrics ?? ''}
-          rows={10}
-          placeholder="Paste lyrics here…"
-          className={`${inputCls} font-mono`}
-        />
+        <LyricsEditor defaultValue={initial?.lyrics ?? ''} />
       </section>
 
       {/* Translations */}

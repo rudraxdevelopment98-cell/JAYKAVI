@@ -96,3 +96,54 @@ a { color: inherit; }
     scroll-behavior: auto !important;
   }
 }
+
+/* ===== RESPONSIVE ===== */
+
+/* base grid class (overridden by media queries below) */
+.songs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 22px;
+}
+
+@media (max-width: 768px) {
+  .songs-grid { grid-template-columns: 1fr 1fr !important; gap: 14px !important; }
+  .song-grid  { grid-template-columns: 1fr !important; gap: 28px !important; }
+  .page-pad   { padding-left: 5vw !important; padding-right: 5vw !important; }
+}
+@media (max-width: 480px) {
+  .songs-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ===== ADMIN LIGHT THEME ===== */
+[data-admin-theme='light'] .admin-shell {
+  background-color: #F0F0F2 !important;
+  color: #1a1a1a !important;
+}
+[data-admin-theme='light'] .admin-shell aside {
+  background-color: #FFFFFF !important;
+  border-color: #E0E0E0 !important;
+}
+[data-admin-theme='light'] .admin-shell .bg-neutral-950 { background-color: #F0F0F2 !important; }
+[data-admin-theme='light'] .admin-shell .bg-neutral-900,
+[data-admin-theme='light'] .admin-shell .bg-neutral-900\/50,
+[data-admin-theme='light'] .admin-shell .bg-neutral-900\/40,
+[data-admin-theme='light'] .admin-shell .bg-neutral-900\/60 { background-color: #FFFFFF !important; }
+[data-admin-theme='light'] .admin-shell .border-neutral-800 { border-color: #DDDDDD !important; }
+[data-admin-theme='light'] .admin-shell .border-neutral-700 { border-color: #CCCCCC !important; }
+[data-admin-theme='light'] .admin-shell .text-neutral-100 { color: #111 !important; }
+[data-admin-theme='light'] .admin-shell .text-neutral-200 { color: #222 !important; }
+[data-admin-theme='light'] .admin-shell .text-neutral-300 { color: #333 !important; }
+[data-admin-theme='light'] .admin-shell .text-neutral-400 { color: #555 !important; }
+[data-admin-theme='light'] .admin-shell .text-neutral-500 { color: #777 !important; }
+[data-admin-theme='light'] .admin-shell input,
+[data-admin-theme='light'] .admin-shell textarea,
+[data-admin-theme='light'] .admin-shell select {
+  background-color: #F8F8F8 !important;
+  border-color: #CCCCCC !important;
+  color: #111 !important;
+}
+[data-admin-theme='light'] .admin-shell .hover\:bg-neutral-800:hover { background-color: #EBEBEB !important; }
+[data-admin-theme='light'] .admin-shell h1,
+[data-admin-theme='light'] .admin-shell h2,
+[data-admin-theme='light'] .admin-shell h3 { color: #111 !important; }

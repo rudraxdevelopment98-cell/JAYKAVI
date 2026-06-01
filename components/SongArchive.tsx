@@ -308,7 +308,7 @@ export default function SongArchive({ songs, facets }: { songs: Song[]; facets: 
           ))}
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 22 }}>
+        <div className="songs-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 22 }}>
           {filtered.map((s, i) => <SongCard key={s.id} song={s} index={i} />)}
         </div>
       )}
