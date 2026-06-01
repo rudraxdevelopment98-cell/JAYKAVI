@@ -113,7 +113,11 @@ export async function hydrateVideos(ids: string[]): Promise<Map<string, YTVideo>
         channelTitle: sn.channelTitle ?? '',
         publishedAt: sn.publishedAt ?? '',
         thumbnailUrl:
-          sn.thumbnails?.medium?.url ?? sn.thumbnails?.default?.url ?? '',
+          sn.thumbnails?.maxres?.url ??
+          sn.thumbnails?.high?.url ??
+          sn.thumbnails?.standard?.url ??
+          sn.thumbnails?.medium?.url ??
+          sn.thumbnails?.default?.url ?? '',
         viewCount:
           item.statistics?.viewCount != null
             ? parseInt(item.statistics.viewCount, 10)
@@ -124,9 +128,24 @@ export async function hydrateVideos(ids: string[]): Promise<Map<string, YTVideo>
   return map;
 }
 
-export function passesFilter(video: YTVideo, needles: string[]): boolean {
-  const blob = `${video.title} ${video.description}`.toLowerCase();
-  return needles.some((n) => blob.includes(n.toLowerCase()));
+export function passesFilter(video: YTVideo, needles: string[], knownSingers?: string[]): boolean {
+  const title = video.title.toLowerCase();
+  const desc = video.description.toLowerCase().slice(0, 1500);
+  // Strong: credit found in the title → definite match
+  if (needles.some(n => title.includes(n.toLowerCase()))) return true;
+  // Weak: credit only in description → only accept if it appears in a credit line
+  const creditContext = /(?:lyrics?|written by|lyricsist|lyricist|shayar|kavita|rachna|words by)\s*[:\-]?\s*/i;
+  const descLines = video.description.split('\n');
+  for (const line of descLines) {
+    const l = line.toLowerCase();
+    if (needles.some(n => l.includes(n.toLowerCase()))) {
+      // Accept if this line looks like a credit line
+      if (creditContext.test(line) || l.includes('lyric') || l.includes('written') || l.includes('શબ્દ') || l.includes('lyrics')) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 export function guessSinger(title: string, singers: string[]): string {
@@ -136,8 +155,14 @@ export function guessSinger(title: string, singers: string[]): string {
 
 export function cleanTitle(title: string): string {
   return title
+    .replace(/\(official\s*(video|audio|music\s*video|lyric\s*video|song)?\)/gi, '')
+    .replace(/\[official\s*(video|audio|music\s*video|lyric\s*video|song)?\]/gi, '')
+    .replace(/\|\s*official\s*(video|audio|song)/gi, '')
+    .replace(/(?:full\s+)?(?:official\s+)?(?:hd|hq|4k|1080p|720p)/gi, '')
+    .replace(/new\s+(?:gujarati\s+)?(?:song|video)\s*\d{4}/gi, '')
+    .replace(/\d{4}\s+(?:new\s+)?(?:gujarati\s+)?(?:song|video)/gi, '')
     .replace(/#\S+/g, '')
-    .replace(/\|.*$/, '')
+    .replace(/\|[^|]{0,60}$/, '') // strip trailing pipe section
     .replace(/\s{2,}/g, ' ')
     .trim()
     .replace(/^[-|\s]+|[-|\s]+$/g, '')

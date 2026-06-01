@@ -117,7 +117,7 @@ export async function runHarvest(): Promise<HarvestResult> {
         continue;
       }
 
-      if (!passesFilter(video, cfg.creditMustContain)) continue;
+      if (!passesFilter(video, cfg.creditMustContain, cfg.knownSingers)) continue;
 
       await prisma.harvestCandidate.create({
         data: {

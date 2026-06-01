@@ -35,13 +35,21 @@ export default function SongCard({ song, index = 0 }: { song: Song; index?: numb
       <Link href={`/songs/${song.slug}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
         <div style={{
           height: 240, position: 'relative', display: 'flex', alignItems: 'flex-end', padding: 22,
-          background: song.artworkUrl ? `url(${song.artworkUrl}) center/cover` : gradFor(song.slug),
+          background: song.artworkUrl ? 'var(--panel-solid)' : gradFor(song.slug),
+          overflow: 'hidden',
         }}>
+          {song.artworkUrl && (
+            <img
+              src={song.artworkUrl}
+              alt={song.title}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }}
+            />
+          )}
           {song.genre?.[0] && (
             <span style={{
               position: 'absolute', top: 16, left: 16, background: 'rgba(0,0,0,.4)',
               backdropFilter: 'blur(6px)', color: '#fff', fontSize: '.66rem', padding: '6px 12px',
-              borderRadius: 100, letterSpacing: '.12em', textTransform: 'uppercase',
+              borderRadius: 100, letterSpacing: '.12em', textTransform: 'uppercase', zIndex: 1,
             }}>{song.genre[0]}</span>
           )}
           {!song.artworkUrl && (

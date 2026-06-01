@@ -10,10 +10,9 @@ export default function LyricsList({
   withLyrics: Song[];
   all: Song[];
 }) {
-  const list = withLyrics.length > 0 ? withLyrics : all;
   const [q, setQ] = useState('');
 
-  const filtered = list
+  const filtered = all
     .filter((s) => {
       const n = q.toLowerCase();
       return (
@@ -42,13 +41,6 @@ export default function LyricsList({
         }}
       />
 
-      {withLyrics.length === 0 && (
-        <p className="text-muted" style={{ marginBottom: 24 }}>
-          Full lyrics are being added. For now this lists every song — open one to read its
-          lyrics as they go live.
-        </p>
-      )}
-
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         {filtered.map((s) => (
           <Link
@@ -64,10 +56,17 @@ export default function LyricsList({
               alignItems: 'baseline',
             }}
           >
-            <span className="font-serif" style={{ fontSize: '1.25rem' }}>
-              {s.title}
-            </span>
-            <span className="text-muted" style={{ fontSize: '.82rem' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flex: 1, minWidth: 0 }}>
+              <span className="font-serif" style={{ fontSize: '1.2rem' }}>
+                {s.title}
+              </span>
+              {s.lyrics ? (
+                <span className="accent" style={{ fontSize: '.7rem', fontWeight: 600, letterSpacing: '.08em', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  ✦ Lyrics
+                </span>
+              ) : null}
+            </div>
+            <span className="text-muted" style={{ fontSize: '.82rem', whiteSpace: 'nowrap', flexShrink: 0 }}>
               {s.performingSingers?.join(', ')}
             </span>
           </Link>

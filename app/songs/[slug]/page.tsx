@@ -37,18 +37,35 @@ export default async function SongDetail({ params }: { params: { slug: string } 
     ))
     .slice(0, 4);
 
+  // Render lyrics: split by newline, blank lines become spacers
+  function renderLyrics(text: string) {
+    const lines = text.split('\n');
+    const elements: React.ReactNode[] = [];
+    let key = 0;
+    for (const line of lines) {
+      if (line.trim() === '') {
+        elements.push(<div key={key++} style={{ height: 20 }} />);
+      } else {
+        elements.push(<p key={key++} style={{ margin: 0, lineHeight: 1.9 }}>{line}</p>);
+      }
+    }
+    return elements;
+  }
+
   return (
-    <div style={{ position: 'relative', zIndex: 2 }}>
+    <div style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto' }}>
       {/* hero */}
       <div style={{
         padding: '18vh 6vw 6vh',
         background: song.artworkUrl
-          ? `linear-gradient(to bottom, rgba(10,10,11,.5), var(--bg)), url(${song.artworkUrl}) center/cover`
+          ? `linear-gradient(to bottom, rgba(10,10,11,.7) 0%, rgba(10,10,11,.85) 60%, var(--bg) 100%), url(${song.artworkUrl}) center/cover`
           : 'var(--hero-grad)',
+        borderRadius: '0 0 24px 24px',
+        marginBottom: 0,
       }}>
         <Link href="/songs" className="text-muted" style={{ textDecoration: 'none', fontSize: '.85rem' }}>← All songs</Link>
         {song.genre?.[0] && <p className="accent" style={{ textTransform: 'uppercase', letterSpacing: '.3em', fontSize: '.74rem', fontWeight: 600, marginTop: 20 }}>{song.genre.join(' · ')}</p>}
-        <h1 className="font-serif" style={{ fontSize: 'clamp(2.4rem,7vw,5.5rem)', fontWeight: 600, lineHeight: 1, margin: '10px 0 18px' }}>{song.title}</h1>
+        <h1 className="font-serif" style={{ fontSize: 'clamp(2.6rem,7vw,5.5rem)', fontWeight: 700, lineHeight: 1.05, margin: '10px 0 18px', letterSpacing: '-.01em' }}>{song.title}</h1>
         {song.performingSingers.length > 0 && (
           <p style={{ fontSize: '1.15rem' }}>Sung by <strong>{song.performingSingers.join(', ')}</strong></p>
         )}
@@ -57,7 +74,7 @@ export default async function SongDetail({ params }: { params: { slug: string } 
         </div>
       </div>
 
-      <div style={{ padding: '4vh 6vw 9vh', display: 'grid', gridTemplateColumns: 'minmax(0,2fr) minmax(0,1fr)', gap: 50, maxWidth: 1100, margin: '0 auto' }} className="song-grid">
+      <div style={{ padding: '4vh 6vw 9vh', display: 'grid', gridTemplateColumns: 'minmax(0,2fr) minmax(0,1fr)', gap: 50 }} className="song-grid">
         {/* lyrics + embed */}
         <div>
           {song.embed?.youtubeId && (
@@ -71,7 +88,7 @@ export default async function SongDetail({ params }: { params: { slug: string } 
           )}
           <h2 className="font-serif" style={{ fontSize: '1.6rem', marginBottom: 18 }}>Lyrics</h2>
           {song.lyrics ? (
-            <div className="font-serif" style={{ whiteSpace: 'pre-wrap', lineHeight: 2, fontSize: '1.15rem' }}>{song.lyrics}</div>
+            <div className="font-serif" style={{ fontSize: '1.15rem' }}>{renderLyrics(song.lyrics)}</div>
           ) : (
             <p className="text-muted">Lyrics will be added soon.</p>
           )}
@@ -92,7 +109,7 @@ export default async function SongDetail({ params }: { params: { slug: string } 
       </div>
 
       {related.length > 0 && (
-        <div style={{ padding: '0 6vw 9vh', maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ padding: '0 6vw 9vh' }}>
           <h2 className="font-serif" style={{ fontSize: '1.6rem', marginBottom: 22 }}>Related songs</h2>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             {related.map((r) => (
@@ -104,7 +121,9 @@ export default async function SongDetail({ params }: { params: { slug: string } 
         </div>
       )}
 
-      <style>{`@media (max-width: 820px){ .song-grid{ grid-template-columns: 1fr !important; } }`}</style>
+      <style>{`
+        @media (max-width: 820px) { .song-grid { grid-template-columns: 1fr !important; gap: 28px !important; } }
+      `}</style>
     </div>
   );
 }
