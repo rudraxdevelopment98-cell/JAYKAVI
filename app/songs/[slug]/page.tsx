@@ -32,19 +32,18 @@ export default async function SongDetail({ params }: { params: { slug: string } 
   ]);
   const related = all
     .filter((s) => s.id !== song.id && (
-      s.collectionId === song.collectionId && song.collectionId ||
+      (s.collectionId === song.collectionId && !!song.collectionId) ||
       s.performingSingers.some((p) => song.performingSingers.includes(p))
     ))
-    .slice(0, 4);
+    .slice(0, 6);
 
-  // Render lyrics: split by newline, blank lines become spacers
   function renderLyrics(text: string) {
     const lines = text.split('\n');
     const elements: React.ReactNode[] = [];
     let key = 0;
     for (const line of lines) {
       if (line.trim() === '') {
-        elements.push(<div key={key++} style={{ height: 20 }} />);
+        elements.push(<div key={key++} style={{ height: 18 }} />);
       } else {
         elements.push(<p key={key++} style={{ margin: 0, lineHeight: 1.9 }}>{line}</p>);
       }
@@ -53,76 +52,108 @@ export default async function SongDetail({ params }: { params: { slug: string } 
   }
 
   return (
-    <div style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto' }}>
-      {/* hero */}
-      <div style={{
-        padding: '18vh 6vw 6vh',
+    <div style={{ position: 'relative', zIndex: 2 }}>
+      {/* ── Hero ── */}
+      <div className="song-hero" style={{
         background: song.artworkUrl
-          ? `linear-gradient(to bottom, rgba(10,10,11,.7) 0%, rgba(10,10,11,.85) 60%, var(--bg) 100%), url(${song.artworkUrl}) center/cover`
+          ? `linear-gradient(to bottom, rgba(10,10,11,.65) 0%, rgba(10,10,11,.9) 70%, var(--bg) 100%), url(${song.artworkUrl}) center/cover no-repeat`
           : 'var(--hero-grad)',
-        borderRadius: '0 0 24px 24px',
-        marginBottom: 0,
       }}>
-        <Link href="/songs" className="text-muted" style={{ textDecoration: 'none', fontSize: '.85rem' }}>← All songs</Link>
-        {song.genre?.[0] && <p className="accent" style={{ textTransform: 'uppercase', letterSpacing: '.3em', fontSize: '.74rem', fontWeight: 600, marginTop: 20 }}>{song.genre.join(' · ')}</p>}
-        <h1 className="font-serif" style={{ fontSize: 'clamp(2.6rem,7vw,5.5rem)', fontWeight: 700, lineHeight: 1.05, margin: '10px 0 18px', letterSpacing: '-.01em' }}>{song.title}</h1>
-        {song.performingSingers.length > 0 && (
-          <p style={{ fontSize: '1.15rem' }}>Sung by <strong>{song.performingSingers.join(', ')}</strong></p>
-        )}
-        <div style={{ marginTop: 24 }}>
+        <div className="song-hero-inner">
+          <Link href="/songs" className="text-muted" style={{ textDecoration: 'none', fontSize: '.85rem' }}>← All songs</Link>
+          {song.genre?.[0] && (
+            <p className="accent" style={{ textTransform: 'uppercase', letterSpacing: '.3em', fontSize: '.74rem', fontWeight: 600, marginTop: 18 }}>
+              {song.genre.join(' · ')}
+            </p>
+          )}
+          <h1 className="font-serif" style={{ fontSize: 'clamp(2rem,6vw,5rem)', fontWeight: 700, lineHeight: 1.05, margin: '10px 0 16px', letterSpacing: '-.01em' }}>
+            {song.title}
+          </h1>
+          {song.performingSingers.length > 0 && (
+            <p style={{ fontSize: '1.05rem', margin: '0 0 22px' }}>
+              Sung by <strong>{song.performingSingers.join(', ')}</strong>
+            </p>
+          )}
           <PlatformLinkButtons links={song.platformLinks} />
         </div>
       </div>
 
-      <div style={{ padding: '4vh 6vw 9vh', display: 'grid', gridTemplateColumns: 'minmax(0,2fr) minmax(0,1fr)', gap: 50 }} className="song-grid">
-        {/* lyrics + embed */}
-        <div>
-          {song.embed?.youtubeId && (
-            <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, marginBottom: 36, borderRadius: 16, overflow: 'hidden' }}>
-              <iframe
-                src={`https://www.youtube.com/embed/${song.embed.youtubeId}`}
-                title={song.title} allowFullScreen
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
-              />
+      {/* ── Body ── */}
+      <div className="song-body-wrap">
+        <div className="song-grid">
+          {/* lyrics + embed */}
+          <div>
+            {song.embed?.youtubeId && (
+              <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, marginBottom: 32, borderRadius: 14, overflow: 'hidden' }}>
+                <iframe
+                  src={`https://www.youtube.com/embed/${song.embed.youtubeId}`}
+                  title={song.title} allowFullScreen
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
+                />
+              </div>
+            )}
+            <h2 className="font-serif" style={{ fontSize: '1.5rem', marginBottom: 16 }}>Lyrics</h2>
+            {song.lyrics ? (
+              <div className="font-serif lyrics-body">{renderLyrics(song.lyrics)}</div>
+            ) : (
+              <p className="text-muted">Lyrics will be added soon.</p>
+            )}
+          </div>
+
+          {/* credits sidebar */}
+          <aside>
+            <div className="glass credits-card">
+              <h3 className="font-serif" style={{ fontSize: '1.15rem', marginBottom: 18 }}>Credits</h3>
+              <Credit label="Lyricist" value={song.lyricist} />
+              {song.performingSingers.length > 0 && <Credit label="Singer(s)" value={song.performingSingers.join(', ')} />}
+              {song.composer && <Credit label="Composer" value={song.composer} />}
+              {collection && <Credit label="Collection" value={collection.title} />}
+              {song.releaseYear && <Credit label="Year" value={String(song.releaseYear)} />}
+              {song.language && <Credit label="Language" value={song.language} />}
             </div>
-          )}
-          <h2 className="font-serif" style={{ fontSize: '1.6rem', marginBottom: 18 }}>Lyrics</h2>
-          {song.lyrics ? (
-            <div className="font-serif" style={{ fontSize: '1.15rem' }}>{renderLyrics(song.lyrics)}</div>
-          ) : (
-            <p className="text-muted">Lyrics will be added soon.</p>
-          )}
+          </aside>
         </div>
 
-        {/* credits */}
-        <aside>
-          <div className="glass" style={{ padding: 26, borderRadius: 18, position: 'sticky', top: 100 }}>
-            <h3 className="font-serif" style={{ fontSize: '1.2rem', marginBottom: 16 }}>Credits</h3>
-            <Credit label="Lyricist" value={song.lyricist} />
-            {song.performingSingers.length > 0 && <Credit label="Singer(s)" value={song.performingSingers.join(', ')} />}
-            {song.composer && <Credit label="Composer" value={song.composer} />}
-            {collection && <Credit label="Collection" value={collection.title} />}
-            {song.releaseYear && <Credit label="Year" value={String(song.releaseYear)} />}
-            {song.language && <Credit label="Language" value={song.language} />}
+        {/* Related */}
+        {related.length > 0 && (
+          <div style={{ marginTop: 56 }}>
+            <h2 className="font-serif" style={{ fontSize: '1.5rem', marginBottom: 18 }}>Related songs</h2>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              {related.map((r) => (
+                <Link key={r.id} href={`/songs/${r.slug}`} className="glass" style={{ textDecoration: 'none', padding: '12px 18px', borderRadius: 12 }}>
+                  <span className="font-serif">{r.title}</span>
+                </Link>
+              ))}
+            </div>
           </div>
-        </aside>
+        )}
       </div>
 
-      {related.length > 0 && (
-        <div style={{ padding: '0 6vw 9vh' }}>
-          <h2 className="font-serif" style={{ fontSize: '1.6rem', marginBottom: 22 }}>Related songs</h2>
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            {related.map((r) => (
-              <Link key={r.id} href={`/songs/${r.slug}`} className="glass" style={{ textDecoration: 'none', padding: '14px 20px', borderRadius: 12 }}>
-                <span className="font-serif">{r.title}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
       <style>{`
-        @media (max-width: 820px) { .song-grid { grid-template-columns: 1fr !important; gap: 28px !important; } }
+        .song-hero {
+          padding: clamp(100px,16vh,180px) clamp(20px,6vw,96px) clamp(40px,6vh,80px);
+        }
+        .song-hero-inner { max-width: 800px; }
+        .song-body-wrap {
+          max-width: 1100px; margin: 0 auto;
+          padding: clamp(32px,4vh,60px) clamp(20px,6vw,96px) clamp(60px,9vh,120px);
+        }
+        .song-grid {
+          display: grid;
+          grid-template-columns: minmax(0,2fr) minmax(0,1fr);
+          gap: 48px;
+        }
+        .lyrics-body { font-size: clamp(1rem,1.5vw,1.15rem); }
+        .credits-card { padding: 24px; border-radius: 18px; position: sticky; top: 90px; }
+
+        @media (max-width: 820px) {
+          .song-grid { grid-template-columns: 1fr; gap: 32px; }
+          .credits-card { position: static; }
+        }
+        @media (max-width: 480px) {
+          .song-hero { padding-left: 5vw; padding-right: 5vw; }
+          .song-body-wrap { padding-left: 5vw; padding-right: 5vw; }
+        }
       `}</style>
     </div>
   );
@@ -131,8 +162,8 @@ export default async function SongDetail({ params }: { params: { slug: string } 
 function Credit({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ marginBottom: 14 }}>
-      <div className="text-muted" style={{ fontSize: '.7rem', textTransform: 'uppercase', letterSpacing: '.18em' }}>{label}</div>
-      <div style={{ fontSize: '1rem', marginTop: 3 }}>{value}</div>
+      <div className="text-muted" style={{ fontSize: '.68rem', textTransform: 'uppercase', letterSpacing: '.18em' }}>{label}</div>
+      <div style={{ fontSize: '.97rem', marginTop: 3, lineHeight: 1.4 }}>{value}</div>
     </div>
   );
 }

@@ -28,7 +28,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
   if (!post || !post.published) notFound();
 
   return (
-    <article style={{ padding: '16vh 6vw 9vh', maxWidth: 760, margin: '0 auto', position: 'relative', zIndex: 2 }}>
+    <article className="page-wrap" style={{ maxWidth: 760, margin: '0 auto' }}>
       <FadeUp>
         <Link href="/blog" className="text-muted" style={{ fontSize: '.85rem', textDecoration: 'none' }}>
           ← All posts

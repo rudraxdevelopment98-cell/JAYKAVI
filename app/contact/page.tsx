@@ -7,15 +7,7 @@ export default async function ContactPage() {
   const social = await getSocial();
 
   return (
-    <div
-      style={{
-        padding: '16vh 6vw 9vh',
-        maxWidth: 640,
-        margin: '0 auto',
-        position: 'relative',
-        zIndex: 2,
-      }}
-    >
+    <div className="page-wrap" style={{ maxWidth: 680, margin: '0 auto' }}>
       <p
         className="accent"
         style={{

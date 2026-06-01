@@ -7,15 +7,7 @@ export default async function LyricsPage() {
   const [withLyrics, all] = await Promise.all([getSongsWithLyrics(), getAllSongs()]);
 
   return (
-    <div
-      style={{
-        padding: '16vh 6vw 9vh',
-        maxWidth: 900,
-        margin: '0 auto',
-        position: 'relative',
-        zIndex: 2,
-      }}
-    >
+    <div className="page-wrap page-wrap-narrow">
       <p
         className="accent"
         style={{

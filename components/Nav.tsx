@@ -26,72 +26,163 @@ export default function Nav() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  return (
-    <nav
-      style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: scrolled ? '14px 6vw' : '22px 6vw',
-        background: scrolled ? 'var(--panel)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(18px)' : 'none',
-        borderBottom: scrolled ? '1px solid var(--line)' : '1px solid transparent',
-        transition: 'all .4s ease',
-      }}
-    >
-      <Link href="/" className="font-serif" style={{ fontWeight: 600, fontSize: '1.3rem', letterSpacing: '.5px', textDecoration: 'none' }}>
-        JAY<span className="accent">KAVI</span>
-      </Link>
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
 
-      <ul style={{ display: 'flex', gap: 34, listStyle: 'none', alignItems: 'center', margin: 0 }} className="nav-desktop">
-        {links.map((link) => {
-          const active = pathname === link.href;
-          return (
+  // Close on route change
+  useEffect(() => { setOpen(false); }, [pathname]);
+
+  return (
+    <>
+      <nav className={`site-nav${scrolled ? ' scrolled' : ''}`}>
+        {/* Logo */}
+        <Link href="/" className="nav-logo font-serif" onClick={() => setOpen(false)}>
+          JAY<span className="accent">KAVI</span>
+        </Link>
+
+        {/* Desktop links */}
+        <ul className="nav-links">
+          {links.map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
-                style={{
-                  textDecoration: 'none', fontSize: '.92rem', fontWeight: 500,
-                  opacity: active ? 1 : 0.8,
-                  borderBottom: active ? '2px solid var(--accent)' : '2px solid transparent',
-                  paddingBottom: 4, transition: 'opacity .3s',
-                }}
+                className={`nav-link${pathname === link.href ? ' active' : ''}`}
               >
                 {link.label}
               </Link>
             </li>
-          );
-        })}
-        <li><ThemeToggle /></li>
-      </ul>
+          ))}
+          <li><ThemeToggle /></li>
+        </ul>
 
-      {/* mobile */}
-      <div className="nav-mobile" style={{ display: 'none', gap: 12, alignItems: 'center' }}>
-        <ThemeToggle />
-        <button onClick={() => setOpen(!open)} aria-label="Menu" style={{ background: 'none', border: 'none', color: 'var(--text)', fontSize: '1.6rem', cursor: 'pointer' }}>
-          {open ? '✕' : '☰'}
-        </button>
-      </div>
+        {/* Mobile right side */}
+        <div className="nav-mobile-right">
+          <ThemeToggle />
+          <button
+            className="nav-burger"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+          >
+            <span className={`burger-line${open ? ' open' : ''}`} />
+            <span className={`burger-line${open ? ' open' : ''}`} />
+            <span className={`burger-line${open ? ' open' : ''}`} />
+          </button>
+        </div>
+      </nav>
 
-      {open && (
-        <div style={{
-          position: 'fixed', inset: 0, top: 64, background: 'var(--bg)', zIndex: 99,
-          display: 'flex', flexDirection: 'column', padding: '6vw', gap: 8,
-        }}>
-          {links.map((link) => (
-            <Link key={link.href} href={link.href} onClick={() => setOpen(false)}
-              className="font-serif" style={{ fontSize: '2rem', textDecoration: 'none', padding: '10px 0' }}>
+      {/* Mobile drawer */}
+      <div className={`mobile-drawer${open ? ' open' : ''}`} aria-hidden={!open}>
+        <nav className="mobile-nav">
+          {links.map((link, i) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`mobile-link font-serif${pathname === link.href ? ' active' : ''}`}
+              style={{ transitionDelay: open ? `${i * 0.05}s` : '0s' }}
+              onClick={() => setOpen(false)}
+            >
               {link.label}
             </Link>
           ))}
-        </div>
-      )}
+        </nav>
+      </div>
 
       <style>{`
+        /* ── Nav bar ── */
+        .site-nav {
+          position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 22px 6vw;
+          transition: padding .35s ease, background .35s ease, border-color .35s ease;
+          border-bottom: 1px solid transparent;
+        }
+        .site-nav.scrolled {
+          padding: 14px 6vw;
+          background: var(--panel);
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
+          border-color: var(--line);
+        }
+
+        /* ── Logo ── */
+        .nav-logo {
+          font-weight: 600; font-size: 1.3rem; letter-spacing: .5px;
+          text-decoration: none; z-index: 2;
+        }
+
+        /* ── Desktop links ── */
+        .nav-links {
+          display: flex; gap: 30px; list-style: none; align-items: center; margin: 0; padding: 0;
+        }
+        .nav-link {
+          text-decoration: none; font-size: .9rem; font-weight: 500;
+          opacity: .8; padding-bottom: 3px;
+          border-bottom: 2px solid transparent;
+          transition: opacity .25s, border-color .25s;
+        }
+        .nav-link:hover { opacity: 1; }
+        .nav-link.active { opacity: 1; border-bottom-color: var(--accent); }
+
+        /* ── Mobile right ── */
+        .nav-mobile-right {
+          display: none; align-items: center; gap: 10px; z-index: 2;
+        }
+
+        /* ── Burger ── */
+        .nav-burger {
+          display: flex; flex-direction: column; justify-content: center; gap: 5px;
+          width: 40px; height: 40px; background: none; border: none;
+          cursor: pointer; padding: 8px; border-radius: 8px;
+        }
+        .burger-line {
+          display: block; width: 22px; height: 2px;
+          background: var(--text); border-radius: 2px;
+          transition: transform .3s ease, opacity .3s ease;
+          transform-origin: center;
+        }
+        .burger-line.open:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .burger-line.open:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        .burger-line.open:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* ── Mobile drawer ── */
+        .mobile-drawer {
+          position: fixed; inset: 0; z-index: 199;
+          background: var(--bg);
+          display: flex; flex-direction: column; justify-content: center;
+          padding: 0 8vw;
+          opacity: 0; pointer-events: none;
+          transition: opacity .3s ease;
+        }
+        .mobile-drawer.open {
+          opacity: 1; pointer-events: auto;
+        }
+        .mobile-nav {
+          display: flex; flex-direction: column; gap: 4px;
+        }
+        .mobile-link {
+          font-size: clamp(2rem, 8vw, 3rem); font-weight: 600;
+          text-decoration: none; padding: 10px 0;
+          border-bottom: 1px solid var(--line);
+          opacity: 0; transform: translateY(16px);
+          transition: opacity .3s ease, transform .3s ease, color .2s;
+          color: var(--text);
+        }
+        .mobile-drawer.open .mobile-link {
+          opacity: 1; transform: translateY(0);
+        }
+        .mobile-link.active { color: var(--accent); }
+        .mobile-link:last-child { border-bottom: none; }
+
+        /* ── Breakpoint ── */
         @media (max-width: 820px) {
-          .nav-desktop { display: none !important; }
-          .nav-mobile { display: flex !important; }
+          .nav-links { display: none !important; }
+          .nav-mobile-right { display: flex !important; }
         }
       `}</style>
-    </nav>
+    </>
   );
 }

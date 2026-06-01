@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: 'About — JAYKAVI' };
 export default async function AboutPage() {
   const l = await getLyricist();
   return (
-    <div style={{ padding: '16vh 6vw 9vh', maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 2 }}>
+    <div className="page-wrap page-wrap-narrow">
       <FadeUp>
         <p className="accent" style={{ textTransform: 'uppercase', letterSpacing: '.3em', fontSize: '.76rem', fontWeight: 600 }}>About</p>
         <h1 className="font-serif" style={{ fontSize: 'clamp(2.4rem,6vw,4.5rem)', fontWeight: 600, lineHeight: 1, margin: '14px 0 10px' }}>

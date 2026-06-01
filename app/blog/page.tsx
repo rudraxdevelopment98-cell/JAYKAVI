@@ -25,7 +25,7 @@ export default async function BlogPage() {
   const posts = await getPosts();
 
   return (
-    <div style={{ padding: '16vh 6vw 9vh', maxWidth: 1000, margin: '0 auto', position: 'relative', zIndex: 2 }}>
+    <div className="page-wrap page-wrap-mid">
       <FadeUp>
         <p className="accent" style={{ textTransform: 'uppercase', letterSpacing: '.3em', fontSize: '.76rem', fontWeight: 600 }}>
           Updates
