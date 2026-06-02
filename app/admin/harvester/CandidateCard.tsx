@@ -13,10 +13,12 @@ interface Candidate {
   thumbnailUrl: string | null;
   youtubeId: string;
   channelTitle: string | null;
+  description: string | null;
 }
 
 export default function CandidateCard({ c }: { c: Candidate }) {
   const [open, setOpen] = useState(false);
+  const [showDesc, setShowDesc] = useState(false);
   const [busy, setBusy] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
@@ -41,6 +43,17 @@ export default function CandidateCard({ c }: { c: Candidate }) {
 
   const inputCls = 'w-full px-2 py-1 text-sm bg-neutral-950 border border-neutral-700 rounded focus:outline-none focus:border-amber-500';
 
+  // Highlight credit keywords in description for quick visual scan
+  function highlightDesc(text: string): React.ReactNode[] {
+    const creditRe = /(lyrics?|lyricist|written\s+by|jaykavi|jayesh\s+prajapati|જયકવિ|જયેશ\s+પ્રજાપ|ગીત|ગીતકાર)/gi;
+    const parts = text.split(creditRe);
+    return parts.map((part, i) =>
+      creditRe.test(part)
+        ? <mark key={i} style={{ background: 'rgba(251,191,36,.25)', color: '#fbbf24', borderRadius: 2 }}>{part}</mark>
+        : part
+    );
+  }
+
   return (
     <div className="border border-neutral-800 rounded-xl overflow-hidden bg-neutral-900">
       {/* Main row */}
@@ -49,6 +62,7 @@ export default function CandidateCard({ c }: { c: Candidate }) {
           <img
             src={c.thumbnailUrl}
             alt=""
+            loading="lazy"
             className="w-28 h-16 object-cover rounded flex-shrink-0"
           />
         )}
@@ -62,14 +76,25 @@ export default function CandidateCard({ c }: { c: Candidate }) {
               <span>{c.viewCount.toLocaleString()} views</span>
             )}
           </div>
-          <a
-            href={`https://www.youtube.com/watch?v=${c.youtubeId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-amber-400 hover:underline mt-1 inline-block"
-          >
-            youtube.com/watch?v={c.youtubeId} ↗
-          </a>
+          <div className="flex items-center gap-3 mt-1">
+            <a
+              href={`https://www.youtube.com/watch?v=${c.youtubeId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-amber-400 hover:underline"
+            >
+              Watch on YouTube ↗
+            </a>
+            {c.description && (
+              <button
+                type="button"
+                onClick={() => setShowDesc((v) => !v)}
+                className="text-xs text-neutral-500 hover:text-neutral-300 underline"
+              >
+                {showDesc ? 'Hide description' : 'Why included? ↓'}
+              </button>
+            )}
+          </div>
         </div>
         <div className="flex gap-2 flex-shrink-0">
           <button
@@ -88,7 +113,19 @@ export default function CandidateCard({ c }: { c: Candidate }) {
         </div>
       </div>
 
-      {/* Edit form */}
+      {/* Description preview — shows why the filter accepted this video */}
+      {showDesc && c.description && (
+        <div className="border-t border-neutral-800 bg-neutral-950/40 px-4 py-3">
+          <p className="text-xs text-neutral-500 mb-2 font-medium">
+            Video description — highlighted words triggered the filter:
+          </p>
+          <pre className="text-xs text-neutral-400 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+            {highlightDesc(c.description)}
+          </pre>
+        </div>
+      )}
+
+      {/* Edit / approve form */}
       {open && (
         <div className="border-t border-neutral-800 bg-neutral-950/60 p-4 space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -125,7 +162,7 @@ export default function CandidateCard({ c }: { c: Candidate }) {
             </button>
           </div>
           <p className="text-xs text-neutral-500 italic">
-            Original title: {c.rawTitle}
+            Original YouTube title: {c.rawTitle}
           </p>
         </div>
       )}

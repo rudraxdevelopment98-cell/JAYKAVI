@@ -38,12 +38,9 @@ export interface YTVideo {
 
 export async function resolveChannelId(urlOrId: string): Promise<string | null> {
   const s = urlOrId.trim();
-  // raw channel ID
   if (/^UC[\w-]{22}$/.test(s)) return s;
-  // /channel/UC... URL
   const m = s.match(/\/channel\/(UC[\w-]{22})/);
   if (m) return m[1];
-  // @handle or custom URL — resolve via search
   const handle = s.replace(/\/$/, '').split('/').pop()!.replace(/^@/, '');
   const data = await ytGet('search', { part: 'snippet', q: handle, type: 'channel', maxResults: 1 });
   return data.items?.[0]?.snippet?.channelId ?? null;
@@ -83,6 +80,7 @@ export async function videoIdsFromSearch(term: string, cap: number): Promise<str
       part: 'snippet',
       q: term,
       type: 'video',
+      videoCategoryId: '10', // Music only
       maxResults: Math.min(50, cap - out.length),
     };
     if (token) params.pageToken = token;
@@ -128,24 +126,89 @@ export async function hydrateVideos(ids: string[]): Promise<Map<string, YTVideo>
   return map;
 }
 
-export function passesFilter(video: YTVideo, needles: string[], knownSingers?: string[]): boolean {
-  const title = video.title.toLowerCase();
-  const desc = video.description.toLowerCase().slice(0, 1500);
-  // Strong: credit found in the title → definite match
-  if (needles.some(n => title.includes(n.toLowerCase()))) return true;
-  // Weak: credit only in description → only accept if it appears in a credit line
-  const creditContext = /(?:lyrics?|written by|lyricsist|lyricist|shayar|kavita|rachna|words by)\s*[:\-]?\s*/i;
-  const descLines = video.description.split('\n');
-  for (const line of descLines) {
-    const l = line.toLowerCase();
-    if (needles.some(n => l.includes(n.toLowerCase()))) {
-      // Accept if this line looks like a credit line
-      if (creditContext.test(line) || l.includes('lyric') || l.includes('written') || l.includes('શબ્દ') || l.includes('lyrics')) {
-        return true;
-      }
+// ─── Compilation / jukebox reject patterns ───────────────────────────────────
+const COMPILATION_RE = /\b(jukebox|non[- ]?stop|nonstop|top\s*\d+|mashup|mash[- ]?up|collection|full album|all songs|songs list|playlist|medley|mix\s*vol|bhajan\s*mala|garba\s*collection)\b/i;
+
+// ─── Strong credit-line patterns ─────────────────────────────────────────────
+// Matches "Lyrics : X", "Written By - X", "ગીત : X", "ગીતકાર : X", "Kavya : X" etc.
+const CREDIT_LINE_RE = /(?:lyrics?|lyricist|written\s+by|words?\s+by|script\s+by|ગીત|ગીતકાર|ગીતો|શબ્દ|kavi(?:ta)?|kavya|rachna\s+karta|poet)\s*[:\-–|]\s*/i;
+
+// Medium: line talks about lyrics/writing but without colon
+const CREDIT_CONTEXT_RE = /(?:lyrics?|lyricist|written\s+by|words?\s+by|ગીત|ગીતકાર)/i;
+
+function matchesNeedle(text: string, needle: string): boolean {
+  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Use word boundaries for ASCII, plain includes for Unicode (Gujarati)
+  if (/^[\x00-\x7F]+$/.test(needle)) {
+    try {
+      return new RegExp(`\\b${escaped}\\b`, 'i').test(text);
+    } catch {
+      return text.toLowerCase().includes(needle.toLowerCase());
     }
   }
-  return false;
+  return text.toLowerCase().includes(needle.toLowerCase());
+}
+
+/**
+ * Score-based filter.
+ * Score thresholds:
+ *   >= 5 → accept (high confidence)
+ *   <  5 → reject
+ *
+ * Scoring:
+ *   +6  lyricist name in video title (word boundary for English)
+ *   +5  "Lyrics : JAYKAVI" style credit line in description
+ *   +3  lyricist name on a line that has a credit keyword (written by, ગીત etc.)
+ *   +1  lyricist name found anywhere in description (not hashtag)
+ *  -10  title looks like a compilation (jukebox, nonstop, mashup, …)
+ */
+export function passesFilter(video: YTVideo, needles: string[], _knownSingers?: string[]): boolean {
+  const title = video.title;
+  const titleL = title.toLowerCase();
+
+  // Hard reject: compilation videos
+  if (COMPILATION_RE.test(title)) return false;
+
+  let score = 0;
+
+  // +6: name in title
+  for (const needle of needles) {
+    if (matchesNeedle(titleL, needle.toLowerCase())) {
+      score += 6;
+      break;
+    }
+  }
+
+  // Analyse description lines
+  const lines = video.description.split('\n');
+  const hashtagLineRe = /^(\s*#\w+\s*)+$/;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    // Skip lines that are purely hashtags (e.g. "#JAYKAVI #Gujarati")
+    if (hashtagLineRe.test(line)) continue;
+
+    const lineL = line.toLowerCase();
+    for (const needle of needles) {
+      if (matchesNeedle(lineL, needle.toLowerCase())) {
+        if (CREDIT_LINE_RE.test(line)) {
+          // "Lyrics : JAYKAVI" → strongest signal
+          score += 5;
+        } else if (CREDIT_CONTEXT_RE.test(line)) {
+          // "Lyrics JAYKAVI" or "ગીત JAYKAVI" without colon
+          score += 3;
+        } else {
+          // Name found somewhere in a non-hashtag line
+          score += 1;
+        }
+        break; // only count each line once
+      }
+    }
+    if (score >= 5) break; // no need to keep scanning
+  }
+
+  return score >= 5;
 }
 
 export function guessSinger(title: string, singers: string[]): string {
@@ -162,7 +225,7 @@ export function cleanTitle(title: string): string {
     .replace(/new\s+(?:gujarati\s+)?(?:song|video)\s*\d{4}/gi, '')
     .replace(/\d{4}\s+(?:new\s+)?(?:gujarati\s+)?(?:song|video)/gi, '')
     .replace(/#\S+/g, '')
-    .replace(/\|[^|]{0,60}$/, '') // strip trailing pipe section
+    .replace(/\|[^|]{0,60}$/, '')
     .replace(/\s{2,}/g, ' ')
     .trim()
     .replace(/^[-|\s]+|[-|\s]+$/g, '')

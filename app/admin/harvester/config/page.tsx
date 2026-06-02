@@ -26,9 +26,20 @@ export default async function HarvestConfigPage() {
         <h1 className="text-3xl font-semibold">Harvest Config</h1>
       </div>
 
-      <p className="text-neutral-400 mb-6 text-sm">
-        All settings are saved here and used on every harvest run. No coding needed.
-      </p>
+      {/* How the filter works */}
+      <div className="mb-8 p-4 border border-amber-800/40 bg-amber-950/20 rounded-xl text-sm text-neutral-300 space-y-2">
+        <p className="font-semibold text-amber-400">How the filter works</p>
+        <p>Every video found via search terms or third-party channels goes through a <strong>confidence score</strong> before it reaches your candidate list:</p>
+        <ul className="list-disc list-inside space-y-1 text-neutral-400 text-xs">
+          <li><span className="text-green-400 font-medium">+6 pts</span> — lyricist name found in the video <strong>title</strong> (strongest signal)</li>
+          <li><span className="text-green-400 font-medium">+5 pts</span> — description has a credit line like <code className="text-amber-300">Lyrics : JAYKAVI</code> or <code className="text-amber-300">ગીત : જયકવિ</code></li>
+          <li><span className="text-yellow-400 font-medium">+3 pts</span> — description line contains the name near a lyrics/written-by keyword</li>
+          <li><span className="text-neutral-400 font-medium">+1 pt</span> — name found anywhere in description (not in a #hashtag line)</li>
+          <li><span className="text-red-400 font-medium">Rejected</span> — title contains jukebox / nonstop / mashup / collection / top-10 etc.</li>
+        </ul>
+        <p className="text-xs text-neutral-500">A video needs <strong>score ≥ 5</strong> to be accepted. This means it must have the name in the title, OR a clearly formatted lyricist credit line. Hashtag-only mentions are ignored.</p>
+        <p className="text-xs text-neutral-500">Videos from <strong>Own channels</strong> bypass the filter entirely — they are always trusted.</p>
+      </div>
 
       <form action={saveHarvestConfig} className="space-y-6">
         <div>
@@ -41,7 +52,7 @@ export default async function HarvestConfigPage() {
             placeholder={"https://www.youtube.com/@jaykavi_official\nUCxxxxxxxxxxxxxxxxxxxxxx"}
           />
           <p className="text-xs text-neutral-500 mt-1">
-            Every video from these channels is checked. Paste full URLs or channel IDs (UC…).
+            These are <strong>JAYKAVI&apos;s own channels</strong>. Every video from here is trusted and added as a candidate automatically — no filter applied.
           </p>
         </div>
 
@@ -50,14 +61,12 @@ export default async function HarvestConfigPage() {
           <textarea
             name="searchChannels"
             rows={4}
-            defaultValue={(cfg?.searchChannels ?? []).join('\n')}
+            defaultValue={((cfg as any)?.searchChannels ?? []).join('\n')}
             className={inputCls}
-            placeholder={"https://www.youtube.com/@SomeMusicChannel\nUCxxxxxxxxxxxxxxxxxxxxxx"}
+            placeholder={"https://www.youtube.com/@SomeMusicLabel\nUCxxxxxxxxxxxxxxxxxxxxxx"}
           />
           <p className="text-xs text-neutral-500 mt-1">
-            These are <strong>third-party channels</strong> (record labels, music companies, fan pages) that publish
-            JAYKAVI songs. The harvester will scan their uploads and keep only videos that pass the
-            "Credit must contain" filter — so you still get only JAYKAVI-credited songs.
+            Third-party labels or fan channels that publish JAYKAVI songs. Their uploads are scanned but every video must pass the confidence filter before appearing as a candidate.
           </p>
         </div>
 
@@ -70,12 +79,12 @@ export default async function HarvestConfigPage() {
             className={inputCls}
           />
           <p className="text-xs text-neutral-500 mt-1">
-            Each term is searched on YouTube. Results are then filtered by the credit strings below.
+            YouTube is searched for each term (Music category only). Results then go through the confidence filter. Keep terms specific — <code className="text-amber-300">JAYKAVI lyrics</code> is better than just <code className="text-amber-300">Gujarati songs</code>.
           </p>
         </div>
 
         <div>
-          <label className={labelCls}>Credit must contain (one per line, case-insensitive)</label>
+          <label className={labelCls}>Credit keywords — name / aliases (one per line, case-insensitive)</label>
           <textarea
             name="creditMustContain"
             rows={5}
@@ -83,8 +92,7 @@ export default async function HarvestConfigPage() {
             className={inputCls}
           />
           <p className="text-xs text-neutral-500 mt-1">
-            A video is accepted <strong>only</strong> if its title or description contains at least one of these strings.
-            This ensures only songs actually credited to JAYKAVI are added.
+            The exact strings the filter looks for in titles and description credit lines. Include all known name variants and Gujarati script versions. Do <strong>not</strong> put generic words here — only the lyricist&apos;s name/aliases.
           </p>
         </div>
 
@@ -97,8 +105,7 @@ export default async function HarvestConfigPage() {
             className={inputCls}
           />
           <p className="text-xs text-neutral-500 mt-1">
-            Used to auto-detect the performing singer from the video title. Add more as JAYKAVI works
-            with new artists.
+            Used to auto-detect the performing singer from the video title. Does not affect filtering — it only pre-fills the &quot;Singer&quot; field when you approve a candidate.
           </p>
         </div>
 
@@ -109,11 +116,11 @@ export default async function HarvestConfigPage() {
             type="number"
             min={10}
             max={500}
-            defaultValue={cfg?.maxResultsPerTerm ?? 100}
+            defaultValue={cfg?.maxResultsPerTerm ?? 50}
             className={`${inputCls} max-w-xs`}
           />
           <p className="text-xs text-neutral-500 mt-1">
-            Higher = broader coverage, more YouTube API quota used. Free quota: 10,000 units/day.
+            Higher = broader coverage, more YouTube API quota used. Each search costs ~100 quota units. Free quota: 10,000 units/day. Recommended: 50–100.
           </p>
         </div>
 
