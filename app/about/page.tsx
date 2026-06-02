@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { getLyricist } from '@/lib/data';
 import { FadeUp } from '@/components/Reveal';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = { title: 'About — JAYKAVI' };
 
 export default async function AboutPage() {
@@ -40,7 +42,14 @@ export default async function AboutPage() {
       {l.awards && l.awards.length > 0 && (
         <FadeUp delay={0.25}>
           <h2 className="font-serif" style={{ fontSize: '1.6rem', marginTop: 50, marginBottom: 16 }}>Recognition</h2>
-          <ul style={{ lineHeight: 2 }}>{l.awards.map((a) => <li key={a}>{a}</li>)}</ul>
+          <ul style={{ lineHeight: 2, listStyle: 'none', padding: 0, margin: 0 }}>
+            {l.awards.map((a) => (
+              <li key={a} style={{ display: 'flex', alignItems: 'baseline', gap: 10, padding: '4px 0', borderBottom: '1px solid var(--line)' }}>
+                <span className="accent" style={{ fontSize: '.8rem', flexShrink: 0 }}>✦</span>
+                <span>{a}</span>
+              </li>
+            ))}
+          </ul>
         </FadeUp>
       )}
     </div>

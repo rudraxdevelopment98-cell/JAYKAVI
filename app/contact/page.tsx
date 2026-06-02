@@ -1,6 +1,7 @@
 import { getSocial } from '@/lib/data';
 import ContactForm from './ContactForm';
 
+export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Contact — JAYKAVI' };
 
 export default async function ContactPage() {

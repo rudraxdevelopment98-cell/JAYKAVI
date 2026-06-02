@@ -1,6 +1,8 @@
 import { getSongsWithLyrics, getAllSongs } from '@/lib/data';
 import LyricsList from './LyricsList';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = { title: 'Lyrics — JAYKAVI' };
 
 export default async function LyricsPage() {

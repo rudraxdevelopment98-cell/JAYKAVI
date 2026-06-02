@@ -58,7 +58,7 @@ export default async function BlogPage() {
                 >
                   {p.coverUrl && (
                     <div style={{ aspectRatio: '16 / 9', overflow: 'hidden' }}>
-                      <img src={p.coverUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={p.coverUrl} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                   )}
                   <div style={{ padding: '20px 22px', flex: 1, display: 'flex', flexDirection: 'column' }}>

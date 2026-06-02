@@ -46,7 +46,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
       {post.coverUrl && (
         <FadeUp delay={0.1}>
           <div style={{ borderRadius: 16, overflow: 'hidden', marginBottom: 40 }}>
-            <img src={post.coverUrl} alt="" style={{ width: '100%', display: 'block' }} />
+            <img src={post.coverUrl} alt="" loading="eager" style={{ width: '100%', display: 'block' }} />
           </div>
         </FadeUp>
       )}

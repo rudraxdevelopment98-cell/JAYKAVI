@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { getJourney, getLyricist } from '@/lib/data';
 import { FadeUp } from '@/components/Reveal';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = { title: 'Journey — JAYKAVI' };
 
 export default async function JourneyPage() {

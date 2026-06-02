@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { getAllSongs, getFacets } from '@/lib/data';
 import SongArchive from '@/components/SongArchive';
 
+export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Songs — JAYKAVI', description: 'The complete archive of songs written by JAYKAVI.' };
 
 export default async function SongsPage() {

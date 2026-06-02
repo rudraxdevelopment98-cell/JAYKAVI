@@ -249,41 +249,63 @@ export default function SongArchive({ songs, facets }: { songs: Song[]; facets: 
   return (
     <div>
       {/* search + filters */}
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 28 }}>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginBottom: 28 }}>
         <input
           value={q} onChange={(e) => setQ(e.target.value)}
           placeholder="Search title, singer, or lyrics…"
-          style={{ ...selectStyle, flex: '1 1 260px', minWidth: 200, cursor: 'text' }}
+          style={{ ...selectStyle, flex: '1 1 220px', minWidth: 180, cursor: 'text' }}
         />
-        <FilterDropdown
-          value={singer}
-          options={singerOptions}
-          onChange={(val) => setParam('singer', val || null)}
-          placeholder="All singers"
-        />
-        <FilterDropdown
-          value={genre}
-          options={genreOptions}
-          onChange={(val) => setParam('genre', val || null)}
-          placeholder="All genres"
-        />
-        {facets.years.length > 0 && (
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', flex: '0 0 auto' }}>
           <FilterDropdown
-            value={year}
-            options={yearOptions}
-            onChange={(val) => setParam('year', val || null)}
-            placeholder="All years"
+            value={singer}
+            options={singerOptions}
+            onChange={(val) => setParam('singer', val || null)}
+            placeholder="All singers"
           />
-        )}
-        <FilterDropdown
-          value={sort}
-          options={sortOptions}
-          onChange={(val) => setParam('sort', val)}
-          placeholder="Sort"
-        />
-        <div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>
-          <button onClick={() => setParam('view', 'grid')} style={{ ...selectStyle, opacity: view === 'grid' ? 1 : .5 }}>Grid</button>
-          <button onClick={() => setParam('view', 'list')} style={{ ...selectStyle, opacity: view === 'list' ? 1 : .5 }}>List</button>
+          <FilterDropdown
+            value={genre}
+            options={genreOptions}
+            onChange={(val) => setParam('genre', val || null)}
+            placeholder="All genres"
+          />
+          {facets.years.length > 0 && (
+            <FilterDropdown
+              value={year}
+              options={yearOptions}
+              onChange={(val) => setParam('year', val || null)}
+              placeholder="All years"
+            />
+          )}
+          <FilterDropdown
+            value={sort}
+            options={sortOptions}
+            onChange={(val) => setParam('sort', val)}
+            placeholder="Sort"
+          />
+          <div style={{ display: 'flex', gap: 4 }}>
+            <button
+              type="button"
+              onClick={() => setParam('view', 'grid')}
+              style={{ ...selectStyle, opacity: view === 'grid' ? 1 : .45, padding: '9px 13px' }}
+              aria-label="Grid view"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <rect x="0" y="0" width="6" height="6" rx="1"/><rect x="10" y="0" width="6" height="6" rx="1"/>
+                <rect x="0" y="10" width="6" height="6" rx="1"/><rect x="10" y="10" width="6" height="6" rx="1"/>
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => setParam('view', 'list')}
+              style={{ ...selectStyle, opacity: view === 'list' ? 1 : .45, padding: '9px 13px' }}
+              aria-label="List view"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <rect x="0" y="1" width="16" height="2" rx="1"/><rect x="0" y="7" width="16" height="2" rx="1"/>
+                <rect x="0" y="13" width="16" height="2" rx="1"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -308,7 +330,7 @@ export default function SongArchive({ songs, facets }: { songs: Song[]; facets: 
           ))}
         </div>
       ) : (
-        <div className="songs-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 22 }}>
+        <div className="songs-grid">
           {filtered.map((s, i) => <SongCard key={s.id} song={s} index={i} />)}
         </div>
       )}

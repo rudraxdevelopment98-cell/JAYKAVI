@@ -1,4 +1,5 @@
 import Link from 'next/link';
+export const dynamic = 'force-dynamic';
 import { getLyricist, getTrendingSongs, getTopSongs, getJourney } from '@/lib/data';
 import CinematicHero from '@/components/CinematicHero';
 import HorizontalScrollRow from '@/components/HorizontalScrollRow';

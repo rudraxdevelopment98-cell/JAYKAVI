@@ -99,7 +99,7 @@ export default async function Footer() {
             style={{ ...linkStyle, textTransform: 'capitalize' }}
           >
             <SocialIcon name={k} />
-            {k.replace(/Secondary/i, '')}
+            {k.replace(/Secondary/i, '').replace(/([A-Z])/g, ' $1').trim() || k}
           </a>
         ))}
       </div>

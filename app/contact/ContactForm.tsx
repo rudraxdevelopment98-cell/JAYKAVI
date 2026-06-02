@@ -156,7 +156,7 @@ export default function ContactForm({ social }: { social: Record<string, string>
                 className="glass"
                 style={{ textDecoration: 'none', padding: '12px 20px', borderRadius: 100, textTransform: 'capitalize' }}
               >
-                {k.replace(/Secondary/i, '')}
+                {k.replace(/Secondary/i, '').replace(/([A-Z])/g, ' $1').trim() || k}
               </a>
             ))}
           </div>
@@ -271,7 +271,7 @@ export default function ContactForm({ social }: { social: Record<string, string>
               className="glass"
               style={{ textDecoration: 'none', padding: '12px 20px', borderRadius: 100, textTransform: 'capitalize' }}
             >
-              {k.replace(/Secondary/i, '')}
+              {k.replace(/Secondary/i, '').replace(/([A-Z])/g, ' $1').trim() || k}
             </a>
           ))}
         </div>

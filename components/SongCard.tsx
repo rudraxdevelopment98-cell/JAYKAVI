@@ -26,7 +26,7 @@ export default function SongCard({ song, index = 0 }: { song: Song; index?: numb
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.5, delay: Math.min(index * 0.04, 0.3) }}
-      whileHover={{ y: -10, scale: 1.02 }}
+      whileHover={{ y: -4, scale: 1.01 }}
       style={{
         borderRadius: 20, overflow: 'hidden', background: 'var(--panel-solid)',
         border: '1px solid var(--line)', cursor: 'pointer', height: '100%',
@@ -42,7 +42,8 @@ export default function SongCard({ song, index = 0 }: { song: Song; index?: numb
             <img
               src={song.artworkUrl}
               alt={song.title}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }}
+              loading="lazy"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
             />
           )}
           {song.genre?.[0] && (
