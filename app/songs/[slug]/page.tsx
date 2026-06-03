@@ -43,6 +43,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
+function isSafeUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  try {
+    const { protocol } = new URL(url);
+    return protocol === 'https:' || protocol === 'http:';
+  } catch { return false; }
+}
+
 export default async function SongDetail({ params }: { params: { slug: string } }) {
   const song = await getSongBySlug(params.slug);
   if (!song) notFound();
@@ -80,7 +88,7 @@ export default async function SongDetail({ params }: { params: { slug: string } 
       <TrackView slug={song.slug} />
       {/* ── Hero ── */}
       <div className="song-hero" style={{
-        background: song.artworkUrl
+        background: isSafeUrl(song.artworkUrl)
           ? `linear-gradient(to bottom, rgba(10,10,11,.65) 0%, rgba(10,10,11,.9) 70%, var(--bg) 100%), url(${song.artworkUrl}) center/cover no-repeat`
           : 'var(--hero-grad)',
       }}>

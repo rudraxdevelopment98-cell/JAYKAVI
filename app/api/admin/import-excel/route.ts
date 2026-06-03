@@ -1,19 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-interface ExcelRow {
-  Title?: string;
-  Channel?: string;
-  Published?: string;
-  Views?: number | string;
-  Link?: string;
-  Source?: string;
-}
+const MAX_ROWS = 5_000;
+const ALLOWED_MIME = new Set(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel']);
+// xlsx magic bytes: PK\x03\x04 (ZIP/OOXML)
+const XLSX_MAGIC = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
 
 function extractYouTubeId(url: string): string | null {
   const m = url?.match(/v=([A-Za-z0-9_-]{11})/);
@@ -43,23 +39,57 @@ export async function POST(req: NextRequest) {
   const file = formData.get('file') as File | null;
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });
 
+  if (file.size > 10 * 1024 * 1024) {
+    return NextResponse.json({ error: 'File too large (max 10 MB)' }, { status: 400 });
+  }
+
   const buffer = Buffer.from(await file.arrayBuffer());
-  const workbook = XLSX.read(buffer, { type: 'buffer' });
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows: ExcelRow[] = XLSX.utils.sheet_to_json(sheet);
+
+  // Validate magic bytes — must be a ZIP/OOXML file (.xlsx), not a crafted payload
+  if (!buffer.subarray(0, 4).equals(XLSX_MAGIC)) {
+    return NextResponse.json({ error: 'Invalid file format. Only .xlsx files are accepted.' }, { status: 400 });
+  }
+
+  // Parse with exceljs (no prototype pollution CVEs unlike xlsx@0.18)
+  const workbook = new ExcelJS.Workbook();
+  try {
+    await workbook.xlsx.load(buffer);
+  } catch {
+    return NextResponse.json({ error: 'Could not parse the Excel file.' }, { status: 400 });
+  }
+
+  const sheet = workbook.worksheets[0];
+  if (!sheet) return NextResponse.json({ error: 'No worksheet found in file' }, { status: 400 });
+
+  // Extract header row to map columns by name
+  const headers: string[] = [];
+  sheet.getRow(1).eachCell((cell) => { headers.push(String(cell.value ?? '').trim()); });
+
+  const idx = (name: string) => headers.indexOf(name);
+  const rows: Array<Record<string, string>> = [];
+
+  sheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) return; // skip header
+    if (rows.length >= MAX_ROWS) return;
+    const obj: Record<string, string> = {};
+    headers.forEach((h, i) => {
+      const cell = row.getCell(i + 1);
+      obj[h] = cell.value != null ? String(cell.value) : '';
+    });
+    rows.push(obj);
+  });
 
   if (rows.length === 0) {
     return NextResponse.json({ error: 'No rows found in sheet' }, { status: 400 });
+  }
+  if (rows.length >= MAX_ROWS) {
+    return NextResponse.json({ error: `Spreadsheet too large (max ${MAX_ROWS} rows)` }, { status: 400 });
   }
 
   let run;
   try {
     run = await prisma.harvestRun.create({
-      data: {
-        status: 'done',
-        scanned: rows.length,
-        newFound: rows.length,
-      },
+      data: { status: 'done', scanned: rows.length, newFound: rows.length },
     });
   } catch {
     return NextResponse.json({ error: 'Database not connected. Set up DATABASE_URL first.' }, { status: 503 });
@@ -69,13 +99,15 @@ export async function POST(req: NextRequest) {
   let skipped = 0;
 
   for (const row of rows) {
-    if (!row.Title || !row.Link) { skipped++; continue; }
+    const title = row['Title']?.trim();
+    const link  = row['Link']?.trim();
+    if (!title || !link) { skipped++; continue; }
 
-    const youtubeId = extractYouTubeId(String(row.Link));
+    const youtubeId = extractYouTubeId(link);
     if (!youtubeId) { skipped++; continue; }
 
-    const title = cleanTitle(String(row.Title));
-    const year = row.Published ? extractYear(String(row.Published)) : null;
+    const cleanedTitle = cleanTitle(title);
+    const year = row['Published'] ? extractYear(row['Published']) : null;
 
     try {
       await prisma.harvestCandidate.upsert({
@@ -83,10 +115,10 @@ export async function POST(req: NextRequest) {
         create: {
           runId: run.id,
           youtubeId,
-          cleanTitle: title,
-          rawTitle: String(row.Title),
-          channelTitle: row.Channel ? String(row.Channel) : null,
-          viewCount: row.Views ? Number(row.Views) : null,
+          cleanTitle: cleanedTitle,
+          rawTitle: title,
+          channelTitle: row['Channel'] || null,
+          viewCount: row['Views'] ? Number(row['Views']) || null : null,
           releaseYear: year,
           status: 'pending',
         },

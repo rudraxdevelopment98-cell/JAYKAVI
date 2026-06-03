@@ -1,18 +1,34 @@
 import { signIn, auth } from '@/auth';
 import { redirect } from 'next/navigation';
 
+// Only allow same-origin relative paths as callback targets.
+// Prevents open-redirect phishing attacks via crafted callbackUrl params.
+function safeCallbackUrl(raw?: string): string {
+  if (!raw) return '/admin';
+  try {
+    const u = new URL(raw, 'http://localhost');
+    if (u.hostname !== 'localhost') return '/admin';
+    const path = u.pathname + u.search;
+    return path.startsWith('/admin') ? path : '/admin';
+  } catch {
+    return '/admin';
+  }
+}
+
 export default async function LoginPage({
   searchParams,
 }: {
   searchParams: { callbackUrl?: string; error?: string };
 }) {
+  const callbackUrl = safeCallbackUrl(searchParams.callbackUrl);
+
   try {
     const session = await auth();
     if (session && (session as any).isAdmin) {
-      redirect(searchParams.callbackUrl ?? '/admin');
+      redirect(callbackUrl);
     }
   } catch {
-    // AUTH_SECRET not set or auth misconfigured — still show the login UI
+    redirect('/admin/login');
   }
 
   return (
@@ -34,9 +50,7 @@ export default async function LoginPage({
         <form
           action={async () => {
             'use server';
-            await signIn('google', {
-              redirectTo: searchParams.callbackUrl ?? '/admin',
-            });
+            await signIn('google', { redirectTo: callbackUrl });
           }}
         >
           <button

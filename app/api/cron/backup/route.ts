@@ -10,11 +10,12 @@ export const maxDuration = 60;
 // (useful in local/dev), but setting CRON_SECRET in production is recommended.
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const auth = req.headers.get('authorization');
-    if (auth !== `Bearer ${secret}`) {
-      return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
-    }
+  // Fail-closed: if no secret is configured in production, deny the request.
+  if (!secret) {
+    return NextResponse.json({ ok: false, error: 'CRON_SECRET is not configured' }, { status: 503 });
+  }
+  if (req.headers.get('authorization') !== `Bearer ${secret}`) {
+    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
@@ -23,7 +24,7 @@ export async function GET(req: Request) {
     const prunedViews = await pruneDailyViews();
     return NextResponse.json({ ok: true, itemCount, createdAt, prunedLogs: pruned, prunedViews });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ ok: false, error: msg }, { status: 500 });
+    console.error('[cron/backup]', err);
+    return NextResponse.json({ ok: false, error: 'Internal server error' }, { status: 500 });
   }
 }

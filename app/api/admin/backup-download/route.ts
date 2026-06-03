@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { logActivity } from '@/lib/activity';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,13 @@ export async function GET() {
   if (!backup) {
     return NextResponse.json({ error: 'No backup yet' }, { status: 404 });
   }
+
+  await logActivity({
+    actorEmail: session.user?.email,
+    action: 'export',
+    entity: 'Backup',
+    label: new Date(backup.createdAt).toISOString().slice(0, 10),
+  }).catch(() => {});
 
   const date = new Date(backup.createdAt).toISOString().slice(0, 10);
   return new NextResponse(backup.data, {

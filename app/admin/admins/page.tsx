@@ -60,7 +60,13 @@ async function updateAdmin(formData: FormData) {
   const name = (formData.get('name') as string || '').trim() || null;
   const role = (formData.get('role') as string || '').trim() || 'Admin';
   const note = (formData.get('note') as string || '').trim() || null;
-  const permissions = formData.getAll('permissions').map(String).filter(Boolean);
+  let permissions = formData.getAll('permissions').map(String).filter(Boolean);
+
+  // Only env-level owners may grant the special 'all' wildcard permission.
+  const { isEnvAdmin: checkEnvAdmin } = await import('@/auth');
+  if (permissions.includes('all') && !checkEnvAdmin(session.user?.email)) {
+    permissions = permissions.filter((p) => p !== 'all');
+  }
 
   const updated = await prisma.adminUser.update({
     where: { id },

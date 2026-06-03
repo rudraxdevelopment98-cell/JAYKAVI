@@ -1,6 +1,6 @@
 import { prisma } from './prisma';
 
-export const LOG_RETENTION_DAYS = 7;
+export const LOG_RETENTION_DAYS = 90;
 export const ANALYTICS_RETENTION_DAYS = 90;
 
 // Delete daily-view analytics rows older than the retention window so the
@@ -60,11 +60,16 @@ export async function createBackup(): Promise<{ itemCount: number; createdAt: Da
     prisma.adminUser.findMany(),
   ]);
 
+  // Strip private contact fields so they are never stored in the backup JSON.
+  const contactSafe = contact
+    ? (({ privateEmail: _pe, privatePhone: _pp, ...rest }) => rest)(contact as any)
+    : null;
+
   const snapshot = {
     version: 1,
     takenAt: new Date().toISOString(),
     lyricist,
-    contact,
+    contact: contactSafe,
     singers,
     collections,
     songs,

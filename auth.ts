@@ -54,21 +54,21 @@ export async function getPermissionsForEmail(email?: string | null): Promise<str
   }
 }
 
+const JWT_RECHECK_INTERVAL = 60 * 60; // re-validate DB admin status every 1 hour
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  trustHost: true,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
-  session: { strategy: 'jwt' },
+  session: { strategy: 'jwt', maxAge: 8 * 60 * 60 },
   pages: {
     signIn: '/admin/login',
   },
   callbacks: {
     async signIn({ user }) {
-      // Runs in the Node runtime — safe to query the database here.
       const allowed = await isAllowedAdmin(user.email);
       if (allowed) {
         try {
@@ -84,14 +84,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return allowed;
     },
     async jwt({ token, user }) {
-      // On initial sign-in the user already passed the signIn() gate above,
-      // so they are an admin. Load their permissions once here (Node runtime)
-      // and persist on the token (edge middleware stays DB-free).
+      const nowSec = Math.floor(Date.now() / 1000);
+
       if (user) {
+        // Initial sign-in — user already passed the signIn() gate.
         token.isAdmin = true;
         token.permissions = await getPermissionsForEmail(token.email as string | undefined);
+        (token as any).checkedAt = nowSec;
+      } else {
+        // Subsequent JWT refreshes — re-validate DB admin status periodically
+        // so a removed admin loses access within one hour, not one session.
+        const checkedAt = (token as any).checkedAt as number | undefined;
+        if (!checkedAt || nowSec - checkedAt > JWT_RECHECK_INTERVAL) {
+          const still = await isAllowedAdmin(token.email as string | undefined);
+          if (!still) {
+            token.isAdmin = false;
+            token.permissions = [];
+          } else {
+            token.permissions = await getPermissionsForEmail(token.email as string | undefined);
+          }
+          (token as any).checkedAt = nowSec;
+        }
       }
-      // Env owners are always full admins, even on older tokens.
+
+      // Env owners always get full access regardless of DB state.
       if (isEnvAdmin(token.email as string | undefined)) {
         token.isAdmin = true;
         token.permissions = ['all'];

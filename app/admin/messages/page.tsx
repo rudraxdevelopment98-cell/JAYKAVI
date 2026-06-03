@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
@@ -15,12 +16,16 @@ async function getMessages() {
 
 async function markRead(id: string) {
   'use server';
+  const session = await auth();
+  if (!session || !(session as any).isAdmin) throw new Error('Unauthorized');
   await prisma.contactMessage.update({ where: { id }, data: { read: true } });
   revalidatePath('/admin/messages');
 }
 
 async function markAllRead() {
   'use server';
+  const session = await auth();
+  if (!session || !(session as any).isAdmin) throw new Error('Unauthorized');
   await prisma.contactMessage.updateMany({ where: { read: false }, data: { read: true } });
   revalidatePath('/admin/messages');
 }

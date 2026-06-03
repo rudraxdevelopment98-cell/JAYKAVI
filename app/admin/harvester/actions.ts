@@ -213,7 +213,10 @@ export async function saveHarvestConfig(formData: FormData) {
       : [];
   }
 
-  const maxResults = parseInt(formData.get('maxResultsPerTerm') as string || '100', 10);
+  const maxResultsRaw = parseInt(formData.get('maxResultsPerTerm') as string || '100', 10);
+  const maxResults = Number.isFinite(maxResultsRaw)
+    ? Math.min(Math.max(maxResultsRaw, 1), 500)
+    : 100;
 
   await prisma.harvestConfig.upsert({
     where: { id: 1 },
@@ -223,7 +226,7 @@ export async function saveHarvestConfig(formData: FormData) {
       searchTerms: lines('searchTerms'),
       creditMustContain: lines('creditMustContain'),
       knownSingers: lines('knownSingers'),
-      maxResultsPerTerm: Number.isFinite(maxResults) ? maxResults : 100,
+      maxResultsPerTerm: maxResults,
     },
     create: {
       id: 1,
@@ -232,7 +235,7 @@ export async function saveHarvestConfig(formData: FormData) {
       searchTerms: lines('searchTerms'),
       creditMustContain: lines('creditMustContain'),
       knownSingers: lines('knownSingers'),
-      maxResultsPerTerm: Number.isFinite(maxResults) ? maxResults : 100,
+      maxResultsPerTerm: maxResults,
     },
   });
 
