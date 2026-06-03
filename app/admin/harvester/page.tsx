@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import RunButton from './RunButton';
-import CandidateCard from './CandidateCard';
+import HarvesterQueue from './HarvesterQueue';
 import ClearAllButton from './ClearAllButton';
 import AutoRunToggle from './AutoRunToggle';
 import ImportExcelButton from './ImportExcelButton';
@@ -116,17 +116,7 @@ export default async function HarvesterPage() {
           <ClearAllButton count={pending.length} />
         </div>
 
-        {pending.length === 0 ? (
-          <div className="px-5 py-8 bg-neutral-900/60 border border-neutral-800 rounded-xl text-center text-neutral-400">
-            No songs waiting for review. Run the harvester to find new songs.
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {pending.map((c) => (
-              <CandidateCard key={c.id} c={c} />
-            ))}
-          </div>
-        )}
+        <HarvesterQueue candidates={pending} />
       </section>
 
       {/* Recent runs */}

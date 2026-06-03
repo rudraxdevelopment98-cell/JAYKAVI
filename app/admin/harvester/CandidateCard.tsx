@@ -17,7 +17,7 @@ interface Candidate {
   description: string | null;
 }
 
-export default function CandidateCard({ c }: { c: Candidate }) {
+export default function CandidateCard({ c, onDismiss }: { c: Candidate; onDismiss?: () => void }) {
   const [open, setOpen] = useState(false);
   const [showDesc, setShowDesc] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -40,6 +40,7 @@ export default function CandidateCard({ c }: { c: Candidate }) {
       setBusy(false);
     } else {
       setDismissed(true);
+      onDismiss?.();
     }
   }
 
@@ -47,6 +48,7 @@ export default function CandidateCard({ c }: { c: Candidate }) {
     setBusy(true);
     await rejectCandidate(c.id);
     setDismissed(true);
+    onDismiss?.();
   }
 
   const inputCls = 'w-full px-2 py-1 text-sm bg-neutral-950 border border-neutral-700 rounded focus:outline-none focus:border-amber-500';

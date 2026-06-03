@@ -233,3 +233,19 @@ export async function deleteSong(id: string) {
   revalidatePath('/admin/songs');
   redirect('/admin/songs');
 }
+
+export async function bulkDeleteSongs(ids: string[]): Promise<{ deleted: number }> {
+  const session = await auth();
+  assertAdmin(session);
+  if (!ids.length) return { deleted: 0 };
+  const { count } = await prisma.song.deleteMany({ where: { id: { in: ids } } });
+  await logActivity({
+    actorEmail: session?.user?.email,
+    action: 'delete',
+    entity: 'Song',
+    label: `Bulk delete — ${count} song${count !== 1 ? 's' : ''}`,
+  });
+  revalidatePath('/admin/songs');
+  revalidatePath('/songs');
+  return { deleted: count };
+}

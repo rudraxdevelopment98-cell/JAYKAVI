@@ -202,6 +202,99 @@ export async function rejectCandidate(candidateId: string) {
   revalidatePath('/admin/harvester');
 }
 
+export async function bulkRejectCandidates(ids: string[]): Promise<{ rejected: number }> {
+  const session = await auth();
+  assertAdmin(session);
+  if (!ids.length) return { rejected: 0 };
+  const { count } = await prisma.harvestCandidate.updateMany({
+    where: { id: { in: ids }, status: 'pending' },
+    data: { status: 'rejected' },
+  });
+  revalidatePath('/admin/harvester');
+  return { rejected: count };
+}
+
+export interface BulkApproveResult {
+  approved: number;
+  skipped: number; // duplicates skipped
+}
+
+export async function bulkApproveSimple(ids: string[]): Promise<BulkApproveResult> {
+  const session = await auth();
+  assertAdmin(session);
+  if (!ids.length) return { approved: 0, skipped: 0 };
+
+  const candidates = await prisma.harvestCandidate.findMany({
+    where: { id: { in: ids }, status: 'pending' },
+  });
+
+  let approved = 0;
+  let skipped = 0;
+
+  for (const c of candidates) {
+    const title = c.cleanTitle.trim();
+    const youtubeId = c.youtubeId;
+
+    // Skip duplicates
+    const existing = await prisma.song.findFirst({
+      where: {
+        OR: [
+          youtubeId ? { youtubeId } : undefined,
+          { title: { equals: title, mode: 'insensitive' } },
+        ].filter(Boolean) as any,
+      },
+      select: { id: true },
+    });
+    if (existing) { skipped++; continue; }
+
+    const slug = await uniqueSlug(slugify(title));
+    const releaseYear = c.releaseYear ?? null;
+
+    const song = await prisma.song.create({
+      data: {
+        slug, title,
+        lyricistCredit: 'Jayesh Prajapati "JAYKAVI"',
+        language: 'Gujarati',
+        artworkUrl: c.thumbnailUrl,
+        releaseYear,
+        youtubeId,
+        viewCount: c.viewCount ?? 0,
+        platformLinks: youtubeId ? {
+          create: {
+            platform: 'youtube',
+            url: `https://www.youtube.com/watch?v=${youtubeId}`,
+            isPrimary: true,
+          },
+        } : undefined,
+      },
+    });
+
+    // Attach singer guess if present
+    const singerNames = (c.singerGuess ?? '')
+      .split(',').map((s) => s.trim()).filter(Boolean);
+    for (const name of singerNames) {
+      const singer = await prisma.singer.upsert({
+        where: { legacyId: `auto-${name.toLowerCase().replace(/\s+/g, '-')}` },
+        update: {},
+        create: { legacyId: `auto-${name.toLowerCase().replace(/\s+/g, '-')}`, name },
+      });
+      await prisma.songSinger.create({ data: { songId: song.id, singerId: singer.id } });
+    }
+
+    await prisma.harvestCandidate.update({
+      where: { id: c.id },
+      data: { status: 'approved', songId: song.id },
+    });
+
+    approved++;
+  }
+
+  revalidatePath('/admin/harvester');
+  revalidatePath('/admin/songs');
+  revalidatePath('/songs');
+  return { approved, skipped };
+}
+
 export async function saveHarvestConfig(formData: FormData) {
   const session = await auth();
   assertAdmin(session);
