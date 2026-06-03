@@ -106,40 +106,40 @@ a { color: inherit; }
    data-theme-skin on <html> (server-rendered from SiteSettings DB row).
    ===================================================================== */
 
-/* ── Traditional (Gujarati gold & saffron) — dark ─────────────────── */
+/* ── Traditional (Library / Manuscript) — dark ─────────────────── */
 [data-theme-skin='traditional'][data-theme='dark'],
 [data-theme-skin='traditional']:not([data-theme='light']) {
-  --bg: #08090B;
-  --panel: rgba(20, 14, 4, 0.65);
-  --panel-solid: #110C03;
-  --text: #F5EDD8;
-  --muted: #9B7A4A;
-  --line: rgba(212, 175, 55, 0.14);
-  --accent: #D4AF37;
-  --glow: 0 0 70px rgba(212, 175, 55, 0.3);
+  --bg: #0b0905;
+  --panel: rgba(24, 17, 8, 0.72);
+  --panel-solid: #150f07;
+  --text: #EDE0C8;
+  --muted: #8A7355;
+  --line: rgba(200, 165, 100, 0.14);
+  --accent: #C8A55A;
+  --glow: 0 0 60px rgba(200,165,100,.22);
+  /* Dark library reading room — deep warm black, subtle aged-paper highlight at top */
   --hero-grad:
-    radial-gradient(120% 90% at 70% 10%, rgba(212,175,55,.35), transparent 55%),
-    radial-gradient(90% 80% at 15% 30%, rgba(255,153,51,.2), transparent 60%),
-    radial-gradient(70% 70% at 50% 100%, rgba(212,175,55,.12), transparent 55%);
+    radial-gradient(80% 55% at 50% 0%, rgba(200,165,100,.18) 0%, transparent 65%),
+    linear-gradient(175deg, #1a1208 0%, #0b0905 60%, #07060a 100%);
 }
 
-/* ── Traditional (Gujarati gold & saffron) — light ────────────────── */
+/* ── Traditional (Library / Manuscript) — light ────────────────── */
 [data-theme-skin='traditional'][data-theme='light'] {
-  --bg: #FDFBF6;
-  --panel: rgba(255, 255, 255, 0.65);
-  --panel-solid: #FFFFFF;
-  --text: #2A1A00;
-  --muted: #9B7A4A;
-  --line: rgba(166, 93, 0, 0.12);
-  --accent: #A65D00;
-  --glow: 0 20px 60px rgba(166, 93, 0, 0.18);
+  --bg: #F8F3EB;
+  --panel: rgba(248, 243, 235, 0.75);
+  --panel-solid: #F3EDE1;
+  --text: #1E160A;
+  --muted: #7A6244;
+  --line: rgba(140, 100, 40, 0.14);
+  --accent: #8C6428;
+  --glow: 0 20px 60px rgba(140,100,40,.15);
+  /* Parchment page — warm cream with a gentle amber highlight */
   --hero-grad:
-    radial-gradient(120% 90% at 70% 10%, rgba(212,175,55,.22), transparent 55%),
-    radial-gradient(90% 80% at 15% 30%, rgba(245,237,214,.9), transparent 60%),
-    radial-gradient(70% 70% at 50% 100%, rgba(253,251,246,.8), transparent 55%);
+    radial-gradient(80% 55% at 50% 0%, rgba(200,165,100,.18) 0%, transparent 65%),
+    linear-gradient(175deg, #2a1c0a 0%, #1e1408 55%, #0d0b10 100%);
 }
 [data-theme-skin='traditional'][data-theme='light'] .gradient-text {
-  background: linear-gradient(100deg, #A65D00, #D4AF37);
+  background: linear-gradient(100deg, #8C6428, #C8A55A);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -153,21 +153,20 @@ a { color: inherit; }
    ===================================================================== */
 
 [data-theme-skin='traditional'] {
-  --gold: #D4AF37;
-  --gold-soft: #E7C766;
-  --saffron: #FF9933;
-  --gold-line: rgba(212, 175, 55, 0.28);
+  /* Aged-gilt palette — muted, scholarly, not temple-bright */
+  --gold:      #C8A55A;   /* aged gilt, not bright yellow */
+  --gold-soft: #DFC080;   /* lighter gilt highlight */
+  --gold-line: rgba(200,165,90,.26);
 }
 [data-theme-skin='traditional'][data-theme='light'] {
-  --gold: #A65D00;
-  --gold-soft: #C8862B;
-  --saffron: #E07A1F;
-  --gold-line: rgba(166, 93, 0, 0.25);
+  --gold:      #8C6428;   /* dark leather-gold */
+  --gold-soft: #B08040;
+  --gold-line: rgba(140,100,40,.22);
 }
 
-/* Gold gradient text helper */
+/* Gilt gradient text helper */
 [data-theme-skin='traditional'] .trad-gold-text {
-  background: linear-gradient(100deg, var(--gold-soft), var(--gold), var(--saffron));
+  background: linear-gradient(100deg, var(--gold-soft), var(--gold));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -175,18 +174,13 @@ a { color: inherit; }
 
 /* Ornate fixed top border that frames every page */
 .trad-frame-top {
-  position: fixed; top: 0; left: 0; right: 0; height: 10px; z-index: 300;
+  position: fixed; top: 0; left: 0; right: 0; height: 6px; z-index: 300;
   pointer-events: none;
-  background:
-    repeating-linear-gradient(90deg,
-      var(--gold) 0, var(--gold) 10px,
-      transparent 10px, transparent 20px),
-    linear-gradient(180deg, var(--saffron), transparent);
-  opacity: .85;
-  box-shadow: 0 1px 14px rgba(212,175,55,.4);
+  background: linear-gradient(90deg, var(--gold-soft), var(--gold), var(--gold-soft));
+  opacity: .7;
 }
 .trad-frame-top::after {
-  content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 2px;
+  content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
@@ -243,9 +237,9 @@ a { color: inherit; }
   border-radius: 16px; position: relative; overflow: hidden;
 }
 
-/* Song card fallback gradient — gold/saffron under the Traditional skin */
+/* Song card / catalog art fallback — aged gilt under the Traditional skin */
 [data-theme-skin='traditional'] .sc-art-fallback {
-  background: linear-gradient(160deg, rgba(212,175,55,.42), rgba(8,9,11,.92)) !important;
+  background: linear-gradient(160deg, rgba(200,165,90,.32) 0%, rgba(11,9,5,.94) 100%) !important;
 }
 
 /* Richer footer in traditional skin handled by Footer component variant */

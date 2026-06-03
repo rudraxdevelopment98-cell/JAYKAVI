@@ -13,13 +13,13 @@ export default async function SongsPage() {
   return (
     <div className="page-wrap">
       {traditional ? (
-        <div style={{ textAlign: 'center', marginBottom: 44 }}>
-          <span className="trad-eyebrow">Bhajans Collection</span>
-          <h1 className="font-serif trad-gold-text" style={{ fontSize: 'clamp(2.2rem,5vw,3.6rem)', fontWeight: 700, margin: '8px 0 0' }}>
-            ગુજરાતી ભજન સંગ્રહ
+        <div style={{ marginBottom: 44 }}>
+          <span className="trad-eyebrow">The Collection</span>
+          <h1 className="font-serif trad-gold-text" style={{ fontSize: 'clamp(2.2rem,6vw,3.6rem)', fontWeight: 800, margin: '8px 0 0', letterSpacing: '-.01em' }}>
+            ભજન સંગ્રહ
           </h1>
-          <div className="trad-divider" style={{ justifyContent: 'center' }}>❖</div>
-          <p className="text-muted" style={{ fontSize: '.98rem', maxWidth: 520, margin: '0 auto' }}>
+          <div className="trad-divider" style={{ justifyContent: 'flex-start' }}>❖</div>
+          <p className="text-muted" style={{ fontSize: '.97rem', maxWidth: 480, lineHeight: 1.7 }}>
             Every bhajan and song written by JAYKAVI — search, filter, and listen.
           </p>
         </div>

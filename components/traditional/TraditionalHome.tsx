@@ -2,87 +2,77 @@ import Link from 'next/link';
 import { getLyricist, getAllSongs, getSocial, type TraditionalSettings } from '@/lib/data';
 import type { Song } from '@/lib/types';
 
-// Only allow http/https artwork URLs to be interpolated into CSS backgrounds.
 function safeUrl(u?: string | null): string | null {
   if (!u) return null;
-  try {
-    const p = new URL(u).protocol;
-    return p === 'https:' || p === 'http:' ? u : null;
-  } catch {
-    return null;
-  }
+  try { const p = new URL(u).protocol; return p === 'https:' || p === 'http:' ? u : null; }
+  catch { return null; }
 }
 
-/* ── Inline ornamental icons ─────────────────────────────────────── */
-function Lotus() {
+/* ── Library-themed SVG icons ─────────────────────────────────── */
+function BookOpen() {
   return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M12 21c4 0 7-2.5 7-5 0-1-3 .5-3 .5S15 12 12 12s-4 4.5-4 4.5-3-1.5-3-.5c0 2.5 3 5 7 5z" />
-      <path d="M12 12c0-3 0-7 0-9-2 2-3 5-3 7M12 12c0-3 0-7 0-9 2 2 3 5 3 7" />
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M2 6c0-1.1.9-2 2-2h5a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4a2 2 0 0 1-2-2V6z"/>
+      <path d="M22 6c0-1.1-.9-2-2-2h-5a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h6a2 2 0 0 0 2-2V6z"/>
+    </svg>
+  );
+}
+function Scroll() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M8 21h12a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4z"/>
+      <path d="M19 17V5a2 2 0 0 0-2-2H4"/>
+      <path d="M4 3a2 2 0 0 0-2 2v13.5"/>
+      <path d="M4 3a2 2 0 0 1 2 2v1"/>
+    </svg>
+  );
+}
+function Quill() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M20 3c-1.5 1.5-3 3-3 7H5s1-5 5-7h10z"/>
+      <path d="M17 10c0 4-7 11-7 11s-.5-2-1-4"/>
+      <path d="M6 17c-1 1-2 3-2 4"/>
     </svg>
   );
 }
 function MusicNote() {
   return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M9 3v10.55A4 4 0 1 0 11 17V7h3V3z" />
-    </svg>
-  );
-}
-function Temple() {
-  return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M12 2l3 4H9l3-4zM5 10h14M6 10v9M18 10v9M10 10v9M14 10v9M4 22h16M4 19h16" />
-    </svg>
-  );
-}
-function Hands() {
-  return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M12 3c1 2 1 4 1 6M7 21c-2-2-3-5-3-8 0-1.5 2-1.5 2 0M17 21c2-2 3-5 3-8 0-1.5-2-1.5-2 0" />
-      <path d="M9 13c0-2 0-3 1-3s1 1 1 3M15 13c0-2 0-3-1-3s-1 1-1 3" />
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M9 18V5l12-2v13"/>
+      <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
     </svg>
   );
 }
 function Play() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M8 5v14l11-7z" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M8 5v14l11-7z"/>
+    </svg>
+  );
+}
+function ChevronRight() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <polyline points="9 18 15 12 9 6"/>
     </svg>
   );
 }
 function YouTube() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff" aria-hidden>
-      <rect x="2" y="5" width="20" height="14" rx="4" fill="#E0231C" />
-      <path d="M10 9l5 3-5 3z" fill="#fff" />
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
+      <rect x="2" y="5" width="20" height="14" rx="4" fill="#E0231C"/>
+      <path d="M10 9l5 3-5 3z" fill="#fff"/>
     </svg>
-  );
-}
-function Om() {
-  return (
-    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" opacity=".5" aria-hidden>
-      <path d="M7 14c-2 0-3-1.5-3-3s1.5-3 3-3 2 1 2 2-1 2-2 2M9 12c1-2 3-3 5-3 2 0 3 1.5 3 3.5S15 16 13 16M16 6c1-.5 2 0 2 1M14 4a3 3 0 0 1 3 3" />
-    </svg>
-  );
-}
-
-/* ── Decorative double-bell, CSS chain via inline style ──────────── */
-function Bell({ side }: { side: 'left' | 'right' }) {
-  return (
-    <div className={`th-bell th-bell-${side}`} aria-hidden>
-      <span className="th-chain" />
-      <span className="th-bell-body" />
-    </div>
   );
 }
 
 function SectionHead({ tag, title, center }: { tag: string; title: string; center?: boolean }) {
   return (
-    <div style={{ textAlign: center ? 'center' : 'left', marginBottom: 34 }}>
+    <div style={{ textAlign: center ? 'center' : 'left', marginBottom: 32 }}>
       <span className="trad-eyebrow">{tag}</span>
       <h2 className="font-serif trad-gold-text th-section-title">{title}</h2>
-      {center && <div className="trad-divider">❖</div>}
+      <div className="trad-divider" style={center ? undefined : { justifyContent: 'flex-start' }}>❖</div>
     </div>
   );
 }
@@ -95,384 +85,457 @@ export default async function TraditionalHome({ settings }: { settings: Traditio
   ]);
 
   const name = l.displayName ?? l.name;
+  const nameParts = name.split(' ');
+  const firstWord = nameParts[0];
+  const restWords = nameParts.slice(1).join(' ');
+
   const bhajans = songs.slice(0, 8);
-  const videos = songs.filter((s) => s.embed?.youtubeId).slice(0, 6);
-  const ytVideos = videos.length ? videos : bhajans;
+  const videos = songs.filter((s) => s.embed?.youtubeId).slice(0, 4);
+  const ytVideos = videos.length ? videos : bhajans.slice(0, 4);
   const youtubeUrl = social.youtube || 'https://www.youtube.com';
   const firstSong = bhajans[0];
-  const philosophy = l.philosophy || 'સંગીત એ સાધના છે, અને ભજન એ આત્માની ભાષા છે.';
-
-  const featureIcons = [<Lotus key="lotus" />, <MusicNote key="music" />, <Temple key="temple" />, <Hands key="hands" />];
-  const features = settings.features.map((f, i) => ({ icon: featureIcons[i], t: f.title, d: f.desc }));
 
   const portraitUrl = safeUrl(settings.heroPortrait);
   const deityUrl    = safeUrl(settings.heroDeity);
   const heroBgUrl   = safeUrl(settings.heroBg);
 
-  const lyricCards = [
-    { t: 'ભજન લિરિક્સ', d: 'પ્રતિ એક ભજનના લિરિક્સ અહીં વાંચો.' },
-    { t: 'કવિતા સંગ્રહ', d: 'ભક્તિ, પ્રેમ અને જીવન પર આધારિત કવિતાઓ.' },
-    { t: 'સંદેશ', d: 'પ્રેરણાદાયક વિચારો અને જીવન માર્ગદર્શન.' },
-  ];
+  const featureIcons = [<BookOpen key="book" />, <MusicNote key="music" />, <Scroll key="scroll" />, <Quill key="quill" />];
+  const features = settings.features.map((f, i) => ({ icon: featureIcons[i], t: f.title, d: f.desc }));
+
+  const stats: string[] = [
+    songs.length > 0 ? `${songs.length}+ ભજન` : '',
+    l.languages?.length ? l.languages.slice(0, 2).join(' · ') : '',
+    l.careerStartYear ? `Since ${l.careerStartYear}` : '',
+  ].filter(Boolean);
 
   return (
     <div className="th-root">
-      {/* ════════ HERO ════════ */}
-      <header className="th-hero" style={heroBgUrl ? {
-        backgroundImage: `linear-gradient(to bottom, rgba(8,9,11,.55) 0%, rgba(8,9,11,.75) 100%), url(${heroBgUrl})`,
-        backgroundSize: 'cover', backgroundPosition: 'center',
-      } : undefined}>
-        <Bell side="left" />
-        <Bell side="right" />
 
-        {/* flanking ornamental art panels */}
-        <div className="th-hero-art th-hero-art-left" aria-hidden>
-          <div className="th-arch">
-            {portraitUrl
-              ? <img src={portraitUrl} alt="Singer portrait" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
-              : <Om />}
-          </div>
-        </div>
-
-        <div className="th-hero-center">
+      {/* ══════════════ HERO — Library title page ══════════════ */}
+      <header
+        className="th-hero"
+        style={heroBgUrl ? {
+          backgroundImage: `linear-gradient(to bottom right, rgba(10,7,4,.82) 0%, rgba(8,6,3,.72) 100%), url(${heroBgUrl})`,
+          backgroundSize: 'cover', backgroundPosition: 'center',
+        } : undefined}
+      >
+        <div className="th-hero-inner">
           <p className="th-mantra">{settings.mantra}</p>
-          <div className="trad-divider">❖</div>
           <h1 className="font-serif th-name">
-            {l.name.split(' ').map((w, i) => (
-              <span key={i} className={i === 0 ? 'th-name-first trad-gold-text' : 'th-name-rest'}>
-                {w}{' '}
-              </span>
-            ))}
+            {firstWord && <span className="th-name-first">{firstWord}</span>}
+            {restWords && <span className="th-name-rest trad-gold-text">{restWords}</span>}
           </h1>
           <p className="th-tagline">{l.tagline}</p>
-          <Link href={firstSong ? `/songs/${firstSong.slug}` : '/songs'} className="th-listen">
-            <span className="th-listen-play"><Play /></span>
-            LISTEN NOW
-          </Link>
-        </div>
 
-        <div className="th-hero-art th-hero-art-right" aria-hidden>
-          <div className="th-arch th-arch-deity">
-            {deityUrl
-              ? <img src={deityUrl} alt="Devotional art" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
-              : <Lotus />}
+          {stats.length > 0 && (
+            <div className="th-stats">
+              {stats.map((s, i) => <span key={i}>{s}</span>)}
+            </div>
+          )}
+
+          <div className="th-hero-ctas">
+            <Link href="/songs" className="th-cta-primary">
+              Browse Collection
+            </Link>
+            <Link href="/about" className="th-cta-ghost">
+              About the Lyricist
+            </Link>
           </div>
         </div>
+
+        {/* Portrait shown on tablet/desktop when provided */}
+        {portraitUrl && (
+          <div className="th-hero-portrait" aria-hidden>
+            <img src={portraitUrl} alt={name} />
+          </div>
+        )}
 
         <div className="th-hero-scallop" aria-hidden />
       </header>
 
-      {/* ════════ ABOUT ════════ */}
-      <section className="th-section th-about">
-        <div className="th-about-portrait" aria-hidden>
-          <div className="th-arch th-arch-sm"><MusicNote /></div>
-        </div>
-        <div className="th-about-body">
-          <span className="trad-eyebrow">ABOUT</span>
-          <h2 className="font-serif trad-gold-text th-about-name">{name}</h2>
-          <p className="th-about-bio">{l.bio}</p>
-          <Link href="/about" className="th-readmore">READ MORE ✍</Link>
-        </div>
-        <div className="th-features">
-          {features.map((f) => (
-            <div key={f.t} className="th-feature">
-              <span className="th-feature-icon">{f.icon}</span>
-              <div>
-                <div className="font-serif th-feature-title">{f.t}</div>
-                <div className="th-feature-desc">{f.d}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ════════ BHAJANS COLLECTION ════════ */}
+      {/* ══════════════ COLLECTION — Catalog grid ══════════════ */}
       <section className="th-section">
-        <SectionHead center tag="Bhajans Collection" title="ગુજરાતી ભજનો" />
-        <div className="trad-scroll">
+        <SectionHead tag="The Collection" title="ભજન સંગ્રહ" />
+        <div className="th-catalog">
           {bhajans.map((s) => (
-            <BhajanCard key={s.id} song={s} name={name} />
+            <CatalogCard key={s.id} song={s} lyricist={name} />
           ))}
         </div>
-        <div style={{ textAlign: 'center', marginTop: 18 }}>
-          <Link href="/songs" className="th-pill-btn">VIEW ALL BHAJANS</Link>
+        <div className="th-section-footer">
+          <Link href="/songs" className="th-btn-outline">
+            View Full Catalog <ChevronRight />
+          </Link>
         </div>
       </section>
 
-      {/* ════════ VIDEO + LYRICS ════════ */}
-      <section className="th-section th-vl">
-        {/* Video gallery */}
-        <div className="trad-card th-panel">
-          <div className="th-panel-head">
-            <div>
-              <span className="trad-eyebrow">Video Gallery</span>
-              <h3 className="font-serif trad-gold-text th-panel-title">ભક્તિના દર્શન</h3>
+      {/* ══════════════ ABOUT — Author profile ══════════════ */}
+      <section className="th-section th-about-section">
+        {/* Portrait side */}
+        <div className="th-about-visual">
+          {portraitUrl ? (
+            <img src={portraitUrl} alt={name} className="th-about-photo" />
+          ) : deityUrl ? (
+            <img src={deityUrl} alt="Devotional art" className="th-about-photo" />
+          ) : (
+            <div className="th-about-placeholder">
+              <BookOpen />
             </div>
-            <Link href="/songs" className="th-mini-btn">VIEW ALL</Link>
+          )}
+        </div>
+
+        {/* Bio side */}
+        <div className="th-about-body">
+          <span className="trad-eyebrow">About the Lyricist</span>
+          <h2 className="font-serif trad-gold-text th-about-name">{name}</h2>
+          {l.title && <p className="th-about-title">{l.title}</p>}
+          <p className="th-about-bio">{l.bio}</p>
+
+          <div className="th-features">
+            {features.map((f) => (
+              <div key={f.t} className="th-feature">
+                <span className="th-feature-icon">{f.icon}</span>
+                <div>
+                  <div className="font-serif th-feature-title">{f.t}</div>
+                  <div className="th-feature-desc">{f.d}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Link href="/about" className="th-btn-outline">
+            Read Full Biography <ChevronRight />
+          </Link>
+        </div>
+      </section>
+
+      {/* ══════════════ WATCH & LISTEN ══════════════ */}
+      {ytVideos.length > 0 && (
+        <section className="th-section">
+          <div className="th-vl-head">
+            <SectionHead tag="Watch &amp; Listen" title="ભક્તિ ગીતો" />
+            <a
+              href={youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="th-yt-badge"
+            >
+              <YouTube /> YouTube Channel ↗
+            </a>
           </div>
           <div className="th-video-grid">
-            {ytVideos.slice(0, 3).map((s) => (
-              <Link key={s.id} href={`/songs/${s.slug}`} className="th-video">
-                <div
-                  className="th-video-thumb"
-                  style={safeUrl(s.artworkUrl) ? { backgroundImage: `url(${s.artworkUrl})` } : undefined}
-                >
-                  <span className="th-play-dot"><Play /></span>
-                </div>
-                <span className="th-video-title">{s.title}</span>
-              </Link>
+            {ytVideos.map((s) => (
+              <VideoCard key={s.id} song={s} />
             ))}
           </div>
-        </div>
+          <div className="th-section-footer">
+            <Link href="/songs" className="th-btn-outline">
+              Browse All Songs <ChevronRight />
+            </Link>
+          </div>
+        </section>
+      )}
 
-        {/* Lyrics & poetry */}
-        <div className="trad-card th-panel">
-          <div className="th-panel-head">
-            <div>
-              <span className="trad-eyebrow">Lyrics &amp; Poetry</span>
-              <h3 className="font-serif trad-gold-text th-panel-title">શબ્દો જે સ્પર્શે છે આત્માને</h3>
-            </div>
-            <Link href="/lyrics" className="th-mini-btn">VIEW ALL</Link>
-          </div>
-          <div className="th-lyric-grid">
-            {lyricCards.map((c) => (
-              <Link key={c.t} href="/lyrics" className="th-lyric-card">
-                <span className="th-lyric-icon"><Lotus /></span>
-                <div className="font-serif th-lyric-title">{c.t}</div>
-                <div className="th-lyric-desc">{c.d}</div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ════════ YOUTUBE MUSIC ════════ */}
-      <section className="th-section">
-        <div className="trad-card th-yt">
-          <div className="th-yt-head">
-            <span className="th-yt-icon"><YouTube /></span>
-            <div>
-              <div className="font-serif th-yt-title">YOUTUBE MUSIC</div>
-              <div className="th-yt-sub">સાંભળો હવે અમારી ચેનલ પર</div>
-              <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" className="th-pill-btn th-yt-btn">
-                VISIT CHANNEL ▶
-              </a>
-            </div>
-          </div>
-          <div className="trad-scroll th-yt-scroll">
-            {ytVideos.slice(0, 6).map((s) => (
-              <Link key={s.id} href={`/songs/${s.slug}`} className="th-yt-vid">
-                <div
-                  className="th-video-thumb"
-                  style={safeUrl(s.artworkUrl) ? { backgroundImage: `url(${s.artworkUrl})` } : undefined}
-                >
-                  <span className="th-play-dot"><Play /></span>
-                </div>
-                <span className="th-video-title">{s.title}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <TraditionalHomeStyles philosophy={philosophy} />
+      <TraditionalHomeStyles />
     </div>
   );
 }
 
-function BhajanCard({ song, name }: { song: Song; name: string }) {
+/* ── Catalog card — library index-card style ─────────────────── */
+function CatalogCard({ song, lyricist }: { song: Song; lyricist: string }) {
   const art = safeUrl(song.artworkUrl);
+  const genre = song.genre?.[0];
+  const singer = song.performingSingers?.[0] || lyricist;
   return (
-    <Link href={`/songs/${song.slug}`} className="th-bhajan h-scroll-item">
-      <div className="th-bhajan-card trad-card">
-        <div className="th-bhajan-art" style={art ? { backgroundImage: `url(${art})` } : undefined}>
-          <span className="th-play-dot th-play-lg"><Play /></span>
-        </div>
-        <div className="th-bhajan-meta">
-          <div className="font-serif th-bhajan-title">{song.title}</div>
-          <div className="th-bhajan-sub">{name}</div>
+    <Link href={`/songs/${song.slug}`} className="th-catalog-card">
+      <div className="th-catalog-art sc-art-fallback" style={art ? { backgroundImage: `url(${art})`, background: 'none' } : undefined}>
+        <span className="th-catalog-play"><Play /></span>
+        {song.isTrending && <span className="th-catalog-badge">Trending</span>}
+      </div>
+      <div className="th-catalog-body">
+        {genre && <span className="th-catalog-genre">{genre}</span>}
+        <div className="font-serif th-catalog-title">{song.title}</div>
+        <div className="th-catalog-sub">
+          {singer}
+          {song.releaseYear && <> · {song.releaseYear}</>}
         </div>
       </div>
     </Link>
   );
 }
 
-/* Scoped styles for the traditional homepage. */
-function TraditionalHomeStyles({ philosophy }: { philosophy: string }) {
+/* ── Video card ───────────────────────────────────────────────── */
+function VideoCard({ song }: { song: Song }) {
+  const art = safeUrl(song.artworkUrl);
+  return (
+    <Link href={`/songs/${song.slug}`} className="th-vid-card">
+      <div
+        className="th-vid-thumb sc-art-fallback"
+        style={art ? { backgroundImage: `url(${art})`, background: 'none' } : undefined}
+      >
+        <span className="th-play-dot"><Play /></span>
+      </div>
+      <p className="font-serif th-vid-title">{song.title}</p>
+    </Link>
+  );
+}
+
+/* ── Scoped CSS for the traditional homepage ─────────────────── */
+function TraditionalHomeStyles() {
   return (
     <style>{`
       .th-root { position: relative; z-index: 2; }
-      .th-section { padding: clamp(48px,7vh,90px) clamp(20px,6vw,80px); max-width: 1180px; margin: 0 auto; }
-      .th-section-title { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 700; margin: 6px 0 0; }
 
-      /* ── HERO ── */
+      /* ── HERO (mobile-first) ── */
       .th-hero {
-        position: relative; min-height: 92svh; display: grid;
-        grid-template-columns: 1fr minmax(0,640px) 1fr; align-items: center;
-        gap: 20px; padding: 120px 5vw 90px; background: var(--hero-grad); overflow: hidden;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100svh;
+        padding: 90px 24px 70px;
+        background: var(--hero-grad);
+        overflow: hidden;
+        text-align: center;
       }
-      .th-hero-center { text-align: center; position: relative; z-index: 3; }
-      .th-mantra { color: var(--gold); letter-spacing: .22em; font-size: clamp(.9rem,2vw,1.15rem); font-weight: 600; margin: 0; }
-      .th-name { font-weight: 700; line-height: .98; margin: 6px 0 0; font-size: clamp(2.6rem,9vw,6rem); letter-spacing: -.01em; }
-      .th-name-rest { color: var(--text); }
-      .th-tagline { color: var(--gold-soft); font-size: clamp(1rem,2vw,1.35rem); margin: 18px 0 30px; font-family: var(--font-fraunces), serif; }
-      .th-listen {
-        display: inline-flex; align-items: center; gap: 12px;
-        padding: 13px 28px 13px 14px; border-radius: 100px; text-decoration: none;
-        font-weight: 700; letter-spacing: .12em; font-size: .82rem; color: #1a1200;
+      .th-hero-inner {
+        position: relative; z-index: 3;
+        max-width: 540px; width: 100%;
+      }
+      .th-mantra {
+        font-size: .82rem; letter-spacing: .28em;
+        color: var(--gold); font-weight: 500;
+        margin: 0 0 20px; text-transform: uppercase;
+      }
+      .th-name {
+        font-size: clamp(3rem, 14vw, 6.5rem);
+        font-weight: 800; line-height: .92;
+        margin: 0 0 18px; letter-spacing: -.02em;
+      }
+      .th-name-first { display: block; color: var(--text); }
+      .th-name-rest  { display: block; }
+      .th-tagline {
+        font-family: var(--font-fraunces), serif;
+        font-size: clamp(.95rem, 3vw, 1.2rem);
+        color: var(--muted); margin: 0 0 28px; line-height: 1.6;
+      }
+      .th-stats {
+        display: flex; flex-wrap: wrap; gap: 8px;
+        justify-content: center; margin: 0 0 36px;
+      }
+      .th-stats span {
+        font-size: .76rem; color: var(--muted);
+        padding: 5px 14px; border-radius: 100px;
+        border: 1px solid var(--gold-line); white-space: nowrap;
+      }
+      .th-hero-ctas {
+        display: flex; flex-direction: column; gap: 12px;
+        align-items: stretch; width: 100%; max-width: 320px;
+        margin: 0 auto;
+      }
+      .th-cta-primary {
+        display: flex; align-items: center; justify-content: center;
+        padding: 17px 28px; border-radius: 14px;
         background: linear-gradient(120deg, var(--gold-soft), var(--gold));
-        box-shadow: 0 10px 30px rgba(212,175,55,.4); transition: transform .25s;
+        color: #1a1200; font-weight: 700; font-size: .9rem;
+        letter-spacing: .06em; text-decoration: none;
+        box-shadow: 0 8px 28px rgba(212,175,55,.35);
+        transition: transform .22s, box-shadow .22s;
+        min-height: 52px;
       }
-      .th-listen:hover { transform: translateY(-2px); }
-      .th-listen-play {
-        width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
-        background: rgba(26,18,0,.85); color: var(--gold);
+      .th-cta-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(212,175,55,.45); }
+      .th-cta-ghost {
+        display: flex; align-items: center; justify-content: center;
+        padding: 16px 28px; border-radius: 14px;
+        border: 1px solid var(--gold-line); color: var(--muted);
+        font-size: .88rem; text-decoration: none;
+        min-height: 52px; transition: background .22s, color .22s;
       }
+      .th-cta-ghost:hover { background: rgba(212,175,55,.08); color: var(--text); }
 
-      /* flanking arch art */
-      .th-hero-art { display: grid; place-items: center; position: relative; z-index: 2; }
-      .th-arch {
-        width: clamp(150px, 18vw, 240px); aspect-ratio: 3/4; border-radius: 50% 50% 14px 14px;
-        display: grid; place-items: center; color: var(--gold);
-        background:
-          radial-gradient(120% 90% at 50% 20%, rgba(212,175,55,.22), transparent 70%),
-          var(--panel-solid);
+      /* portrait — hidden on phones, shown on tablet/desktop */
+      .th-hero-portrait { display: none; flex-shrink: 0; position: relative; z-index: 2; }
+      .th-hero-portrait img {
+        width: clamp(200px,28vw,320px); height: auto; aspect-ratio: 3/4;
+        object-fit: cover; border-radius: 20px;
         border: 2px solid var(--gold-line);
-        box-shadow: 0 0 60px rgba(212,175,55,.25), inset 0 0 40px rgba(212,175,55,.08);
-      }
-      .th-arch-deity { background:
-          radial-gradient(120% 90% at 50% 25%, rgba(255,153,51,.28), transparent 70%),
-          var(--panel-solid); }
-      .th-arch-sm { width: clamp(140px,16vw,200px); }
-
-      /* hanging bells */
-      .th-bell { position: absolute; top: 0; z-index: 4; display: flex; flex-direction: column; align-items: center; }
-      .th-bell-left { left: clamp(12px,6vw,90px); }
-      .th-bell-right { right: clamp(12px,6vw,90px); }
-      .th-chain { width: 2px; height: clamp(70px,12vh,130px); background: linear-gradient(var(--gold), var(--gold-soft)); }
-      .th-bell-body {
-        width: 30px; height: 34px; border-radius: 50% 50% 40% 40%;
-        background: linear-gradient(160deg, var(--gold-soft), var(--gold));
-        box-shadow: 0 6px 16px rgba(212,175,55,.45); position: relative;
-      }
-      .th-bell-body::after {
-        content: ""; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
-        width: 7px; height: 7px; border-radius: 50%; background: var(--gold);
+        box-shadow: 0 24px 64px rgba(0,0,0,.55);
       }
 
+      /* scallop bottom edge */
       .th-hero-scallop {
         position: absolute; bottom: -2px; left: 0; right: 0; height: 60px;
-        background:
-          radial-gradient(circle at 30px -18px, transparent 30px, var(--bg) 31px) repeat-x;
+        background: radial-gradient(circle at 30px -18px, transparent 30px, var(--bg) 31px) repeat-x;
         background-size: 60px 60px;
       }
 
-      /* ── ABOUT ── */
-      .th-about {
-        display: grid; grid-template-columns: 220px 1.3fr 1fr; gap: 40px; align-items: center;
+      /* ── SECTIONS ── */
+      .th-section {
+        padding: clamp(44px,7vh,80px) clamp(20px,5vw,64px);
+        max-width: 1200px; margin: 0 auto;
       }
-      .th-about-portrait { display: grid; place-items: center; }
-      .th-arch.th-arch-sm { width: 200px; }
-      .th-about-name { font-size: clamp(1.6rem,3.5vw,2.3rem); font-weight: 700; margin: 6px 0 14px; }
-      .th-about-bio { color: var(--muted); line-height: 1.8; font-size: .98rem; margin: 0 0 22px; }
-      .th-readmore {
-        display: inline-block; text-decoration: none; color: var(--gold);
-        border: 1px solid var(--gold-line); padding: 9px 20px; border-radius: 100px;
-        font-size: .8rem; font-weight: 600; letter-spacing: .08em; transition: background .25s;
+      .th-section-title {
+        font-size: clamp(1.7rem,5vw,2.8rem); font-weight: 700; margin: 4px 0 0;
       }
-      .th-readmore:hover { background: rgba(212,175,55,.1); }
-      .th-features { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-      .th-feature { display: flex; gap: 14px; align-items: flex-start; }
-      .th-feature-icon { color: var(--gold); flex-shrink: 0; }
-      .th-feature-title { font-size: 1.1rem; font-weight: 600; color: var(--text); }
-      .th-feature-desc { color: var(--muted); font-size: .82rem; margin-top: 2px; }
+      .th-section-footer { text-align: center; margin-top: 36px; }
 
-      /* ── horizontal scroll shared ── */
-      .trad-scroll {
-        display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory;
-        padding: 10px 4px 24px; scrollbar-width: none;
+      /* ── CATALOG GRID (mobile: 2 col) ── */
+      .th-catalog {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
       }
-      .trad-scroll::-webkit-scrollbar { display: none; }
-
-      /* ── BHAJAN CARDS ── */
-      .th-bhajan { flex: 0 0 min(200px,60vw); scroll-snap-align: start; text-decoration: none; }
-      .th-bhajan-card { display: flex; flex-direction: column; transition: transform .3s; }
-      .th-bhajan:hover .th-bhajan-card { transform: translateY(-5px); }
-      .th-bhajan-art {
-        height: 200px; background-size: cover; background-position: center;
+      .th-catalog-card {
+        display: flex; flex-direction: column;
+        border-radius: 14px; overflow: hidden;
+        border: 1px solid var(--gold-line);
+        background: var(--panel-solid);
+        text-decoration: none;
+        transition: transform .28s, box-shadow .28s;
+      }
+      .th-catalog-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,.3); }
+      .th-catalog-art {
+        height: 130px; /* compact on mobile */
+        background-size: cover; background-position: center;
         background-color: var(--panel-solid);
-        background-image: linear-gradient(160deg, rgba(212,175,55,.3), rgba(17,12,3,.9));
         display: grid; place-items: center; position: relative;
       }
-      .th-bhajan-meta { padding: 14px 14px 18px; text-align: center; }
-      .th-bhajan-title { font-size: 1.05rem; font-weight: 600; color: var(--text); }
-      .th-bhajan-sub { color: var(--muted); font-size: .78rem; margin-top: 3px; }
+      .th-catalog-play {
+        width: 38px; height: 38px; border-radius: 50%;
+        background: rgba(212,175,55,.9); color: #1a1200;
+        display: grid; place-items: center;
+        box-shadow: 0 4px 14px rgba(0,0,0,.45);
+        transition: transform .2s;
+      }
+      .th-catalog-card:hover .th-catalog-play { transform: scale(1.1); }
+      .th-catalog-badge {
+        position: absolute; top: 8px; right: 8px;
+        font-size: .65rem; font-weight: 700; letter-spacing: .06em;
+        background: var(--gold); color: #1a1200;
+        padding: 2px 8px; border-radius: 100px;
+      }
+      .th-catalog-body { padding: 11px 13px 15px; }
+      .th-catalog-genre {
+        display: inline-block; font-size: .66rem; font-weight: 600;
+        letter-spacing: .08em; padding: 2px 8px; border-radius: 100px;
+        color: var(--gold); border: 1px solid var(--gold-line);
+        margin-bottom: 7px; text-transform: uppercase;
+      }
+      .th-catalog-title {
+        font-size: .92rem; font-weight: 600; color: var(--text);
+        line-height: 1.35; margin-bottom: 5px;
+        display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+      }
+      .th-catalog-sub { font-size: .72rem; color: var(--muted); }
 
+      /* ── ABOUT ── */
+      .th-about-section {
+        display: grid; grid-template-columns: 1fr; gap: 36px;
+      }
+      .th-about-visual { display: flex; justify-content: center; }
+      .th-about-photo {
+        width: min(200px, 52vw); height: auto; aspect-ratio: 3/4;
+        object-fit: cover; border-radius: 18px;
+        border: 2px solid var(--gold-line);
+        box-shadow: 0 20px 60px rgba(0,0,0,.45);
+      }
+      .th-about-placeholder {
+        width: min(180px, 48vw); aspect-ratio: 3/4;
+        border-radius: 18px; border: 2px solid var(--gold-line);
+        display: grid; place-items: center; color: var(--gold);
+        background: var(--panel-solid); opacity: .6;
+      }
+      .th-about-name { font-size: clamp(1.7rem,5vw,2.4rem); font-weight: 700; margin: 6px 0 8px; }
+      .th-about-title { color: var(--gold-soft); font-size: .88rem; margin: 0 0 14px; font-style: italic; }
+      .th-about-bio { color: var(--muted); line-height: 1.85; font-size: .97rem; margin: 0 0 24px; }
+      .th-features { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 0 0 28px; }
+      .th-feature { display: flex; gap: 12px; align-items: flex-start; }
+      .th-feature-icon { color: var(--gold); flex-shrink: 0; margin-top: 2px; }
+      .th-feature-title { font-size: .98rem; font-weight: 600; color: var(--text); }
+      .th-feature-desc { color: var(--muted); font-size: .79rem; margin-top: 3px; line-height: 1.5; }
+
+      /* ── SHARED BUTTON ── */
+      .th-btn-outline {
+        display: inline-flex; align-items: center; gap: 6px;
+        text-decoration: none; color: var(--gold);
+        border: 1px solid var(--gold); padding: 13px 26px; border-radius: 12px;
+        font-size: .82rem; font-weight: 700; letter-spacing: .07em;
+        transition: background .22s, color .22s; min-height: 48px;
+      }
+      .th-btn-outline:hover { background: var(--gold); color: #1a1200; }
+
+      /* ── VIDEO SECTION ── */
+      .th-vl-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; }
+      .th-yt-badge {
+        display: inline-flex; align-items: center; gap: 7px;
+        text-decoration: none; font-size: .78rem; font-weight: 600;
+        color: var(--muted); border: 1px solid var(--line);
+        padding: 8px 16px; border-radius: 100px;
+        transition: background .2s, color .2s; white-space: nowrap; flex-shrink: 0;
+        margin-top: 4px;
+      }
+      .th-yt-badge:hover { background: rgba(212,175,55,.08); color: var(--text); }
+      .th-video-grid {
+        display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+      }
+      .th-vid-card { text-decoration: none; }
+      .th-vid-thumb {
+        height: 120px; border-radius: 14px;
+        background-size: cover; background-position: center;
+        background-color: var(--panel-solid);
+        display: grid; place-items: center;
+        border: 1px solid var(--gold-line); margin-bottom: 10px;
+        transition: transform .25s;
+        overflow: hidden;
+      }
+      .th-vid-card:hover .th-vid-thumb { transform: scale(1.02); }
       .th-play-dot {
-        width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
-        background: rgba(212,175,55,.92); color: #1a1200;
+        width: 44px; height: 44px; border-radius: 50%;
+        display: grid; place-items: center;
+        background: rgba(212,175,55,.9); color: #1a1200;
         box-shadow: 0 6px 18px rgba(0,0,0,.4);
       }
-      .th-play-lg { width: 52px; height: 52px; }
+      .th-vid-title {
+        font-size: .85rem; color: var(--text);
+        line-height: 1.35; text-align: center;
+        display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+        padding: 0 4px;
+      }
 
-      .th-pill-btn {
-        display: inline-block; text-decoration: none; color: var(--gold);
-        border: 1px solid var(--gold); padding: 10px 24px; border-radius: 100px;
-        font-size: .8rem; font-weight: 700; letter-spacing: .1em; transition: background .25s, color .25s;
+      /* ── TABLET: 640px ── */
+      @media (min-width: 640px) {
+        .th-hero { padding: 100px 48px 80px; }
+        .th-hero-ctas { flex-direction: row; width: auto; max-width: none; margin: 0 auto; }
+        .th-cta-primary, .th-cta-ghost { min-width: 200px; }
+        .th-catalog { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+        .th-catalog-art { height: 155px; }
+        .th-about-section { grid-template-columns: 220px 1fr; align-items: start; gap: 48px; }
+        .th-about-visual { justify-content: flex-start; }
+        .th-about-photo { width: 220px; }
+        .th-video-grid { grid-template-columns: repeat(2, 1fr); gap: 18px; }
+        .th-vid-thumb { height: 150px; }
       }
-      .th-pill-btn:hover { background: var(--gold); color: #1a1200; }
 
-      /* ── VIDEO + LYRICS ── */
-      .th-vl { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
-      .th-panel { padding: 26px; }
-      .th-panel-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 14px; }
-      .th-panel-title { font-size: clamp(1.3rem,2.5vw,1.7rem); font-weight: 700; margin: 4px 0 0; }
-      .th-mini-btn {
-        text-decoration: none; color: var(--gold); border: 1px solid var(--gold-line);
-        padding: 6px 14px; border-radius: 100px; font-size: .7rem; font-weight: 700;
-        letter-spacing: .08em; white-space: nowrap; flex-shrink: 0;
-      }
-      .th-video-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-      .th-video { text-decoration: none; text-align: center; }
-      .th-video-thumb {
-        height: 90px; border-radius: 12px; background-size: cover; background-position: center;
-        background-image: linear-gradient(160deg, rgba(212,175,55,.3), rgba(17,12,3,.9));
-        display: grid; place-items: center; border: 1px solid var(--gold-line); margin-bottom: 8px;
-      }
-      .th-video-title { color: var(--text); font-size: .8rem; font-family: var(--font-fraunces), serif; }
-      .th-lyric-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-      .th-lyric-card {
-        text-decoration: none; text-align: center; padding: 18px 12px; border-radius: 14px;
-        background: rgba(212,175,55,.05); border: 1px solid var(--gold-line); transition: background .25s;
-      }
-      .th-lyric-card:hover { background: rgba(212,175,55,.12); }
-      .th-lyric-icon { color: var(--gold); display: inline-flex; }
-      .th-lyric-title { font-size: 1rem; font-weight: 600; color: var(--text); margin: 8px 0 4px; }
-      .th-lyric-desc { color: var(--muted); font-size: .76rem; line-height: 1.5; }
-
-      /* ── YOUTUBE ── */
-      .th-yt { padding: 26px; }
-      .th-yt-head { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 18px; }
-      .th-yt-icon { flex-shrink: 0; margin-top: 4px; }
-      .th-yt-title { font-size: 1.15rem; font-weight: 700; letter-spacing: .06em; color: var(--text); }
-      .th-yt-sub { color: var(--muted); font-size: .9rem; margin: 2px 0 12px; }
-      .th-yt-btn { background: var(--gold); color: #1a1200; border-color: var(--gold); }
-      .th-yt-vid { flex: 0 0 min(180px,55vw); scroll-snap-align: start; text-decoration: none; text-align: center; }
-      .th-yt-vid .th-video-thumb { height: 100px; }
-
-      /* ── RESPONSIVE ── */
-      @media (max-width: 900px) {
-        .th-hero { grid-template-columns: 1fr; }
-        .th-hero-art { display: none; }
-        .th-about { grid-template-columns: 1fr; text-align: center; }
-        .th-about-portrait { margin: 0 auto; }
-        .th-features { max-width: 460px; margin: 0 auto; }
-        .th-vl { grid-template-columns: 1fr; }
-      }
-      @media (max-width: 560px) {
-        .th-features { grid-template-columns: 1fr; }
-        .th-video-grid, .th-lyric-grid { grid-template-columns: 1fr; }
-        .th-bell { display: none; }
+      /* ── DESKTOP: 1024px ── */
+      @media (min-width: 1024px) {
+        .th-hero {
+          flex-direction: row; gap: 60px; text-align: left;
+          justify-content: center; min-height: 88svh;
+          padding: 120px 8vw 80px;
+        }
+        .th-hero-inner { max-width: 500px; }
+        .th-hero-ctas { justify-content: flex-start; margin: 0; }
+        .th-mantra { text-align: left; }
+        .th-stats { justify-content: flex-start; }
+        .th-hero-portrait { display: block; }
+        .th-catalog { grid-template-columns: repeat(4, 1fr); }
+        .th-catalog-art { height: 180px; }
+        .th-about-section { grid-template-columns: 260px 1fr; gap: 64px; }
+        .th-about-photo { width: 260px; }
+        .th-features { grid-template-columns: 1fr 1fr; }
+        .th-video-grid { grid-template-columns: repeat(4, 1fr); }
       }
     `}</style>
   );
