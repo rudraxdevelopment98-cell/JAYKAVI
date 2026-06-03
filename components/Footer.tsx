@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getLyricist, getSocial } from '@/lib/data';
+import { getLyricist, getSocial, getActiveTheme } from '@/lib/data';
 
 const iconStyle: React.CSSProperties = {
   display: 'inline-block',
@@ -65,8 +65,12 @@ function SocialIcon({ name }: { name: string }) {
 }
 
 export default async function Footer() {
-  const [l, social] = await Promise.all([getLyricist(), getSocial()]);
+  const [l, social, activeTheme] = await Promise.all([getLyricist(), getSocial(), getActiveTheme()]);
   const socialEntries = Object.entries(social).filter(([, v]) => v && v.startsWith('http'));
+
+  if (activeTheme === 'traditional') {
+    return <TraditionalFooter l={l} socialEntries={socialEntries} />;
+  }
 
   const linkStyle: React.CSSProperties = {
     textDecoration: 'none',
@@ -109,6 +113,117 @@ export default async function Footer() {
       <p className="text-muted" style={{ fontSize: '.8rem', marginTop: 8, opacity: .7 }}>
         © {new Date().getFullYear()} · All lyrics © their respective rights holders.
       </p>
+    </footer>
+  );
+}
+
+/* ── Traditional (gold devotional) footer ───────────────────────── */
+function TraditionalFooter({
+  l,
+  socialEntries,
+}: {
+  l: Awaited<ReturnType<typeof getLyricist>>;
+  socialEntries: [string, string][];
+}) {
+  const name = l.displayName ?? l.name;
+  const quote = l.philosophy || 'સંગીત એ સાધના છે, અને ભજન એ આત્માની ભાષા છે.';
+  const location = l.basedIn || 'Gujarat, India';
+
+  return (
+    <footer className="tf-root">
+      <div className="tf-grid">
+        {/* Quote panel */}
+        <div className="tf-quote">
+          <div className="tf-orn">❖</div>
+          <p className="font-serif">{quote}</p>
+          <div className="tf-orn">❖</div>
+        </div>
+
+        {/* Quick links */}
+        <div className="tf-col">
+          <h4 className="tf-head">QUICK LINKS</h4>
+          <div className="tf-links">
+            <Link href="/" className="tf-link">Home</Link>
+            <Link href="/about" className="tf-link">About</Link>
+            <Link href="/songs" className="tf-link">Bhajans</Link>
+            <Link href="/journey" className="tf-link">Journey</Link>
+            <Link href="/lyrics" className="tf-link">Lyrics</Link>
+            <Link href="/contact" className="tf-link">Contact</Link>
+          </div>
+        </div>
+
+        {/* Contact / booking */}
+        <div className="tf-col">
+          <h4 className="tf-head">CONTACT / BOOKING</h4>
+          <p className="tf-contact">📍 {location}</p>
+          <Link href="/contact" className="tf-contact tf-contact-link">📩 Booking &amp; enquiries</Link>
+          <div className="tf-social">
+            {socialEntries.map(([k, v]) => (
+              <a key={k} href={v} target="_blank" rel="noopener noreferrer" className="tf-social-icon" aria-label={k}>
+                <SocialIcon name={k} />
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="tf-bottom">
+        <span>© {new Date().getFullYear()} {name}. All Rights Reserved.</span>
+        <span>Made with ♥ for devotional music</span>
+      </div>
+
+      {/* CSS deity corner flourish */}
+      <div className="tf-deity" aria-hidden>🪔</div>
+
+      <style>{`
+        .tf-root {
+          position: relative; z-index: 2; padding: clamp(40px,6vh,70px) 6vw 28px;
+          border-top: 1px solid var(--gold-line);
+          background: linear-gradient(180deg, transparent, rgba(212,175,55,.04));
+          overflow: hidden;
+        }
+        .tf-grid {
+          display: grid; grid-template-columns: 1.1fr 1fr 1.1fr; gap: 32px;
+          max-width: 1100px; margin: 0 auto;
+        }
+        .tf-quote {
+          border: 1px solid var(--gold-line); border-radius: 16px; padding: 26px 22px;
+          text-align: center; background: rgba(212,175,55,.04);
+          display: flex; flex-direction: column; justify-content: center; gap: 10px;
+        }
+        .tf-quote p { font-size: 1.05rem; line-height: 1.7; margin: 0; color: var(--text); }
+        .tf-orn { color: var(--gold); font-size: .8rem; opacity: .8; }
+        .tf-head {
+          color: var(--gold); font-size: .82rem; letter-spacing: .14em; font-weight: 700;
+          margin: 0 0 16px; text-transform: uppercase;
+        }
+        .tf-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; }
+        .tf-link { text-decoration: none; color: var(--muted); font-size: .9rem; transition: color .2s; }
+        .tf-link:hover { color: var(--gold); }
+        .tf-contact { color: var(--muted); font-size: .9rem; margin: 0 0 10px; display: block; text-decoration: none; }
+        .tf-contact-link:hover { color: var(--gold); }
+        .tf-social { display: flex; gap: 10px; margin-top: 8px; color: var(--gold); }
+        .tf-social-icon {
+          width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+          border: 1px solid var(--gold-line); color: var(--gold); transition: background .2s;
+        }
+        .tf-social-icon:hover { background: rgba(212,175,55,.12); }
+        .tf-bottom {
+          max-width: 1100px; margin: 28px auto 0; padding-top: 18px;
+          border-top: 1px solid var(--gold-line);
+          display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+          color: var(--muted); font-size: .78rem;
+        }
+        .tf-deity {
+          position: absolute; right: 3vw; bottom: 10px; font-size: 3.4rem; opacity: .5;
+          filter: drop-shadow(0 0 18px rgba(212,175,55,.4));
+        }
+        @media (max-width: 820px) {
+          .tf-grid { grid-template-columns: 1fr; }
+          .tf-bottom { justify-content: center; text-align: center; }
+          .tf-deity { display: none; }
+        }
+      `}</style>
     </footer>
   );
 }

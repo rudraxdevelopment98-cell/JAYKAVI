@@ -145,6 +145,106 @@ a { color: inherit; }
   color: transparent;
 }
 
+/* =====================================================================
+   TRADITIONAL THEME — site-wide ornamental chrome
+   These rules only activate under [data-theme-skin='traditional'] and give
+   every page the gold devotional look: ornate top border, gold nav,
+   decorated section heads, ornamental cards, and a richer footer.
+   ===================================================================== */
+
+[data-theme-skin='traditional'] {
+  --gold: #D4AF37;
+  --gold-soft: #E7C766;
+  --saffron: #FF9933;
+  --gold-line: rgba(212, 175, 55, 0.28);
+}
+[data-theme-skin='traditional'][data-theme='light'] {
+  --gold: #A65D00;
+  --gold-soft: #C8862B;
+  --saffron: #E07A1F;
+  --gold-line: rgba(166, 93, 0, 0.25);
+}
+
+/* Gold gradient text helper */
+[data-theme-skin='traditional'] .trad-gold-text {
+  background: linear-gradient(100deg, var(--gold-soft), var(--gold), var(--saffron));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Ornate fixed top border that frames every page */
+.trad-frame-top {
+  position: fixed; top: 0; left: 0; right: 0; height: 10px; z-index: 300;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg,
+      var(--gold) 0, var(--gold) 10px,
+      transparent 10px, transparent 20px),
+    linear-gradient(180deg, var(--saffron), transparent);
+  opacity: .85;
+  box-shadow: 0 1px 14px rgba(212,175,55,.4);
+}
+.trad-frame-top::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+/* ── Traditional Nav skin (works with existing .site-nav markup) ── */
+[data-theme-skin='traditional'] .site-nav { padding-top: 26px; }
+[data-theme-skin='traditional'] .site-nav.scrolled {
+  background: linear-gradient(180deg, rgba(17,12,3,.92), rgba(17,12,3,.78));
+  border-color: var(--gold-line);
+}
+[data-theme-skin='traditional'][data-theme='light'] .site-nav.scrolled {
+  background: linear-gradient(180deg, rgba(255,252,246,.95), rgba(255,252,246,.82));
+}
+[data-theme-skin='traditional'] .nav-logo { color: var(--gold); letter-spacing: 1px; }
+[data-theme-skin='traditional'] .nav-link.active { border-bottom-color: var(--gold); }
+[data-theme-skin='traditional'] .nav-book {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 20px; border-radius: 100px; text-decoration: none;
+  font-size: .82rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: #1a1200;
+  background: linear-gradient(120deg, var(--gold-soft), var(--gold));
+  box-shadow: 0 6px 20px rgba(212,175,55,.35);
+  transition: transform .25s, box-shadow .25s;
+}
+[data-theme-skin='traditional'] .nav-book:hover {
+  transform: translateY(-2px); box-shadow: 0 10px 26px rgba(212,175,55,.5);
+}
+
+/* ── Reusable ornaments for ALL traditional pages ── */
+[data-theme-skin='traditional'] .trad-eyebrow {
+  text-transform: uppercase; letter-spacing: .34em; font-size: .72rem;
+  font-weight: 700; color: var(--gold); display: block;
+}
+[data-theme-skin='traditional'] .trad-divider {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  color: var(--gold); margin: 14px 0;
+}
+[data-theme-skin='traditional'] .trad-divider::before,
+[data-theme-skin='traditional'] .trad-divider::after {
+  content: ""; height: 1px; width: clamp(40px, 12vw, 110px);
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+[data-theme-skin='traditional'] .trad-divider::after {
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+
+/* Ornamental cards (used by song cards, panels, sub-pages) */
+[data-theme-skin='traditional'] .glass,
+[data-theme-skin='traditional'] .trad-card {
+  border: 1px solid var(--gold-line) !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,.25), inset 0 0 0 1px rgba(212,175,55,.05);
+}
+[data-theme-skin='traditional'] .trad-card {
+  background: var(--panel-solid);
+  border-radius: 16px; position: relative; overflow: hidden;
+}
+
+/* Richer footer in traditional skin handled by Footer component variant */
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;

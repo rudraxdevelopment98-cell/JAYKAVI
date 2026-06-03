@@ -6,6 +6,7 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import SmoothScroll from '@/components/SmoothScroll';
 import HideOnAdmin from '@/components/HideOnAdmin';
+import OrnateFrame from '@/components/traditional/OrnateFrame';
 import { siteUrl } from '@/lib/seo';
 
 const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', display: 'swap' });
@@ -63,8 +64,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={`${fraunces.variable} ${hanken.variable}`}>
+        {activeTheme === 'traditional' && (
+          <HideOnAdmin>
+            <OrnateFrame />
+          </HideOnAdmin>
+        )}
         <SmoothScroll>
-          <Nav />
+          <Nav skin={activeTheme} />
           <main>{children}</main>
           <HideOnAdmin>
             <Footer />

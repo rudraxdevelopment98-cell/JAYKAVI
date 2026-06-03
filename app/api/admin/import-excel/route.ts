@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   // Parse with exceljs (no prototype pollution CVEs unlike xlsx@0.18)
   const workbook = new ExcelJS.Workbook();
   try {
-    await workbook.xlsx.load(buffer);
+    await workbook.xlsx.load(buffer as unknown as ArrayBuffer);
   } catch {
     return NextResponse.json({ error: 'Could not parse the Excel file.' }, { status: 400 });
   }

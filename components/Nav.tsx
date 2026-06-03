@@ -14,7 +14,8 @@ const links = [
   { href: '/contact', label: 'Contact' },
 ];
 
-export default function Nav() {
+export default function Nav({ skin = 'default' }: { skin?: string }) {
+  const traditional = skin === 'traditional';
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -55,6 +56,9 @@ export default function Nav() {
               </Link>
             </li>
           ))}
+          {traditional && (
+            <li><Link href="/contact" className="nav-book">📩 Booking</Link></li>
+          )}
           <li><ThemeToggle /></li>
         </ul>
 
