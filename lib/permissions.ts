@@ -16,6 +16,7 @@ export const ADMIN_SECTIONS = [
   { key: 'admins', label: 'Admins', path: '/admin/admins' },
   { key: 'logs', label: 'Activity Log', path: '/admin/logs' },
   { key: 'backup', label: 'Backup', path: '/admin/backup' },
+  { key: 'theme', label: 'Site Theme', path: '/admin/theme' },
 ] as const;
 
 export type PermissionKey = (typeof ADMIN_SECTIONS)[number]['key'];

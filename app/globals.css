@@ -98,6 +98,53 @@ a { color: inherit; }
   color: transparent;
 }
 
+/* =====================================================================
+   THEME SKINS
+   Each skin overrides the CSS variables for --bg, --accent, --panel,
+   --muted, --line, --glow, --hero-grad.
+   Dark / light is still controlled by data-theme. The skin is set by
+   data-theme-skin on <html> (server-rendered from SiteSettings DB row).
+   ===================================================================== */
+
+/* ── Traditional (Gujarati gold & saffron) — dark ─────────────────── */
+[data-theme-skin='traditional'][data-theme='dark'],
+[data-theme-skin='traditional']:not([data-theme='light']) {
+  --bg: #08090B;
+  --panel: rgba(20, 14, 4, 0.65);
+  --panel-solid: #110C03;
+  --text: #F5EDD8;
+  --muted: #9B7A4A;
+  --line: rgba(212, 175, 55, 0.14);
+  --accent: #D4AF37;
+  --glow: 0 0 70px rgba(212, 175, 55, 0.3);
+  --hero-grad:
+    radial-gradient(120% 90% at 70% 10%, rgba(212,175,55,.35), transparent 55%),
+    radial-gradient(90% 80% at 15% 30%, rgba(255,153,51,.2), transparent 60%),
+    radial-gradient(70% 70% at 50% 100%, rgba(212,175,55,.12), transparent 55%);
+}
+
+/* ── Traditional (Gujarati gold & saffron) — light ────────────────── */
+[data-theme-skin='traditional'][data-theme='light'] {
+  --bg: #FDFBF6;
+  --panel: rgba(255, 255, 255, 0.65);
+  --panel-solid: #FFFFFF;
+  --text: #2A1A00;
+  --muted: #9B7A4A;
+  --line: rgba(166, 93, 0, 0.12);
+  --accent: #A65D00;
+  --glow: 0 20px 60px rgba(166, 93, 0, 0.18);
+  --hero-grad:
+    radial-gradient(120% 90% at 70% 10%, rgba(212,175,55,.22), transparent 55%),
+    radial-gradient(90% 80% at 15% 30%, rgba(245,237,214,.9), transparent 60%),
+    radial-gradient(70% 70% at 50% 100%, rgba(253,251,246,.8), transparent 55%);
+}
+[data-theme-skin='traditional'][data-theme='light'] .gradient-text {
+  background: linear-gradient(100deg, #A65D00, #D4AF37);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;

@@ -262,3 +262,22 @@ export async function getFacets() {
     platforms: [...platforms].sort(),
   };
 }
+
+// -------- Site Settings --------
+
+export async function getActiveTheme(): Promise<string> {
+  try {
+    const row = await prisma.siteSettings.findFirst({ where: { id: 1 } });
+    return row?.activeTheme ?? 'default';
+  } catch {
+    return 'default';
+  }
+}
+
+export async function setSiteTheme(theme: string): Promise<void> {
+  await prisma.siteSettings.upsert({
+    where: { id: 1 },
+    update: { activeTheme: theme },
+    create: { id: 1, activeTheme: theme },
+  });
+}

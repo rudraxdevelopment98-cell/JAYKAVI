@@ -266,6 +266,17 @@ model Backup {
   updatedAt DateTime @updatedAt
 }
 
+// ----------------------------- SITE SETTINGS ----------------------------
+
+// Singleton: global appearance settings.
+// activeTheme: which visual skin is shown to all visitors.
+// "default" = the original JAYKAVI cinematic skin.
+// Future skins just add a new CSS block + a new string value here.
+model SiteSettings {
+  id          Int    @id @default(1)
+  activeTheme String @default("default")
+}
+
 // ----------------------------- CONTACT MESSAGES -------------------------
 
 model ContactMessage {

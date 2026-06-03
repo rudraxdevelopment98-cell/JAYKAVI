@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Fraunces, Hanken_Grotesk } from 'next/font/google';
 import './globals.css';
-import { getLyricist } from '@/lib/data';
+import { getLyricist, getActiveTheme } from '@/lib/data';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import SmoothScroll from '@/components/SmoothScroll';
@@ -41,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Inline script: set theme before paint to avoid flash
+// Inline script: restores user's dark/light preference before paint
 const themeScript = `
 (function(){
   try {
@@ -52,9 +52,13 @@ const themeScript = `
 })();
 `;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Fetch the admin-selected site theme from the DB.
+  // This sets data-theme-skin on <html> — zero flash because it's server-rendered.
+  const activeTheme = await getActiveTheme();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-theme-skin={activeTheme} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

@@ -19,6 +19,7 @@ const NAV = [
   { href: '/admin/admins', label: '👤 Admins' },
   { href: '/admin/logs', label: '📜 Activity Log' },
   { href: '/admin/backup', label: '💾 Backup' },
+  { href: '/admin/theme', label: '🎨 Site Theme' },
 ];
 
 export default async function AdminLayout({
