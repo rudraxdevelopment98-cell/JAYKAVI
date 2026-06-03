@@ -14,6 +14,7 @@ const NAV = [
   { href: '/admin/songs', label: 'Songs' },
   { href: '/admin/journey', label: 'Journey' },
   { href: '/admin/blog', label: '📝 Blog' },
+  { href: '/admin/notebook', label: '📓 Notebook' },
   { href: '/admin/harvester', label: '🎬 Song Harvester' },
   { href: '/admin/analytics', label: '📊 Analytics' },
   { href: '/admin/admins', label: '👤 Admins' },
