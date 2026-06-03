@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import CandidateCard from './CandidateCard';
 import { bulkRejectCandidates, bulkApproveSimple } from './actions';
 
@@ -18,10 +19,12 @@ interface Candidate {
 }
 
 export default function HarvesterQueue({ candidates }: { candidates: Candidate[] }) {
+  const router = useRouter();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<'approve' | 'reject' | null>(null);
   const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const selectAllRef = useRef<HTMLInputElement>(null);
 
   const visible = candidates.filter((c) => !dismissed.has(c.id));
@@ -32,12 +35,18 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
     if (selectAllRef.current) selectAllRef.current.indeterminate = someSelected;
   }, [someSelected]);
 
-  // Auto-clear result banner after 4 s
+  // Auto-clear result/error banners after 5 s
   useEffect(() => {
     if (!result) return;
-    const t = setTimeout(() => setResult(null), 4000);
+    const t = setTimeout(() => setResult(null), 5000);
     return () => clearTimeout(t);
   }, [result]);
+
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(null), 7000);
+    return () => clearTimeout(t);
+  }, [error]);
 
   function toggleAll() {
     setSelected(allSelected ? new Set() : new Set(visible.map((c) => c.id)));
@@ -64,32 +73,43 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
     const n = selected.size;
     if (!confirm(`Quick-approve ${n} candidate${n !== 1 ? 's' : ''} using their existing titles and singer guesses? Duplicates will be skipped.`)) return;
     setBusy('approve');
-    const r = await bulkApproveSimple(Array.from(selected));
-    // Dismiss approved ones (skipped stay — admin can review manually)
-    const toKeep = new Set(selected);
-    // We don't know which specific IDs were skipped vs approved, so dismiss all selected
-    selected.forEach((id) => {
-      setDismissed((prev) => new Set([...prev, id]));
-    });
-    setSelected(new Set());
-    setBusy(null);
-    const msg = r.approved === 0 && r.skipped > 0
-      ? `All ${r.skipped} were duplicates — nothing added.`
-      : `✓ ${r.approved} approved${r.skipped > 0 ? ` · ${r.skipped} skipped (duplicates)` : ''}`;
-    setResult(msg);
+    setError(null);
+    try {
+      const r = await bulkApproveSimple(Array.from(selected));
+      selected.forEach((id) => {
+        setDismissed((prev) => new Set([...prev, id]));
+      });
+      setSelected(new Set());
+      const msg = r.approved === 0 && r.skipped > 0
+        ? `All ${r.skipped} were duplicates — nothing added.`
+        : `✓ ${r.approved} approved${r.skipped > 0 ? ` · ${r.skipped} skipped (duplicates)` : ''}`;
+      setResult(msg);
+      router.refresh();
+    } catch (e: any) {
+      setError(`Approve failed: ${e?.message ?? 'Unknown error'}`);
+    } finally {
+      setBusy(null);
+    }
   }
 
   async function handleBulkReject() {
     const n = selected.size;
     if (!confirm(`Reject ${n} candidate${n !== 1 ? 's' : ''}?`)) return;
     setBusy('reject');
-    const r = await bulkRejectCandidates(Array.from(selected));
-    selected.forEach((id) => {
-      setDismissed((prev) => new Set([...prev, id]));
-    });
-    setSelected(new Set());
-    setBusy(null);
-    setResult(`✕ ${r.rejected} rejected`);
+    setError(null);
+    try {
+      const r = await bulkRejectCandidates(Array.from(selected));
+      selected.forEach((id) => {
+        setDismissed((prev) => new Set([...prev, id]));
+      });
+      setSelected(new Set());
+      setResult(`✕ ${r.rejected} rejected`);
+      router.refresh();
+    } catch (e: any) {
+      setError(`Reject failed: ${e?.message ?? 'Unknown error'}`);
+    } finally {
+      setBusy(null);
+    }
   }
 
   if (visible.length === 0) {
@@ -198,6 +218,15 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
           px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl
           text-sm text-neutral-200 shadow-xl animate-fade-in whitespace-nowrap">
           {result}
+        </div>
+      )}
+
+      {/* Error toast */}
+      {error && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50
+          px-4 py-2 bg-red-950 border border-red-700 rounded-xl
+          text-sm text-red-300 shadow-xl animate-fade-in whitespace-nowrap">
+          {error}
         </div>
       )}
     </div>

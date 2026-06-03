@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { approveCandidate, rejectCandidate } from './actions';
 import type { ApproveResult } from './actions';
 
@@ -18,11 +19,13 @@ interface Candidate {
 }
 
 export default function CandidateCard({ c, onDismiss }: { c: Candidate; onDismiss?: () => void }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [showDesc, setShowDesc] = useState(false);
   const [busy, setBusy] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [dupWarning, setDupWarning] = useState<ApproveResult | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const [title, setTitle] = useState(c.cleanTitle);
   const [singers, setSingers] = useState(c.singerGuess ?? '');
@@ -34,21 +37,35 @@ export default function CandidateCard({ c, onDismiss }: { c: Candidate; onDismis
   async function handleApprove(force = false) {
     setBusy(true);
     setDupWarning(null);
-    const result = await approveCandidate(c.id, { title, singerNames: singers, releaseYear: year, youtubeId: ytId }, force);
-    if (result.duplicate) {
-      setDupWarning(result);
+    setActionError(null);
+    try {
+      const result = await approveCandidate(c.id, { title, singerNames: singers, releaseYear: year, youtubeId: ytId }, force);
+      if (result.duplicate) {
+        setDupWarning(result);
+      } else {
+        setDismissed(true);
+        onDismiss?.();
+        router.refresh();
+      }
+    } catch (e: any) {
+      setActionError(e?.message ?? 'Failed to approve — please try again');
+    } finally {
       setBusy(false);
-    } else {
-      setDismissed(true);
-      onDismiss?.();
     }
   }
 
   async function handleReject() {
     setBusy(true);
-    await rejectCandidate(c.id);
-    setDismissed(true);
-    onDismiss?.();
+    setActionError(null);
+    try {
+      await rejectCandidate(c.id);
+      setDismissed(true);
+      onDismiss?.();
+      router.refresh();
+    } catch (e: any) {
+      setActionError(e?.message ?? 'Failed to reject — please try again');
+      setBusy(false);
+    }
   }
 
   const inputCls = 'w-full px-2 py-1 text-sm bg-neutral-950 border border-neutral-700 rounded focus:outline-none focus:border-amber-500';
@@ -129,6 +146,13 @@ export default function CandidateCard({ c, onDismiss }: { c: Candidate; onDismis
           <pre className="text-xs text-neutral-400 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
             {highlightDesc(c.description)}
           </pre>
+        </div>
+      )}
+
+      {/* Inline error */}
+      {actionError && (
+        <div className="border-t border-red-900 bg-red-950/40 px-4 py-2 text-xs text-red-300">
+          ✗ {actionError}
         </div>
       )}
 
