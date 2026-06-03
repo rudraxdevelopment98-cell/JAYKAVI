@@ -61,6 +61,7 @@ export async function updateMilestone(id: string, formData: FormData) {
   revalidatePath('/admin/journey');
   revalidatePath(`/admin/journey/${id}`);
   revalidatePath('/journey');
+  redirect('/admin/journey');
 }
 
 export async function deleteMilestone(id: string) {

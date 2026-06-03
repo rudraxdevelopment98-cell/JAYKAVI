@@ -76,6 +76,7 @@ export async function updateCollection(id: string, formData: FormData) {
   });
   revalidatePath('/admin/collections');
   revalidatePath(`/admin/collections/${id}`);
+  redirect('/admin/collections');
 }
 
 export async function deleteCollection(id: string) {
