@@ -6,19 +6,37 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import SmoothScroll from '@/components/SmoothScroll';
 import HideOnAdmin from '@/components/HideOnAdmin';
+import { siteUrl } from '@/lib/seo';
 
 const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', display: 'swap' });
 const hanken = Hanken_Grotesk({ subsets: ['latin'], variable: '--font-hanken', display: 'swap' });
 
 export async function generateMetadata(): Promise<Metadata> {
   const l = await getLyricist();
+  const name = l.displayName ?? l.name;
   return {
-    title: `${l.displayName ?? l.name} — ${l.tagline}`,
+    metadataBase: new URL(siteUrl()),
+    title: {
+      default: `${name} — ${l.tagline}`,
+      template: `%s — ${name}`,
+    },
     description: l.bio,
+    keywords: [
+      name, l.name, l.penName ?? '', 'Gujarati lyricist', 'Gujarati songs',
+      'lyrics', 'ગીતકાર', ...(l.languages ?? []), ...(l.genres ?? []),
+    ].filter(Boolean),
+    alternates: { canonical: '/' },
     openGraph: {
-      title: `${l.displayName ?? l.name}`,
+      title: name,
       description: l.tagline,
       type: 'website',
+      siteName: name,
+      locale: 'gu_IN',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: name,
+      description: l.tagline,
     },
   };
 }

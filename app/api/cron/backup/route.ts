@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createBackup, pruneOldLogs } from '@/lib/backup';
+import { createBackup, pruneOldLogs, pruneDailyViews } from '@/lib/backup';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -20,7 +20,8 @@ export async function GET(req: Request) {
   try {
     const { itemCount, createdAt } = await createBackup();
     const pruned = await pruneOldLogs();
-    return NextResponse.json({ ok: true, itemCount, createdAt, prunedLogs: pruned });
+    const prunedViews = await pruneDailyViews();
+    return NextResponse.json({ ok: true, itemCount, createdAt, prunedLogs: pruned, prunedViews });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ ok: false, error: msg }, { status: 500 });

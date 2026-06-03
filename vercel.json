@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/backup",
       "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/cron/harvest",
+      "schedule": "0 4 * * 1"
     }
   ]
 }

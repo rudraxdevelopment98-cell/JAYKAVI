@@ -3,6 +3,7 @@ import Link from 'next/link';
 import RunButton from './RunButton';
 import CandidateCard from './CandidateCard';
 import ClearAllButton from './ClearAllButton';
+import AutoRunToggle from './AutoRunToggle';
 import ImportExcelButton from './ImportExcelButton';
 import PlaylistImportButton from './PlaylistImportButton';
 
@@ -68,6 +69,11 @@ export default async function HarvesterPage() {
           </div>
           <RunButton hasApiKey={hasApiKey} />
         </div>
+      </div>
+
+      {/* Auto-run toggle */}
+      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-4">
+        <AutoRunToggle initial={!!(config as any)?.autoRun} />
       </div>
 
       {/* Playlist import */}

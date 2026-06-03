@@ -97,6 +97,7 @@ model Song {
   artworkUrl         String?
   lyrics             String              @default("")
   viewCount          Int                 @default(0)
+  pageViews          Int                 @default(0) // on-site reads (privacy-friendly counter)
   isTrending         Boolean             @default(false)
   youtubeId          String?
   spotifyTrackId     String?
@@ -174,6 +175,7 @@ model HarvestConfig {
   creditMustContain String[] @default([])
   knownSingers      String[] @default([])
   maxResultsPerTerm Int      @default(100)
+  autoRun           Boolean  @default(false) // weekly auto-harvest on/off
   updatedAt         DateTime @updatedAt
 }
 
@@ -240,6 +242,15 @@ model ActivityLog {
   createdAt  DateTime @default(now())
 
   @@index([createdAt])
+}
+
+// ----------------------------- ANALYTICS --------------------------------
+
+// One row per calendar day: total on-site song views that day.
+// Bounded + tiny (one row/day). Pruned to ~90 days by the cron job.
+model DailyView {
+  day   String @id // YYYY-MM-DD
+  count Int    @default(0)
 }
 
 // ------------------------------- BACKUP ---------------------------------

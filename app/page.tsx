@@ -5,6 +5,8 @@ import CinematicHero from '@/components/CinematicHero';
 import HorizontalScrollRow from '@/components/HorizontalScrollRow';
 import SectionHead from '@/components/SectionHead';
 import { FadeUp } from '@/components/Reveal';
+import JsonLd from '@/components/JsonLd';
+import { siteUrl } from '@/lib/seo';
 
 export default async function Home() {
   const [l, trendingAll, topAll, journeyAll] = await Promise.all([
@@ -17,8 +19,29 @@ export default async function Home() {
   const top = topAll.filter((s) => s.viewCount > 0);
   const journey = journeyAll.slice(0, 4);
 
+  const name = l.displayName ?? l.name;
+  const personLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name,
+    alternateName: l.penName ?? undefined,
+    jobTitle: l.title ?? 'Lyricist',
+    description: l.tagline,
+    url: siteUrl(),
+    ...(l.bornPlace ? { birthPlace: l.bornPlace } : {}),
+    knowsLanguage: l.languages ?? [],
+  };
+  const websiteLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name,
+    url: siteUrl(),
+  };
+
   return (
     <>
+      <JsonLd data={personLd} />
+      <JsonLd data={websiteLd} />
       <CinematicHero l={l} />
 
       {trending.length > 0 && (

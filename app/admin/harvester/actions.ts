@@ -173,6 +173,23 @@ export async function clearAllCandidates() {
   revalidatePath('/admin/harvester');
 }
 
+/**
+ * Turn the weekly automatic harvest on or off. When on, the Vercel cron
+ * job (/api/cron/harvest) runs a harvest once a week automatically.
+ */
+export async function setAutoRun(enabled: boolean) {
+  const session = await auth();
+  assertAdmin(session);
+
+  await prisma.harvestConfig.upsert({
+    where: { id: 1 },
+    update: { autoRun: enabled },
+    create: { id: 1, autoRun: enabled },
+  });
+
+  revalidatePath('/admin/harvester');
+}
+
 export async function rejectCandidate(candidateId: string) {
   const session = await auth();
   assertAdmin(session);

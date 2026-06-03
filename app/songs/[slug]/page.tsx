@@ -3,6 +3,10 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getAllSongs, getSongBySlug, getCollectionById } from '@/lib/data';
 import PlatformLinkButtons from '@/components/PlatformLinkButtons';
+import LyricsViewer from '@/components/LyricsViewer';
+import TrackView from '@/components/TrackView';
+import JsonLd from '@/components/JsonLd';
+import { absoluteUrl } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,11 +18,28 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const song = await getSongBySlug(params.slug);
   if (!song) return { title: 'Song not found' };
-  const desc = song.lyrics ? song.lyrics.slice(0, 150) : `${song.title} — written by ${song.lyricist}`;
+  const singers = song.performingSingers.length ? ` · Sung by ${song.performingSingers.join(', ')}` : '';
+  const desc = song.lyrics
+    ? `${song.lyrics.slice(0, 140).replace(/\n/g, ' ')}…`
+    : `${song.title} — Gujarati song written by ${song.lyricist}${singers}.`;
+  const images = song.artworkUrl ? [song.artworkUrl] : [];
   return {
-    title: `${song.title} — JAYKAVI`,
+    title: song.title,
     description: desc,
-    openGraph: { title: song.title, description: desc, images: song.artworkUrl ? [song.artworkUrl] : [] },
+    alternates: { canonical: `/songs/${song.slug}` },
+    openGraph: {
+      title: song.title,
+      description: desc,
+      type: 'music.song',
+      url: absoluteUrl(`/songs/${song.slug}`),
+      images,
+    },
+    twitter: {
+      card: images.length ? 'summary_large_image' : 'summary',
+      title: song.title,
+      description: desc,
+      images,
+    },
   };
 }
 
@@ -37,22 +58,26 @@ export default async function SongDetail({ params }: { params: { slug: string } 
     ))
     .slice(0, 6);
 
-  function renderLyrics(text: string) {
-    const lines = text.split('\n');
-    const elements: React.ReactNode[] = [];
-    let key = 0;
-    for (const line of lines) {
-      if (line.trim() === '') {
-        elements.push(<div key={key++} style={{ height: 18 }} />);
-      } else {
-        elements.push(<p key={key++} style={{ margin: 0, lineHeight: 1.9 }}>{line}</p>);
-      }
-    }
-    return elements;
-  }
+  // Structured data for rich search results.
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'MusicRecording',
+    name: song.title,
+    url: absoluteUrl(`/songs/${song.slug}`),
+    inLanguage: song.language || 'Gujarati',
+    ...(song.artworkUrl ? { image: song.artworkUrl } : {}),
+    ...(song.releaseYear ? { datePublished: String(song.releaseYear) } : {}),
+    lyricist: { '@type': 'Person', name: song.lyricist },
+    ...(song.performingSingers.length
+      ? { byArtist: song.performingSingers.map((n) => ({ '@type': 'Person', name: n })) }
+      : {}),
+    ...(song.composer ? { composer: { '@type': 'Person', name: song.composer } } : {}),
+  };
 
   return (
     <div style={{ position: 'relative', zIndex: 2 }}>
+      <JsonLd data={jsonLd} />
+      <TrackView slug={song.slug} />
       {/* ── Hero ── */}
       <div className="song-hero" style={{
         background: song.artworkUrl
@@ -94,7 +119,11 @@ export default async function SongDetail({ params }: { params: { slug: string } 
             )}
             <h2 className="font-serif" style={{ fontSize: '1.5rem', marginBottom: 16 }}>Lyrics</h2>
             {song.lyrics ? (
-              <div className="font-serif lyrics-body">{renderLyrics(song.lyrics)}</div>
+              <LyricsViewer
+                lyrics={song.lyrics}
+                translations={song.lyricsTranslations}
+                title={song.title}
+              />
             ) : (
               <p className="text-muted">Lyrics will be added soon.</p>
             )}

@@ -1,6 +1,23 @@
 import { prisma } from './prisma';
 
 export const LOG_RETENTION_DAYS = 7;
+export const ANALYTICS_RETENTION_DAYS = 90;
+
+// Delete daily-view analytics rows older than the retention window so the
+// table stays bounded. Safe to call often; errors are swallowed.
+export async function pruneDailyViews(): Promise<number> {
+  try {
+    const cutoff = new Date(Date.now() - ANALYTICS_RETENTION_DAYS * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+    const res = await prisma.dailyView.deleteMany({
+      where: { day: { lt: cutoff } },
+    });
+    return res.count;
+  } catch {
+    return 0;
+  }
+}
 
 // Delete activity-log entries older than the retention window so the table
 // never grows without bound. Safe to call often; errors are swallowed.
