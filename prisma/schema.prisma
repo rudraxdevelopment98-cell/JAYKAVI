@@ -286,8 +286,9 @@ model SiteSettings {
   tradF2Desc        String  @default("સુરોથી સર્જાયેલ ભક્તિ")
   tradF3Title       String  @default("સંસ્કૃતિ")
   tradF3Desc        String  @default("ગુજરાતી સંસ્કૃતિનો સંગમ")
-  tradF4Title       String  @default("સેવા")
-  tradF4Desc        String  @default("સંગીત દ્વારા સેવા અને સમર્પણ")
+  tradF4Title       String   @default("સેવા")
+  tradF4Desc        String   @default("સંગીત દ્વારા સેવા અને સમર્પણ")
+  viewsSyncedAt     DateTime? // last time YouTube view counts were refreshed
 }
 
 // ----------------------------- CONTACT MESSAGES -------------------------

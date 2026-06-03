@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/harvest",
       "schedule": "0 4 * * 1"
+    },
+    {
+      "path": "/api/cron/sync-views",
+      "schedule": "0 5 */2 * *"
     }
   ]
 }

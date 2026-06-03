@@ -6,11 +6,12 @@ import ClearAllButton from './ClearAllButton';
 import AutoRunToggle from './AutoRunToggle';
 import ImportExcelButton from './ImportExcelButton';
 import PlaylistImportButton from './PlaylistImportButton';
+import SyncViewsButton from './SyncViewsButton';
 
 export const dynamic = 'force-dynamic';
 
 async function getData() {
-  const [config, pending, recent] = await Promise.all([
+  const [config, pending, recent, settings] = await Promise.all([
     prisma.harvestConfig.findFirst({ where: { id: 1 } }),
     prisma.harvestCandidate.findMany({
       where: { status: 'pending' },
@@ -21,12 +22,13 @@ async function getData() {
       take: 5,
       include: { _count: { select: { candidates: true } } },
     }),
+    prisma.siteSettings.findFirst({ where: { id: 1 }, select: { viewsSyncedAt: true } }),
   ]);
-  return { config, pending, recent };
+  return { config, pending, recent, settings };
 }
 
 export default async function HarvesterPage() {
-  const { config, pending, recent } = await getData();
+  const { config, pending, recent, settings } = await getData();
   const hasApiKey = !!process.env.YOUTUBE_API_KEY;
 
   return (
@@ -83,6 +85,16 @@ export default async function HarvesterPage() {
           Paste a YouTube playlist URL or ID to import up to 200 videos as pending candidates.
         </p>
         <PlaylistImportButton />
+      </div>
+
+      {/* View count sync */}
+      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-4">
+        <div className="font-medium mb-1">Sync YouTube View Counts</div>
+        <p className="text-sm text-neutral-400 mb-3">
+          Refreshes the view count for every song that has a YouTube ID. Runs automatically every 2 days,
+          or trigger it manually here.
+        </p>
+        <SyncViewsButton lastSynced={settings?.viewsSyncedAt ?? null} />
       </div>
 
       {/* Excel import */}
