@@ -247,7 +247,10 @@ function CatalogCard({ song, lyricist }: { song: Song; lyricist: string }) {
   const singer = song.performingSingers?.[0] || lyricist;
   return (
     <Link href={`/songs/${song.slug}`} className="th-catalog-card">
-      <div className="th-catalog-art sc-art-fallback" style={art ? { backgroundImage: `url(${art})`, background: 'none' } : undefined}>
+      <div
+        className={`th-catalog-art${art ? '' : ' sc-art-fallback'}`}
+        style={art ? { backgroundImage: `url(${art})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+      >
         <span className="th-catalog-play"><Play /></span>
         {song.isTrending && <span className="th-catalog-badge">Trending</span>}
       </div>
@@ -269,8 +272,8 @@ function VideoCard({ song }: { song: Song }) {
   return (
     <Link href={`/songs/${song.slug}`} className="th-vid-card">
       <div
-        className="th-vid-thumb sc-art-fallback"
-        style={art ? { backgroundImage: `url(${art})`, background: 'none' } : undefined}
+        className={`th-vid-thumb${art ? '' : ' sc-art-fallback'}`}
+        style={art ? { backgroundImage: `url(${art})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
       >
         <span className="th-play-dot"><Play /></span>
       </div>

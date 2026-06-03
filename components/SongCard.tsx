@@ -19,58 +19,50 @@ function gradFor(slug: string) {
 export default function SongCard({ song, index = 0 }: { song: Song; index?: number }) {
   const singers = song.performingSingers?.join(', ');
   const platforms = song.platformLinks?.filter((p) => p.url).map((p) => p.platform) ?? [];
+  const hasArt = !!song.artworkUrl;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      className="sc-wrap"
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.5, delay: Math.min(index * 0.04, 0.3) }}
-      whileHover={{ y: -4, scale: 1.01 }}
-      style={{
-        borderRadius: 20, overflow: 'hidden', background: 'var(--panel-solid)',
-        border: '1px solid var(--line)', cursor: 'pointer', height: '100%',
-      }}
+      viewport={{ once: true, margin: '-32px' }}
+      transition={{ duration: 0.4, delay: Math.min(index * 0.04, 0.25) }}
     >
-      <Link href={`/songs/${song.slug}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
+      <Link href={`/songs/${song.slug}`} className="sc-link">
+        {/* Thumbnail */}
         <div
-          className={song.artworkUrl ? undefined : 'sc-art-fallback'}
-          style={{
-            height: 240, position: 'relative', display: 'flex', alignItems: 'flex-end', padding: 22,
-            background: song.artworkUrl ? 'var(--panel-solid)' : gradFor(song.slug),
-            overflow: 'hidden',
-          }}
+          className={`sc-art${hasArt ? '' : ' sc-art-fallback'}`}
+          style={hasArt ? undefined : { background: gradFor(song.slug) }}
         >
-          {song.artworkUrl && (
+          {hasArt && (
             <img
-              src={song.artworkUrl}
+              src={song.artworkUrl!}
               alt={song.title}
               loading="lazy"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              className="sc-art-img"
             />
           )}
           {song.genre?.[0] && (
-            <span style={{
-              position: 'absolute', top: 16, left: 16, background: 'rgba(0,0,0,.4)',
-              backdropFilter: 'blur(6px)', color: '#fff', fontSize: '.66rem', padding: '6px 12px',
-              borderRadius: 100, letterSpacing: '.12em', textTransform: 'uppercase', zIndex: 1,
-            }}>{song.genre[0]}</span>
+            <span className="sc-genre">{song.genre[0]}</span>
           )}
-          {!song.artworkUrl && (
-            <div className="font-serif" style={{ color: '#fff', fontSize: '1.5rem', lineHeight: 1.1, textShadow: '0 2px 20px rgba(0,0,0,.5)' }}>
-              {song.title}
-            </div>
+          {/* Large title overlay — shown on desktop fallback, hidden on mobile */}
+          {!hasArt && (
+            <div className="font-serif sc-art-title">{song.title}</div>
           )}
         </div>
-        <div style={{ padding: '18px 20px 22px' }}>
-          <h3 className="font-serif" style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>{song.title}</h3>
-          <div className="text-muted" style={{ fontSize: '.84rem', marginTop: 5 }}>
-            {singers || song.language}{song.releaseYear ? ` · ${song.releaseYear}` : ''}
+
+        {/* Info */}
+        <div className="sc-info">
+          <h3 className="font-serif sc-title">{song.title}</h3>
+          <div className="sc-sub text-muted">
+            {singers || song.language}
+            {song.releaseYear ? ` · ${song.releaseYear}` : ''}
           </div>
           {platforms.length > 0 && (
-            <div style={{ display: 'flex', gap: 7, marginTop: 14, flexWrap: 'wrap' }}>
+            <div className="sc-platforms">
               {platforms.slice(0, 3).map((p) => (
-                <span key={p} className="text-muted" style={{ fontSize: '.68rem', padding: '4px 10px', borderRadius: 100, border: '1px solid var(--line)', textTransform: 'capitalize' }}>
+                <span key={p} className="sc-platform text-muted">
                   {p.replace('_', ' ')}
                 </span>
               ))}
