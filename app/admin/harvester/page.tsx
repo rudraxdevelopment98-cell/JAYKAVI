@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import RunButton from './RunButton';
 import CandidateCard from './CandidateCard';
+import ClearAllButton from './ClearAllButton';
 import ImportExcelButton from './ImportExcelButton';
 import PlaylistImportButton from './PlaylistImportButton';
 
@@ -99,13 +100,14 @@ export default async function HarvesterPage() {
 
       {/* Pending review queue */}
       <section className="mb-8">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
           <h2 className="text-xl font-semibold">
             Pending Review{' '}
             <span className="text-neutral-400 font-normal text-base">
               ({pending.length})
             </span>
           </h2>
+          <ClearAllButton count={pending.length} />
         </div>
 
         {pending.length === 0 ? (

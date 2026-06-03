@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { approveCandidate, rejectCandidate } from './actions';
+import type { ApproveResult } from './actions';
 
 interface Candidate {
   id: string;
@@ -21,6 +22,7 @@ export default function CandidateCard({ c }: { c: Candidate }) {
   const [showDesc, setShowDesc] = useState(false);
   const [busy, setBusy] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [dupWarning, setDupWarning] = useState<ApproveResult | null>(null);
 
   const [title, setTitle] = useState(c.cleanTitle);
   const [singers, setSingers] = useState(c.singerGuess ?? '');
@@ -29,10 +31,16 @@ export default function CandidateCard({ c }: { c: Candidate }) {
 
   if (dismissed) return null;
 
-  async function handleApprove() {
+  async function handleApprove(force = false) {
     setBusy(true);
-    await approveCandidate(c.id, { title, singerNames: singers, releaseYear: year, youtubeId: ytId });
-    setDismissed(true);
+    setDupWarning(null);
+    const result = await approveCandidate(c.id, { title, singerNames: singers, releaseYear: year, youtubeId: ytId }, force);
+    if (result.duplicate) {
+      setDupWarning(result);
+      setBusy(false);
+    } else {
+      setDismissed(true);
+    }
   }
 
   async function handleReject() {
@@ -43,7 +51,6 @@ export default function CandidateCard({ c }: { c: Candidate }) {
 
   const inputCls = 'w-full px-2 py-1 text-sm bg-neutral-950 border border-neutral-700 rounded focus:outline-none focus:border-amber-500';
 
-  // Highlight credit keywords in description for quick visual scan
   function highlightDesc(text: string): React.ReactNode[] {
     const creditRe = /(lyrics?|lyricist|written\s+by|jaykavi|jayesh\s+prajapati|જયકવિ|જયેશ\s+પ્રજાપ|ગીત|ગીતકાર)/gi;
     const parts = text.split(creditRe);
@@ -72,9 +79,7 @@ export default function CandidateCard({ c }: { c: Candidate }) {
             {c.channelTitle && <span className="mr-2">📺 {c.channelTitle}</span>}
             {c.singerGuess && <span className="mr-2">🎤 {c.singerGuess}</span>}
             {c.releaseYear && <span className="mr-2">📅 {c.releaseYear}</span>}
-            {c.viewCount != null && (
-              <span>{c.viewCount.toLocaleString()} views</span>
-            )}
+            {c.viewCount != null && <span>{c.viewCount.toLocaleString()} views</span>}
           </div>
           <div className="flex items-center gap-3 mt-1">
             <a
@@ -98,7 +103,7 @@ export default function CandidateCard({ c }: { c: Candidate }) {
         </div>
         <div className="flex gap-2 flex-shrink-0">
           <button
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => { setOpen((v) => !v); setDupWarning(null); }}
             className="px-3 py-1.5 text-xs border border-neutral-700 rounded-md hover:bg-neutral-800 transition"
           >
             {open ? 'Collapse' : 'Edit & Approve'}
@@ -113,7 +118,7 @@ export default function CandidateCard({ c }: { c: Candidate }) {
         </div>
       </div>
 
-      {/* Description preview — shows why the filter accepted this video */}
+      {/* Description preview */}
       {showDesc && c.description && (
         <div className="border-t border-neutral-800 bg-neutral-950/40 px-4 py-3">
           <p className="text-xs text-neutral-500 mb-2 font-medium">
@@ -135,7 +140,13 @@ export default function CandidateCard({ c }: { c: Candidate }) {
             </div>
             <div>
               <label className="block text-xs text-neutral-400 mb-1">Performing singers (comma separated)</label>
-              <input value={singers} onChange={(e) => setSingers(e.target.value)} className={inputCls} placeholder="e.g. Geeta Rabari, Kinjal Dave" />
+              <input
+                value={singers}
+                onChange={(e) => setSingers(e.target.value)}
+                className={inputCls}
+                placeholder="e.g. Geeta Rabari, Kinjal Dave"
+              />
+              <p className="text-xs text-neutral-500 mt-1">New singers are auto-added to the known singers list.</p>
             </div>
             <div>
               <label className="block text-xs text-neutral-400 mb-1">Release year</label>
@@ -146,21 +157,51 @@ export default function CandidateCard({ c }: { c: Candidate }) {
               <input value={ytId} onChange={(e) => setYtId(e.target.value)} className={inputCls} />
             </div>
           </div>
-          <div className="flex gap-2 pt-1">
-            <button
-              onClick={handleApprove}
-              disabled={busy}
-              className="px-4 py-2 text-sm bg-green-600 hover:bg-green-500 text-white rounded-md font-medium transition disabled:opacity-50"
-            >
-              Approve — Add to Songs
-            </button>
-            <button
-              onClick={() => setOpen(false)}
-              className="px-4 py-2 text-sm border border-neutral-700 rounded-md hover:bg-neutral-800 transition"
-            >
-              Cancel
-            </button>
-          </div>
+
+          {/* Duplicate warning */}
+          {dupWarning && (
+            <div className="rounded-lg border border-yellow-700 bg-yellow-950/40 p-3 text-sm">
+              <p className="font-semibold text-yellow-300 mb-1">⚠ Duplicate detected</p>
+              <p className="text-yellow-200/80 text-xs mb-2">
+                {dupWarning.duplicateReason}{' '}
+                <strong>&ldquo;{dupWarning.existingTitle}&rdquo;</strong> is already in your songs list.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleApprove(true)}
+                  disabled={busy}
+                  className="px-3 py-1.5 text-xs bg-yellow-600 hover:bg-yellow-500 text-white rounded-md font-medium transition disabled:opacity-50"
+                >
+                  Add anyway (keep both)
+                </button>
+                <button
+                  onClick={() => setDupWarning(null)}
+                  className="px-3 py-1.5 text-xs border border-neutral-600 rounded-md hover:bg-neutral-800 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!dupWarning && (
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={() => handleApprove(false)}
+                disabled={busy}
+                className="px-4 py-2 text-sm bg-green-600 hover:bg-green-500 text-white rounded-md font-medium transition disabled:opacity-50"
+              >
+                {busy ? 'Checking…' : 'Approve — Add to Songs'}
+              </button>
+              <button
+                onClick={() => setOpen(false)}
+                className="px-4 py-2 text-sm border border-neutral-700 rounded-md hover:bg-neutral-800 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
           <p className="text-xs text-neutral-500 italic">
             Original YouTube title: {c.rawTitle}
           </p>
