@@ -33,11 +33,14 @@ export default function SongCard({ song, index = 0 }: { song: Song; index?: numb
       }}
     >
       <Link href={`/songs/${song.slug}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
-        <div style={{
-          height: 240, position: 'relative', display: 'flex', alignItems: 'flex-end', padding: 22,
-          background: song.artworkUrl ? 'var(--panel-solid)' : gradFor(song.slug),
-          overflow: 'hidden',
-        }}>
+        <div
+          className={song.artworkUrl ? undefined : 'sc-art-fallback'}
+          style={{
+            height: 240, position: 'relative', display: 'flex', alignItems: 'flex-end', padding: 22,
+            background: song.artworkUrl ? 'var(--panel-solid)' : gradFor(song.slug),
+            overflow: 'hidden',
+          }}
+        >
           {song.artworkUrl && (
             <img
               src={song.artworkUrl}

@@ -243,6 +243,11 @@ a { color: inherit; }
   border-radius: 16px; position: relative; overflow: hidden;
 }
 
+/* Song card fallback gradient — gold/saffron under the Traditional skin */
+[data-theme-skin='traditional'] .sc-art-fallback {
+  background: linear-gradient(160deg, rgba(212,175,55,.42), rgba(8,9,11,.92)) !important;
+}
+
 /* Richer footer in traditional skin handled by Footer component variant */
 
 @media (prefers-reduced-motion: reduce) {

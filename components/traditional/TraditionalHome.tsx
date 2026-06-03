@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getLyricist, getAllSongs, getSocial } from '@/lib/data';
+import { getLyricist, getAllSongs, getSocial, type TraditionalSettings } from '@/lib/data';
 import type { Song } from '@/lib/types';
 
 // Only allow http/https artwork URLs to be interpolated into CSS backgrounds.
@@ -87,7 +87,7 @@ function SectionHead({ tag, title, center }: { tag: string; title: string; cente
   );
 }
 
-export default async function TraditionalHome() {
+export default async function TraditionalHome({ settings }: { settings: TraditionalSettings }) {
   const [l, songs, social] = await Promise.all([
     getLyricist(),
     getAllSongs(),
@@ -102,12 +102,12 @@ export default async function TraditionalHome() {
   const firstSong = bhajans[0];
   const philosophy = l.philosophy || 'સંગીત એ સાધના છે, અને ભજન એ આત્માની ભાષા છે.';
 
-  const features = [
-    { icon: <Lotus />, t: 'ભક્તિ', d: 'શુદ્ધ ભાવ અને શ્રદ્ધા' },
-    { icon: <MusicNote />, t: 'સંગીત', d: 'સુરોથી સર્જાયેલ ભક્તિ' },
-    { icon: <Temple />, t: 'સંસ્કૃતિ', d: 'ગુજરાતી સંસ્કૃતિનો સંગમ' },
-    { icon: <Hands />, t: 'સેવા', d: 'સંગીત દ્વારા સેવા અને સમર્પણ' },
-  ];
+  const featureIcons = [<Lotus key="lotus" />, <MusicNote key="music" />, <Temple key="temple" />, <Hands key="hands" />];
+  const features = settings.features.map((f, i) => ({ icon: featureIcons[i], t: f.title, d: f.desc }));
+
+  const portraitUrl = safeUrl(settings.heroPortrait);
+  const deityUrl    = safeUrl(settings.heroDeity);
+  const heroBgUrl   = safeUrl(settings.heroBg);
 
   const lyricCards = [
     { t: 'ભજન લિરિક્સ', d: 'પ્રતિ એક ભજનના લિરિક્સ અહીં વાંચો.' },
@@ -118,17 +118,24 @@ export default async function TraditionalHome() {
   return (
     <div className="th-root">
       {/* ════════ HERO ════════ */}
-      <header className="th-hero">
+      <header className="th-hero" style={heroBgUrl ? {
+        backgroundImage: `linear-gradient(to bottom, rgba(8,9,11,.55) 0%, rgba(8,9,11,.75) 100%), url(${heroBgUrl})`,
+        backgroundSize: 'cover', backgroundPosition: 'center',
+      } : undefined}>
         <Bell side="left" />
         <Bell side="right" />
 
         {/* flanking ornamental art panels */}
         <div className="th-hero-art th-hero-art-left" aria-hidden>
-          <div className="th-arch"><Om /></div>
+          <div className="th-arch">
+            {portraitUrl
+              ? <img src={portraitUrl} alt="Singer portrait" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+              : <Om />}
+          </div>
         </div>
 
         <div className="th-hero-center">
-          <p className="th-mantra">॥ જય શ્રી કૃષ્ણ ॥</p>
+          <p className="th-mantra">{settings.mantra}</p>
           <div className="trad-divider">❖</div>
           <h1 className="font-serif th-name">
             {l.name.split(' ').map((w, i) => (
@@ -145,7 +152,11 @@ export default async function TraditionalHome() {
         </div>
 
         <div className="th-hero-art th-hero-art-right" aria-hidden>
-          <div className="th-arch th-arch-deity"><Lotus /></div>
+          <div className="th-arch th-arch-deity">
+            {deityUrl
+              ? <img src={deityUrl} alt="Devotional art" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+              : <Lotus />}
+          </div>
         </div>
 
         <div className="th-hero-scallop" aria-hidden />

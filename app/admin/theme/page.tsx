@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getActiveTheme } from '@/lib/data';
 import { SITE_THEMES } from '@/lib/themes';
 import { applyTheme } from './actions';
@@ -83,7 +84,27 @@ export default async function SiteThemePage() {
         </button>
       </form>
 
-      <div className="mt-10 pt-8 border-t border-neutral-800 text-xs text-neutral-500 space-y-1">
+      {/* Per-theme configuration links */}
+      {current === 'traditional' && (
+        <div className="mt-8 p-4 rounded-xl border border-amber-900/50 bg-amber-950/20">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-amber-300">Traditional Theme is active</p>
+              <p className="text-xs text-neutral-400 mt-1">
+                Customize hero images, mantra text, and feature cards for the Traditional theme.
+              </p>
+            </div>
+            <Link
+              href="/admin/theme/traditional"
+              className="flex-shrink-0 px-4 py-2 rounded-lg border border-amber-700 text-amber-300 text-sm font-medium hover:bg-amber-950/40 transition"
+            >
+              Configure →
+            </Link>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-8 pt-8 border-t border-neutral-800 text-xs text-neutral-500 space-y-1">
         <p>New themes can be added by a developer — each theme just needs a CSS block and one entry in <code>lib/themes.ts</code>.</p>
         <p>The theme change takes effect for all visitors immediately after saving.</p>
       </div>

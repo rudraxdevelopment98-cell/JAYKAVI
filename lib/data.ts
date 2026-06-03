@@ -281,3 +281,80 @@ export async function setSiteTheme(theme: string): Promise<void> {
     create: { id: 1, activeTheme: theme },
   });
 }
+
+// ── Traditional theme customization ──────────────────────────────────────
+
+export interface TraditionalSettings {
+  mantra: string;
+  heroPortrait: string | null;
+  heroDeity: string | null;
+  heroBg: string | null;
+  features: [
+    { title: string; desc: string },
+    { title: string; desc: string },
+    { title: string; desc: string },
+    { title: string; desc: string },
+  ];
+}
+
+export const TRAD_DEFAULTS: TraditionalSettings = {
+  mantra: '॥ જય શ્રી કૃષ્ણ ॥',
+  heroPortrait: null,
+  heroDeity: null,
+  heroBg: null,
+  features: [
+    { title: 'ભક્તિ',    desc: 'શુદ્ધ ભાવ અને શ્રદ્ધા' },
+    { title: 'સંગીત',    desc: 'સુરોથી સર્જાયેલ ભક્તિ' },
+    { title: 'સંસ્કૃતિ', desc: 'ગુજરાતી સંસ્કૃતિનો સંગમ' },
+    { title: 'સેવા',     desc: 'સંગીત દ્વારા સેવા અને સમર્પણ' },
+  ],
+};
+
+export async function getTraditionalSettings(): Promise<TraditionalSettings> {
+  try {
+    const row = await prisma.siteSettings.findFirst({ where: { id: 1 } });
+    if (!row) return TRAD_DEFAULTS;
+    const d = TRAD_DEFAULTS;
+    return {
+      mantra:       row.tradMantra       || d.mantra,
+      heroPortrait: row.tradHeroPortrait || null,
+      heroDeity:    row.tradHeroDeity    || null,
+      heroBg:       row.tradHeroBg       || null,
+      features: [
+        { title: row.tradF1Title || d.features[0].title, desc: row.tradF1Desc || d.features[0].desc },
+        { title: row.tradF2Title || d.features[1].title, desc: row.tradF2Desc || d.features[1].desc },
+        { title: row.tradF3Title || d.features[2].title, desc: row.tradF3Desc || d.features[2].desc },
+        { title: row.tradF4Title || d.features[3].title, desc: row.tradF4Desc || d.features[3].desc },
+      ],
+    };
+  } catch {
+    return TRAD_DEFAULTS;
+  }
+}
+
+export async function setTraditionalSettings(s: TraditionalSettings): Promise<void> {
+  await prisma.siteSettings.upsert({
+    where: { id: 1 },
+    update: {
+      tradMantra:       s.mantra,
+      tradHeroPortrait: s.heroPortrait || null,
+      tradHeroDeity:    s.heroDeity    || null,
+      tradHeroBg:       s.heroBg       || null,
+      tradF1Title: s.features[0].title, tradF1Desc: s.features[0].desc,
+      tradF2Title: s.features[1].title, tradF2Desc: s.features[1].desc,
+      tradF3Title: s.features[2].title, tradF3Desc: s.features[2].desc,
+      tradF4Title: s.features[3].title, tradF4Desc: s.features[3].desc,
+    },
+    create: {
+      id: 1,
+      tradMantra:       s.mantra,
+      tradHeroPortrait: s.heroPortrait || null,
+      tradHeroDeity:    s.heroDeity    || null,
+      tradHeroBg:       s.heroBg       || null,
+      tradF1Title: s.features[0].title, tradF1Desc: s.features[0].desc,
+      tradF2Title: s.features[1].title, tradF2Desc: s.features[1].desc,
+      tradF3Title: s.features[2].title, tradF3Desc: s.features[2].desc,
+      tradF4Title: s.features[3].title, tradF4Desc: s.features[3].desc,
+    },
+  });
+}

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 export const dynamic = 'force-dynamic';
-import { getLyricist, getTrendingSongs, getTopSongs, getJourney, getActiveTheme } from '@/lib/data';
+import { getLyricist, getTrendingSongs, getTopSongs, getJourney, getActiveTheme, getTraditionalSettings } from '@/lib/data';
 import CinematicHero from '@/components/CinematicHero';
 import HorizontalScrollRow from '@/components/HorizontalScrollRow';
 import SectionHead from '@/components/SectionHead';
@@ -13,7 +13,8 @@ export default async function Home() {
   // The Traditional theme renders a completely different devotional layout.
   const activeTheme = await getActiveTheme();
   if (activeTheme === 'traditional') {
-    return <TraditionalHome />;
+    const tradSettings = await getTraditionalSettings();
+    return <TraditionalHome settings={tradSettings} />;
   }
 
   const [l, trendingAll, topAll, journeyAll] = await Promise.all([

@@ -273,8 +273,21 @@ model Backup {
 // "default" = the original JAYKAVI cinematic skin.
 // Future skins just add a new CSS block + a new string value here.
 model SiteSettings {
-  id          Int    @id @default(1)
-  activeTheme String @default("default")
+  id                Int     @id @default(1)
+  activeTheme       String  @default("default")
+  // Traditional theme customization (all have safe defaults so existing rows work)
+  tradMantra        String  @default("॥ જય શ્રી કૃષ્ણ ॥")
+  tradHeroPortrait  String? // left hero arch — singer portrait URL
+  tradHeroDeity     String? // right hero arch — deity image URL
+  tradHeroBg        String? // optional full-bleed hero background
+  tradF1Title       String  @default("ભક્તિ")
+  tradF1Desc        String  @default("શુદ્ધ ભાવ અને શ્રદ્ધા")
+  tradF2Title       String  @default("સંગીત")
+  tradF2Desc        String  @default("સુરોથી સર્જાયેલ ભક્તિ")
+  tradF3Title       String  @default("સંસ્કૃતિ")
+  tradF3Desc        String  @default("ગુજરાતી સંસ્કૃતિનો સંગમ")
+  tradF4Title       String  @default("સેવા")
+  tradF4Desc        String  @default("સંગીત દ્વારા સેવા અને સમર્પણ")
 }
 
 // ----------------------------- CONTACT MESSAGES -------------------------
