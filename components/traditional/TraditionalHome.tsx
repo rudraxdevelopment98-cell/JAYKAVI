@@ -311,9 +311,10 @@ function TraditionalHomeStyles() {
         margin: 0 0 20px; text-transform: uppercase;
       }
       .th-name {
-        font-size: clamp(3rem, 14vw, 6.5rem);
-        font-weight: 800; line-height: .92;
-        margin: 0 0 18px; letter-spacing: -.02em;
+        font-size: clamp(2.2rem, 10vw, 6rem);
+        font-weight: 800; line-height: 1.08;
+        margin: 0 0 18px; letter-spacing: -.01em;
+        word-break: break-word;
       }
       .th-name-first { display: block; color: var(--text); }
       .th-name-rest  { display: block; }
