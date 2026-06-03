@@ -98,6 +98,17 @@ a { color: inherit; }
   color: transparent;
 }
 
+/*
+ * Default theme nav: dark mode is fine (light text on dark hero).
+ * Light mode: hero gradient is cream/light — dark text is readable.
+ * BUT as a safety net, add a very subtle scrim on the default theme nav
+ * so text always has a minimum contrast base.
+ */
+[data-theme='light']:not([data-theme-skin='traditional']) .site-nav:not(.scrolled) {
+  /* Soft light scrim so dark text stays legible on any hero image */
+  background: linear-gradient(180deg, rgba(250,247,242,.35) 0%, transparent 100%);
+}
+
 /* =====================================================================
    THEME SKINS
    Each skin overrides the CSS variables for --bg, --accent, --panel,
@@ -184,16 +195,84 @@ a { color: inherit; }
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
-/* ── Traditional Nav skin (works with existing .site-nav markup) ── */
-[data-theme-skin='traditional'] .site-nav { padding-top: 26px; }
+/* ── Traditional Nav skin ─────────────────────────────────────────── */
+
+/*
+ * The Traditional hero is ALWAYS a dark background (dark gradient + optional
+ * dark image overlay). The site can be in light OR dark colour mode.
+ * Problem: light mode has dark CSS text variables → invisible on dark hero.
+ * Fix: when the nav is floating (not yet scrolled), force it to always use
+ * the dark-mode colour palette, regardless of the user's light/dark preference.
+ * A thin dark vignette behind the nav ensures readability on any hero image.
+ */
+
+/* Always-dark scrim behind the floating nav */
+[data-theme-skin='traditional'] .site-nav:not(.scrolled) {
+  background: linear-gradient(180deg, rgba(0,0,0,.42) 0%, transparent 100%);
+}
+
+/* Force dark-mode palette inside the floating nav — covers light mode too */
+[data-theme-skin='traditional'] .site-nav:not(.scrolled) {
+  --text:      #EDE0C8;
+  --muted:     #9A8468;
+  --gold:      #C8A55A;
+  --gold-soft: #DFC080;
+  --gold-line: rgba(200,165,90,.3);
+  --accent:    #C8A55A;
+  --line:      rgba(200,165,90,.18);
+}
+/* Explicitly set the logo colour (in case it's inherited, not var-based) */
+[data-theme-skin='traditional'] .site-nav:not(.scrolled) .nav-logo {
+  color: var(--gold);
+}
+/* Nav links */
+[data-theme-skin='traditional'] .site-nav:not(.scrolled) .nav-link {
+  color: rgba(237,224,200,.82);
+}
+[data-theme-skin='traditional'] .site-nav:not(.scrolled) .nav-link:hover {
+  color: #EDE0C8;
+}
+[data-theme-skin='traditional'] .site-nav:not(.scrolled) .nav-link.active {
+  color: var(--gold); border-bottom-color: var(--gold);
+}
+/* Burger icon lines */
+[data-theme-skin='traditional'] .site-nav:not(.scrolled) .burger-line {
+  background: #EDE0C8;
+}
+/* Accent span inside logo (JAY<accent>KAVI</accent>) */
+[data-theme-skin='traditional'] .site-nav:not(.scrolled) .accent {
+  color: var(--gold);
+}
+
+/* Once scrolled, the nav background appears — use theme-correct colours */
 [data-theme-skin='traditional'] .site-nav.scrolled {
-  background: linear-gradient(180deg, rgba(17,12,3,.92), rgba(17,12,3,.78));
+  background: linear-gradient(180deg, rgba(17,12,3,.94), rgba(17,12,3,.80));
   border-color: var(--gold-line);
 }
 [data-theme-skin='traditional'][data-theme='light'] .site-nav.scrolled {
-  background: linear-gradient(180deg, rgba(255,252,246,.95), rgba(255,252,246,.82));
+  background: linear-gradient(180deg, rgba(245,240,232,.97), rgba(245,240,232,.86));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
-[data-theme-skin='traditional'] .nav-logo { color: var(--gold); letter-spacing: 1px; }
+/* Logo + links in scrolled state revert to CSS-variable colours (theme-correct) */
+[data-theme-skin='traditional'] .site-nav.scrolled .nav-logo {
+  color: var(--gold);
+}
+
+/* The hero section background is always dark — local variable override so that
+   any child element using var(--text), var(--muted), var(--gold) etc. gets the
+   dark-mode palette, even when the site is in light mode. */
+[data-theme-skin='traditional'] .th-hero {
+  --text:       #EDE0C8;
+  --muted:      #9A8468;
+  --gold:       #C8A55A;
+  --gold-soft:  #DFC080;
+  --gold-line:  rgba(200,165,90,.32);
+  --panel-solid: rgba(21,15,7,.85);
+  --line:       rgba(200,165,90,.18);
+}
+
+[data-theme-skin='traditional'] .nav-logo { letter-spacing: 1px; }
 [data-theme-skin='traditional'] .nav-link.active { border-bottom-color: var(--gold); }
 [data-theme-skin='traditional'] .nav-book {
   display: inline-flex; align-items: center; gap: 7px;
@@ -201,11 +280,11 @@ a { color: inherit; }
   font-size: .82rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
   color: #1a1200;
   background: linear-gradient(120deg, var(--gold-soft), var(--gold));
-  box-shadow: 0 6px 20px rgba(212,175,55,.35);
+  box-shadow: 0 6px 20px rgba(200,165,90,.3);
   transition: transform .25s, box-shadow .25s;
 }
 [data-theme-skin='traditional'] .nav-book:hover {
-  transform: translateY(-2px); box-shadow: 0 10px 26px rgba(212,175,55,.5);
+  transform: translateY(-2px); box-shadow: 0 10px 26px rgba(200,165,90,.45);
 }
 
 /* ── Reusable ornaments for ALL traditional pages ── */
@@ -230,7 +309,7 @@ a { color: inherit; }
 [data-theme-skin='traditional'] .glass,
 [data-theme-skin='traditional'] .trad-card {
   border: 1px solid var(--gold-line) !important;
-  box-shadow: 0 10px 40px rgba(0,0,0,.25), inset 0 0 0 1px rgba(212,175,55,.05);
+  box-shadow: 0 8px 32px rgba(0,0,0,.2), inset 0 0 0 1px rgba(200,165,90,.05);
 }
 [data-theme-skin='traditional'] .trad-card {
   background: var(--panel-solid);
