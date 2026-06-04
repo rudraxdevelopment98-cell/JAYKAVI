@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -148,7 +147,6 @@ export default function NoteEditor({
   note: NoteData;
   folders: Folder[];
 }) {
-  const router = useRouter();
   const [title, setTitle] = useState(note.title === 'Untitled' ? '' : note.title);
   const [published, setPublished] = useState(note.published);
   const [folderId, setFolderId] = useState<string | null>(note.folderId);
