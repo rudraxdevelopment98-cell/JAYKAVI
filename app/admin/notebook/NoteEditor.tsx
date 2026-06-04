@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -22,6 +21,7 @@ interface NoteData {
   updatedAt: string;
 }
 
+// ─── Toolbar button ────────────────────────────────────────────────────────────
 function Btn({
   onClick,
   active,
@@ -53,6 +53,7 @@ function Sep() {
   return <span className="w-px h-5 bg-neutral-800 mx-0.5 flex-shrink-0" />;
 }
 
+// ─── Word download ─────────────────────────────────────────────────────────────
 function downloadAsWord(title: string, html: string) {
   const doc = `
 <html xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -89,6 +90,7 @@ ${html}
   URL.revokeObjectURL(url);
 }
 
+// ─── PDF download ──────────────────────────────────────────────────────────────
 function downloadAsPDF(title: string, html: string) {
   const win = window.open('', '_blank');
   if (!win) return;
@@ -126,17 +128,18 @@ function downloadAsPDF(title: string, html: string) {
 <body>
 <h1>${title}</h1>
 ${html}
-<div class="meta">&#8212; ${title} &#8212;</div>
+<div class="meta">— ${title} —</div>
 <script>
   window.onload = function() {
     setTimeout(function() { window.print(); }, 300);
   };
-<\/script>
+</script>
 </body>
 </html>`);
   win.document.close();
 }
 
+// ─── Main editor ───────────────────────────────────────────────────────────────
 export default function NoteEditor({
   note,
   folders,
@@ -144,7 +147,6 @@ export default function NoteEditor({
   note: NoteData;
   folders: Folder[];
 }) {
-  const router = useRouter();
   const [title, setTitle] = useState(note.title === 'Untitled' ? '' : note.title);
   const [published, setPublished] = useState(note.published);
   const [folderId, setFolderId] = useState<string | null>(note.folderId);
@@ -193,6 +195,7 @@ export default function NoteEditor({
     [note.id, title, published, folderId, editor],
   );
 
+  // Auto-save 2 s after stopping
   useEffect(() => {
     if (!isDirty.current) return;
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
@@ -200,6 +203,7 @@ export default function NoteEditor({
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
   }, [title, doSave]);
 
+  // Also trigger auto-save on editor content change
   useEffect(() => {
     if (!editor) return;
     const handler = () => {
@@ -253,6 +257,8 @@ export default function NoteEditor({
 
   return (
     <div className="flex flex-col h-[calc(100vh-5rem)] -m-8">
+
+      {/* ── Top action bar ── */}
       <div className="flex items-center gap-2 px-5 py-2.5 border-b border-neutral-800 bg-neutral-950/90 backdrop-blur flex-shrink-0 flex-wrap">
         <Link
           href="/admin/notebook"
@@ -263,6 +269,8 @@ export default function NoteEditor({
           </svg>
           Notebook
         </Link>
+
+        {/* Save status */}
         <span className={`text-xs flex-shrink-0 ${
           saveStatus === 'saved'   ? 'text-neutral-600' :
           saveStatus === 'saving'  ? 'text-amber-500'   :
@@ -274,7 +282,10 @@ export default function NoteEditor({
            saveStatus === 'error'  ? '✗ Failed'     :
                                      '● Unsaved'}
         </span>
+
         <div className="flex-1" />
+
+        {/* Publish toggle */}
         <button
           onClick={handlePublishToggle}
           title={published ? 'Click to make private' : 'Click to make public'}
@@ -287,22 +298,48 @@ export default function NoteEditor({
           <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${published ? 'bg-green-400' : 'bg-neutral-500'}`} />
           {published ? 'Public' : 'Private'}
         </button>
-        <button onClick={() => doSave()} className="px-3 py-1.5 text-xs font-medium bg-neutral-800 text-neutral-200 rounded-lg hover:bg-neutral-700 transition flex-shrink-0">Save</button>
-        <button onClick={handlePDF} title="Download as PDF" className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-neutral-700 text-neutral-300 rounded-lg hover:bg-neutral-800 transition flex-shrink-0">
+
+        {/* Save button */}
+        <button
+          onClick={() => doSave()}
+          className="px-3 py-1.5 text-xs font-medium bg-neutral-800 text-neutral-200 rounded-lg hover:bg-neutral-700 transition flex-shrink-0"
+        >
+          Save
+        </button>
+
+        {/* Downloads */}
+        <button
+          onClick={handlePDF}
+          title="Download as PDF"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-neutral-700 text-neutral-300 rounded-lg hover:bg-neutral-800 transition flex-shrink-0"
+        >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
             <line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/>
           </svg>
           PDF
         </button>
-        <button onClick={handleWord} title="Download as Word" className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-neutral-700 text-neutral-300 rounded-lg hover:bg-neutral-800 transition flex-shrink-0">
+
+        <button
+          onClick={handleWord}
+          title="Download as Word (.doc)"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-neutral-700 text-neutral-300 rounded-lg hover:bg-neutral-800 transition flex-shrink-0"
+        >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
             <line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>
           </svg>
           Word
         </button>
-        <button onClick={() => setShowDelete(true)} className="p-1.5 text-neutral-600 hover:text-red-400 transition flex-shrink-0" title="Delete note">
+
+        {/* Delete */}
+        <button
+          onClick={() => setShowDelete(true)}
+          className="p-1.5 text-neutral-600 hover:text-red-400 transition flex-shrink-0"
+          title="Delete note"
+        >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
             <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
             <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
@@ -310,140 +347,308 @@ export default function NoteEditor({
         </button>
       </div>
 
+      {/* ── Formatting toolbar ── */}
       <div className="flex items-center gap-0.5 px-5 py-1.5 border-b border-neutral-800 bg-neutral-950/60 backdrop-blur flex-shrink-0 flex-wrap">
-        <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive('heading', { level: 1 })} title="Heading 1"><span className="font-bold text-[11px]">H1</span></Btn>
-        <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive('heading', { level: 2 })} title="Heading 2"><span className="font-bold text-[11px]">H2</span></Btn>
-        <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive('heading', { level: 3 })} title="Heading 3"><span className="font-bold text-[11px]">H3</span></Btn>
-        <Sep />
-        <Btn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title="Bold"><span className="font-bold">B</span></Btn>
-        <Btn onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} title="Italic"><span className="italic font-medium">I</span></Btn>
-        <Btn onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} title="Underline"><span className="underline">U</span></Btn>
-        <Btn onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive('strike')} title="Strikethrough"><span className="line-through text-[11px]">S</span></Btn>
-        <Sep />
-        <Btn onClick={() => editor.chain().focus().setTextAlign('left').run()} active={editor.isActive({ textAlign: 'left' })} title="Align left">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden><rect x="3" y="5" width="18" height="2" rx="1"/><rect x="3" y="11" width="12" height="2" rx="1"/><rect x="3" y="17" width="15" height="2" rx="1"/></svg>
+        {/* Headings */}
+        <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          active={editor.isActive('heading', { level: 1 })} title="Heading 1 (Song title)">
+          <span className="font-bold text-[11px]">H1</span>
         </Btn>
-        <Btn onClick={() => editor.chain().focus().setTextAlign('center').run()} active={editor.isActive({ textAlign: 'center' })} title="Align center (lyrics)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden><rect x="3" y="5" width="18" height="2" rx="1"/><rect x="6" y="11" width="12" height="2" rx="1"/><rect x="4" y="17" width="16" height="2" rx="1"/></svg>
+        <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          active={editor.isActive('heading', { level: 2 })} title="Heading 2 (Section)">
+          <span className="font-bold text-[11px]">H2</span>
         </Btn>
-        <Btn onClick={() => editor.chain().focus().setTextAlign('right').run()} active={editor.isActive({ textAlign: 'right' })} title="Align right">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden><rect x="3" y="5" width="18" height="2" rx="1"/><rect x="9" y="11" width="12" height="2" rx="1"/><rect x="6" y="17" width="15" height="2" rx="1"/></svg>
+        <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          active={editor.isActive('heading', { level: 3 })} title="Heading 3 (Sub-section)">
+          <span className="font-bold text-[11px]">H3</span>
         </Btn>
+
         <Sep />
-        <Btn onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} title="Bullet list">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-            <circle cx="5" cy="7" r="1.5" fill="currentColor" stroke="none"/><line x1="9" y1="7" x2="20" y2="7"/>
-            <circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><line x1="9" y1="12" x2="20" y2="12"/>
-            <circle cx="5" cy="17" r="1.5" fill="currentColor" stroke="none"/><line x1="9" y1="17" x2="20" y2="17"/>
+
+        {/* Text style */}
+        <Btn onClick={() => editor.chain().focus().toggleBold().run()}
+          active={editor.isActive('bold')} title="Bold (Ctrl+B)">
+          <span className="font-bold">B</span>
+        </Btn>
+        <Btn onClick={() => editor.chain().focus().toggleItalic().run()}
+          active={editor.isActive('italic')} title="Italic (Ctrl+I)">
+          <span className="italic font-medium">I</span>
+        </Btn>
+        <Btn onClick={() => editor.chain().focus().toggleUnderline().run()}
+          active={editor.isActive('underline')} title="Underline (Ctrl+U)">
+          <span className="underline">U</span>
+        </Btn>
+        <Btn onClick={() => editor.chain().focus().toggleStrike().run()}
+          active={editor.isActive('strike')} title="Strikethrough">
+          <span className="line-through text-[11px]">S</span>
+        </Btn>
+
+        <Sep />
+
+        {/* Alignment */}
+        <Btn onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          active={editor.isActive({ textAlign: 'left' })} title="Align left">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <rect x="3" y="5" width="18" height="2" rx="1"/><rect x="3" y="11" width="12" height="2" rx="1"/><rect x="3" y="17" width="15" height="2" rx="1"/>
           </svg>
         </Btn>
-        <Btn onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} title="Numbered list">
+        <Btn onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          active={editor.isActive({ textAlign: 'center' })} title="Align center (for lyrics)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <rect x="3" y="5" width="18" height="2" rx="1"/><rect x="6" y="11" width="12" height="2" rx="1"/><rect x="4" y="17" width="16" height="2" rx="1"/>
+          </svg>
+        </Btn>
+        <Btn onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          active={editor.isActive({ textAlign: 'right' })} title="Align right">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <rect x="3" y="5" width="18" height="2" rx="1"/><rect x="9" y="11" width="12" height="2" rx="1"/><rect x="6" y="17" width="15" height="2" rx="1"/>
+          </svg>
+        </Btn>
+
+        <Sep />
+
+        {/* Lists */}
+        <Btn onClick={() => editor.chain().focus().toggleBulletList().run()}
+          active={editor.isActive('bulletList')} title="Bullet list">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-            <line x1="10" y1="7" x2="20" y2="7"/><line x1="10" y1="12" x2="20" y2="12"/><line x1="10" y1="17" x2="20" y2="17"/>
+            <circle cx="5" cy="7" r="1.5" fill="currentColor" stroke="none"/>
+            <line x1="9" y1="7" x2="20" y2="7"/>
+            <circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+            <line x1="9" y1="12" x2="20" y2="12"/>
+            <circle cx="5" cy="17" r="1.5" fill="currentColor" stroke="none"/>
+            <line x1="9" y1="17" x2="20" y2="17"/>
+          </svg>
+        </Btn>
+        <Btn onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          active={editor.isActive('orderedList')} title="Numbered list">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+            <line x1="10" y1="7" x2="20" y2="7"/>
+            <line x1="10" y1="12" x2="20" y2="12"/>
+            <line x1="10" y1="17" x2="20" y2="17"/>
             <text x="3" y="8.5" fontSize="7" fill="currentColor" stroke="none" fontFamily="sans-serif">1</text>
             <text x="3" y="13.5" fontSize="7" fill="currentColor" stroke="none" fontFamily="sans-serif">2</text>
             <text x="3" y="18.5" fontSize="7" fill="currentColor" stroke="none" fontFamily="sans-serif">3</text>
           </svg>
         </Btn>
+
         <Sep />
-        <Btn onClick={() => editor.chain().focus().setHorizontalRule().run()} title="Divider">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><line x1="3" y1="12" x2="21" y2="12"/></svg>
+
+        {/* Divider */}
+        <Btn onClick={() => editor.chain().focus().setHorizontalRule().run()}
+          title="Insert divider line">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+          </svg>
         </Btn>
-        <Btn onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()} title="Clear formatting">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M6.5 6.5l11 11"/><path d="M16 4H7L4 11l5 5 3-2.5"/><path d="M14 20h7"/></svg>
+
+        {/* Clear formatting */}
+        <Btn onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
+          title="Clear formatting">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+            <path d="M6.5 6.5l11 11"/><path d="M16 4H7L4 11l5 5 3-2.5"/><path d="M14 20h7"/>
+          </svg>
         </Btn>
+
         <div className="flex-1" />
+
+        {/* Word count */}
         <span className="text-xs text-neutral-600 ml-2">{wordCount} words</span>
       </div>
 
+      {/* ── Writing area ── */}
       <div className="flex flex-1 overflow-hidden">
+
+        {/* Main writing pane */}
         <div className="flex-1 overflow-y-auto bg-neutral-950">
           <div className="max-w-2xl mx-auto px-8 py-8 md:px-12 lg:px-16">
+            {/* Title */}
             <input
               type="text"
               value={title}
               placeholder="Song or note title…"
-              onChange={(e) => { setTitle(e.target.value); isDirty.current = true; setSaveStatus('unsaved'); }}
-              className="w-full bg-transparent text-3xl md:text-4xl font-light text-neutral-100 placeholder:text-neutral-700 focus:outline-none mb-6 border-b border-neutral-800 pb-4 tracking-tight"
+              onChange={(e) => {
+                setTitle(e.target.value);
+                isDirty.current = true;
+                setSaveStatus('unsaved');
+              }}
+              className="w-full bg-transparent text-3xl md:text-4xl font-light
+                text-neutral-100 placeholder:text-neutral-700 focus:outline-none mb-6
+                border-b border-neutral-800 pb-4 tracking-tight"
               style={{ fontFamily: 'var(--font-fraunces), Georgia, serif' }}
             />
+
+            {/* Rich text editor */}
             <EditorContent editor={editor} />
           </div>
         </div>
 
+        {/* Right meta panel */}
         <div className="w-52 flex-shrink-0 border-l border-neutral-800 bg-neutral-900/20 p-4 overflow-y-auto hidden lg:block">
           <div className="space-y-6">
+
             <div>
               <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Folder</p>
-              <select value={folderId ?? ''} onChange={(e) => handleFolderChange(e.target.value || null)} className="w-full px-2 py-1.5 text-xs bg-neutral-900 border border-neutral-700 rounded-md focus:outline-none focus:border-amber-600 text-neutral-300">
+              <select
+                value={folderId ?? ''}
+                onChange={(e) => handleFolderChange(e.target.value || null)}
+                className="w-full px-2 py-1.5 text-xs bg-neutral-900 border border-neutral-700
+                  rounded-md focus:outline-none focus:border-amber-600 text-neutral-300"
+              >
                 <option value="">None</option>
-                {folders.map((f) => <option key={f.id} value={f.id}>{f.title}</option>)}
+                {folders.map((f) => (
+                  <option key={f.id} value={f.id}>{f.title}</option>
+                ))}
               </select>
             </div>
+
             <div>
               <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Visibility</p>
-              <button onClick={handlePublishToggle} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition ${ published ? 'bg-green-900/30 border-green-700/50 text-green-300' : 'bg-neutral-800/60 border-neutral-700 text-neutral-400 hover:text-neutral-200' }`}>
+              <button
+                onClick={handlePublishToggle}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition ${
+                  published
+                    ? 'bg-green-900/30 border-green-700/50 text-green-300'
+                    : 'bg-neutral-800/60 border-neutral-700 text-neutral-400 hover:text-neutral-200'
+                }`}
+              >
                 <span className={`w-2 h-2 rounded-full flex-shrink-0 ${published ? 'bg-green-400' : 'bg-neutral-500'}`} />
                 {published ? 'Public' : 'Private (Draft)'}
               </button>
             </div>
+
             <div>
               <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Stats</p>
               <div className="space-y-1.5 text-xs text-neutral-500">
-                <div className="flex justify-between"><span>Words</span><span className="text-neutral-400">{wordCount}</span></div>
-                <div className="flex justify-between"><span>Chars</span><span className="text-neutral-400">{editor.getText().length}</span></div>
+                <div className="flex justify-between">
+                  <span>Words</span><span className="text-neutral-400">{wordCount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Chars</span>
+                  <span className="text-neutral-400">{editor.getText().length}</span>
+                </div>
               </div>
             </div>
+
             <div>
               <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Export</p>
               <div className="space-y-1.5">
-                <button onClick={handlePDF} className="w-full text-left px-3 py-2 text-xs border border-neutral-800 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition">↓ Download PDF</button>
-                <button onClick={handleWord} className="w-full text-left px-3 py-2 text-xs border border-neutral-800 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition">↓ Download Word</button>
+                <button
+                  onClick={handlePDF}
+                  className="w-full text-left px-3 py-2 text-xs border border-neutral-800 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition"
+                >
+                  ↓ Download PDF
+                </button>
+                <button
+                  onClick={handleWord}
+                  className="w-full text-left px-3 py-2 text-xs border border-neutral-800 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition"
+                >
+                  ↓ Download Word
+                </button>
               </div>
             </div>
+
             <div>
               <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Dates</p>
               <div className="space-y-2 text-xs text-neutral-600">
-                <div><span className="block text-neutral-700">Created</span>{new Date(note.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
-                <div><span className="block text-neutral-700">Updated</span>{new Date(note.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                <div>
+                  <span className="block text-neutral-700">Created</span>
+                  {new Date(note.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </div>
+                <div>
+                  <span className="block text-neutral-700">Updated</span>
+                  {new Date(note.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>
 
+      {/* ── Delete confirm modal ── */}
       {showDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
           <div className="bg-neutral-900 border border-neutral-700 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl">
             <h3 className="font-semibold text-lg mb-2">Delete this note?</h3>
-            <p className="text-sm text-neutral-400 mb-5">&ldquo;{title || 'Untitled'}&rdquo; will be permanently deleted.</p>
+            <p className="text-sm text-neutral-400 mb-5">
+              &ldquo;{title || 'Untitled'}&rdquo; will be permanently deleted.
+            </p>
             <div className="flex gap-3 justify-end">
-              <button onClick={() => setShowDelete(false)} className="px-4 py-2 text-sm border border-neutral-700 rounded-lg hover:bg-neutral-800 transition">Cancel</button>
-              <button onClick={handleDelete} disabled={deleting} className="px-4 py-2 text-sm bg-red-600 hover:bg-red-500 text-white rounded-lg transition disabled:opacity-50">{deleting ? 'Deleting…' : 'Yes, delete'}</button>
+              <button
+                onClick={() => setShowDelete(false)}
+                className="px-4 py-2 text-sm border border-neutral-700 rounded-lg hover:bg-neutral-800 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-4 py-2 text-sm bg-red-600 hover:bg-red-500 text-white rounded-lg transition disabled:opacity-50"
+              >
+                {deleting ? 'Deleting…' : 'Yes, delete'}
+              </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* ── Editor prose styles ── */}
       <style>{`
-        .note-prose { min-height: 60vh; outline: none; font-size: 1rem; line-height: 1.9; color: #d4d4d4; caret-color: #f59e0b; }
-        .note-prose p { margin: 0 0 0.6em; min-height: 1.6em; }
+        .note-prose {
+          min-height: 60vh;
+          outline: none;
+          font-size: 1rem;
+          line-height: 1.9;
+          color: #d4d4d4;
+          caret-color: #f59e0b;
+        }
+        .note-prose p {
+          margin: 0 0 0.6em;
+          min-height: 1.6em;
+        }
         .note-prose p:last-child { margin-bottom: 0; }
-        .note-prose h1 { font-family: var(--font-fraunces), Georgia, serif; font-size: 2rem; font-weight: 300; letter-spacing: -.02em; color: #fafafa; margin: 0.2em 0 0.6em; border-bottom: 1px solid #2a2a2a; padding-bottom: 0.3em; }
-        .note-prose h2 { font-family: var(--font-fraunces), Georgia, serif; font-size: 1.35rem; font-weight: 400; color: #e5e5e5; margin: 1.4em 0 0.4em; letter-spacing: -.01em; }
-        .note-prose h3 { font-size: .9rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: #a3a3a3; margin: 1.2em 0 0.3em; }
+        .note-prose h1 {
+          font-family: var(--font-fraunces), Georgia, serif;
+          font-size: 2rem; font-weight: 300; letter-spacing: -.02em;
+          color: #fafafa; margin: 0.2em 0 0.6em;
+          border-bottom: 1px solid #2a2a2a; padding-bottom: 0.3em;
+        }
+        .note-prose h2 {
+          font-family: var(--font-fraunces), Georgia, serif;
+          font-size: 1.35rem; font-weight: 400;
+          color: #e5e5e5; margin: 1.4em 0 0.4em; letter-spacing: -.01em;
+        }
+        .note-prose h3 {
+          font-size: .9rem; font-weight: 600; text-transform: uppercase;
+          letter-spacing: .1em; color: #a3a3a3; margin: 1.2em 0 0.3em;
+        }
         .note-prose strong { color: #fafafa; font-weight: 600; }
         .note-prose em { font-style: italic; color: #e5e5e5; }
         .note-prose u { text-decoration: underline; text-underline-offset: 3px; }
         .note-prose s { opacity: 0.5; }
-        .note-prose ul { list-style-type: disc; padding-left: 1.5em; margin: 0 0 0.8em; }
-        .note-prose ol { list-style-type: decimal; padding-left: 1.5em; margin: 0 0 0.8em; }
+        .note-prose ul {
+          list-style-type: disc; padding-left: 1.5em; margin: 0 0 0.8em;
+        }
+        .note-prose ol {
+          list-style-type: decimal; padding-left: 1.5em; margin: 0 0 0.8em;
+        }
         .note-prose li { margin: 0.2em 0; }
-        .note-prose hr { border: none; border-top: 1px solid #333; margin: 1.6em 0; }
+        .note-prose hr {
+          border: none; border-top: 1px solid #333;
+          margin: 1.6em 0;
+        }
+        .note-prose [style*="text-align: center"],
         .note-prose .has-text-align-center { text-align: center; }
-        .note-prose .has-text-align-right { text-align: right; }
-        .note-prose p.is-editor-empty:first-child::before { content: attr(data-placeholder); float: left; color: #404040; pointer-events: none; height: 0; }
+        .note-prose [style*="text-align: right"],
+        .note-prose .has-text-align-right  { text-align: right; }
+        /* Placeholder */
+        .note-prose p.is-editor-empty:first-child::before {
+          content: attr(data-placeholder);
+          float: left; color: #404040; pointer-events: none; height: 0;
+        }
+        /* Selection */
         .note-prose ::selection { background: rgba(245,158,11,.18); }
+        /* Focus ring removed */
         .ProseMirror:focus { outline: none; }
       `}</style>
     </div>
