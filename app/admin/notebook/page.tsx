@@ -3,6 +3,10 @@ import Link from 'next/link';
 import NotebookSidebar from './NotebookSidebar';
 import NewNoteButton from './NewNoteButton';
 
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 export const dynamic = 'force-dynamic';
 
 export default async function NotebookPage({
@@ -39,7 +43,6 @@ export default async function NotebookPage({
 
   return (
     <div className="flex gap-0 -m-8 min-h-[calc(100vh-5rem)]">
-      {/* ── Sidebar ── */}
       <NotebookSidebar
         folders={folders}
         activeFolderId={folderId}
@@ -50,8 +53,6 @@ export default async function NotebookPage({
           drafts: await prisma.note.count({ where: { published: false } }),
         }}
       />
-
-      {/* ── Notes list ── */}
       <div className="flex-1 p-8">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -60,7 +61,6 @@ export default async function NotebookPage({
           </div>
           <NewNoteButton folderId={folderId} />
         </div>
-
         {notes.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-neutral-500 gap-3">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -72,39 +72,19 @@ export default async function NotebookPage({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {notes.map((note) => (
-              <Link
-                key={note.id}
-                href={`/admin/notebook/${note.id}`}
-                className="group block p-4 bg-neutral-900 border border-neutral-800 rounded-xl hover:border-neutral-600 transition"
-              >
+              <Link key={note.id} href={`/admin/notebook/${note.id}`} className="group block p-4 bg-neutral-900 border border-neutral-800 rounded-xl hover:border-neutral-600 transition">
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="font-medium text-sm leading-snug line-clamp-2 group-hover:text-white transition">
-                    {note.title}
-                  </h3>
-                  <span
-                    className={`flex-shrink-0 text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                      note.published
-                        ? 'bg-green-900/60 text-green-300'
-                        : 'bg-neutral-800 text-neutral-400'
-                    }`}
-                  >
+                  <h3 className="font-medium text-sm leading-snug line-clamp-2 group-hover:text-white transition">{note.title}</h3>
+                  <span className={`flex-shrink-0 text-xs px-1.5 py-0.5 rounded-full font-medium ${ note.published ? 'bg-green-900/60 text-green-300' : 'bg-neutral-800 text-neutral-400' }`}>
                     {note.published ? 'Published' : 'Draft'}
                   </span>
                 </div>
-
                 {note.content && (
-                  <p className="text-xs text-neutral-500 line-clamp-3 leading-relaxed mb-3">
-                    {note.content}
-                  </p>
+                  <p className="text-xs text-neutral-500 line-clamp-3 leading-relaxed mb-3">{stripHtml(note.content)}</p>
                 )}
-
                 <div className="flex items-center gap-2 text-xs text-neutral-600">
-                  {note.folder && (
-                    <span className="text-amber-600/80">📁 {note.folder.title}</span>
-                  )}
-                  <span className="ml-auto">
-                    {new Date(note.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                  </span>
+                  {note.folder && <span className="text-amber-600/80">📁 {note.folder.title}</span>}
+                  <span className="ml-auto">{new Date(note.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
                 </div>
               </Link>
             ))}
