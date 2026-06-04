@@ -33,6 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const songPages: MetadataRoute.Sitemap = songs.map((s) => ({
     url: `${base}/songs/${s.slug}`,
+    lastModified: (s as any).updatedAt ?? undefined,
     changeFrequency: 'monthly',
     priority: 0.7,
   }));

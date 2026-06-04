@@ -1,13 +1,27 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
-import { getLyricist, getTrendingSongs, getTopSongs, getJourney, getActiveTheme, getTraditionalSettings } from '@/lib/data';
+import { getLyricist, getTrendingSongs, getTopSongs, getJourney, getActiveTheme, getTraditionalSettings, getSocial } from '@/lib/data';
 import CinematicHero from '@/components/CinematicHero';
 import HorizontalScrollRow from '@/components/HorizontalScrollRow';
 import SectionHead from '@/components/SectionHead';
 import { FadeUp } from '@/components/Reveal';
 import JsonLd from '@/components/JsonLd';
 import TraditionalHome from '@/components/traditional/TraditionalHome';
-import { siteUrl } from '@/lib/seo';
+import { siteUrl, absoluteUrl } from '@/lib/seo';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const l = await getLyricist();
+  const name = l.displayName ?? l.name;
+  const base = siteUrl();
+  const desc = `${name} — ${l.tagline}. Official website of Gujarati lyricist ${l.name}. Browse songs, lyrics, journey and more.`;
+  return {
+    title: `${name} — Official Website`,
+    description: desc,
+    alternates: { canonical: base },
+    openGraph: { title: `${name} — Official Website`, description: desc, url: base, type: 'website' },
+  };
+}
 
 export default async function Home() {
   // The Traditional theme renders a completely different devotional layout.
@@ -17,33 +31,53 @@ export default async function Home() {
     return <TraditionalHome settings={tradSettings} />;
   }
 
-  const [l, trendingAll, topAll, journeyAll] = await Promise.all([
+  const [l, trendingAll, topAll, journeyAll, social] = await Promise.all([
     getLyricist(),
     getTrendingSongs(),
     getTopSongs(10),
     getJourney(),
+    getSocial(),
   ]);
   const trending = trendingAll;
   const top = topAll.filter((s) => s.viewCount > 0);
   const journey = journeyAll.slice(0, 4);
 
   const name = l.displayName ?? l.name;
+  const base = siteUrl();
+
+  // Build sameAs links from stored social profiles
+  const sameAs: string[] = [base];
+  if (social.youtube) sameAs.push(social.youtube);
+  if (social.instagram) sameAs.push(`https://www.instagram.com/${social.instagram.replace(/^@/, '')}`);
+  if (social.spotify) sameAs.push(social.spotify);
+
   const personLd = {
     '@context': 'https://schema.org',
     '@type': 'Person',
     name,
-    alternateName: l.penName ?? undefined,
+    alternateName: [l.penName, 'JAYKAVI', 'Jayesh Prajapati', 'jaykavi'].filter(Boolean),
     jobTitle: l.title ?? 'Lyricist',
-    description: l.tagline,
-    url: siteUrl(),
-    ...(l.bornPlace ? { birthPlace: l.bornPlace } : {}),
-    knowsLanguage: l.languages ?? [],
+    description: l.bio,
+    url: base,
+    sameAs,
+    nationality: { '@type': 'Country', name: 'India' },
+    knowsLanguage: l.languages ?? ['Gujarati'],
+    ...(l.bornPlace ? { birthPlace: { '@type': 'Place', name: l.bornPlace } } : {}),
+    ...(l.basedIn ? { homeLocation: { '@type': 'Place', name: l.basedIn } } : {}),
+    ...(l.awards?.length ? { award: l.awards } : {}),
+    worksFor: { '@type': 'Organization', name: 'Gujarati Music Industry' },
   };
   const websiteLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name,
-    url: siteUrl(),
+    url: base,
+    description: l.tagline,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: `${base}/songs?q={search_term_string}` },
+      'query-input': 'required name=search_term_string',
+    },
   };
 
   return (

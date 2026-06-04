@@ -20,18 +20,31 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   if (!song) return { title: 'Song not found' };
   const singers = song.performingSingers.length ? ` · Sung by ${song.performingSingers.join(', ')}` : '';
   const desc = song.lyrics
-    ? `${song.lyrics.slice(0, 140).replace(/\n/g, ' ')}…`
-    : `${song.title} — Gujarati song written by ${song.lyricist}${singers}.`;
+    ? `${song.lyrics.slice(0, 155).replace(/\n/g, ' ')}…`
+    : `${song.title} — Gujarati song written by ${song.lyricist}${singers}. Lyrics, credits and streaming links.`;
   const images = song.artworkUrl ? [song.artworkUrl] : [];
+  const canonicalUrl = absoluteUrl(`/songs/${song.slug}`);
   return {
-    title: song.title,
+    title: `${song.title} — Lyrics & Credits`,
     description: desc,
-    alternates: { canonical: `/songs/${song.slug}` },
+    keywords: [
+      song.title,
+      ...(song.altTitles ?? []),
+      ...song.performingSingers,
+      song.lyricist,
+      'JAYKAVI', 'Jayesh Prajapati',
+      'Gujarati song', 'Gujarati lyrics', 'ગુજરાતી ગીત',
+      ...(song.genre ?? []),
+      song.releaseYear ? String(song.releaseYear) : '',
+      song.composer ?? '',
+    ].filter(Boolean),
+    authors: [{ name: song.lyricist }],
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       title: song.title,
       description: desc,
       type: 'music.song',
-      url: absoluteUrl(`/songs/${song.slug}`),
+      url: canonicalUrl,
       images,
     },
     twitter: {
@@ -66,25 +79,42 @@ export default async function SongDetail({ params }: { params: { slug: string } 
     ))
     .slice(0, 6);
 
-  // Structured data for rich search results.
-  const jsonLd = {
+  const songUrl = absoluteUrl(`/songs/${song.slug}`);
+  const siteBase = absoluteUrl('/');
+
+  // MusicRecording — enables rich results for songs
+  const recordingLd = {
     '@context': 'https://schema.org',
     '@type': 'MusicRecording',
     name: song.title,
-    url: absoluteUrl(`/songs/${song.slug}`),
+    alternateName: song.altTitles?.length ? song.altTitles : undefined,
+    url: songUrl,
     inLanguage: song.language || 'Gujarati',
     ...(song.artworkUrl ? { image: song.artworkUrl } : {}),
-    ...(song.releaseYear ? { datePublished: String(song.releaseYear) } : {}),
-    lyricist: { '@type': 'Person', name: song.lyricist },
+    ...(song.releaseYear ? { datePublished: `${song.releaseYear}-01-01` } : {}),
+    lyricist: { '@type': 'Person', name: song.lyricist, alternateName: ['JAYKAVI', 'Jayesh Prajapati'] },
     ...(song.performingSingers.length
       ? { byArtist: song.performingSingers.map((n) => ({ '@type': 'Person', name: n })) }
       : {}),
     ...(song.composer ? { composer: { '@type': 'Person', name: song.composer } } : {}),
+    ...(song.lyrics ? { lyrics: { '@type': 'CreativeWork', text: song.lyrics.slice(0, 500) } } : {}),
+  };
+
+  // BreadcrumbList — tells Google the page hierarchy
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteBase },
+      { '@type': 'ListItem', position: 2, name: 'Songs', item: absoluteUrl('/songs') },
+      { '@type': 'ListItem', position: 3, name: song.title, item: songUrl },
+    ],
   };
 
   return (
     <div style={{ position: 'relative', zIndex: 2 }}>
-      <JsonLd data={jsonLd} />
+      <JsonLd data={recordingLd} />
+      <JsonLd data={breadcrumbLd} />
       <TrackView slug={song.slug} />
       {/* ── Hero ── */}
       <div className="song-hero" style={{

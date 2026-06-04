@@ -26,30 +26,41 @@ const dmSans = DM_Sans({
 export async function generateMetadata(): Promise<Metadata> {
   const l = await getLyricist();
   const name = l.displayName ?? l.name;
+  const base = siteUrl();
   return {
-    metadataBase: new URL(siteUrl()),
+    metadataBase: new URL(base),
     title: {
       default: `${name} — ${l.tagline}`,
       template: `%s — ${name}`,
     },
     description: l.bio,
     keywords: [
-      name, l.name, l.penName ?? '', 'Gujarati lyricist', 'Gujarati songs',
-      'lyrics', 'ગીતકાર', ...(l.languages ?? []), ...(l.genres ?? []),
+      name, l.name, l.penName ?? '',
+      'JAYKAVI', 'Jayesh Prajapati', 'jaykavi', 'jayesh prajapati',
+      'Gujarati lyricist', 'Gujarati songs', 'Gujarati geet', 'Gujarati kavya',
+      'ગીતકાર', 'ગુજરાતી ગીત', 'જયકવિ', 'ગુજરાતી કવિ',
+      'lyrics', 'song writer', 'bhajan', 'garba', 'lagna geet',
+      ...(l.languages ?? []), ...(l.genres ?? []),
     ].filter(Boolean),
-    alternates: { canonical: '/' },
+    authors: [{ name }],
+    creator: name,
+    alternates: { canonical: base },
     openGraph: {
       title: name,
       description: l.tagline,
       type: 'website',
       siteName: name,
       locale: 'gu_IN',
+      url: base,
     },
     twitter: {
       card: 'summary_large_image',
       title: name,
       description: l.tagline,
     },
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
+      : {}),
   };
 }
 
