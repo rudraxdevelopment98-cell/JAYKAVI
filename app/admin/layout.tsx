@@ -34,10 +34,12 @@ export default async function AdminLayout({
   if (!session.isAdmin) redirect('/admin/login');
 
   // Only show sidebar items this admin is allowed to open.
+  // Empty permissions = legacy full-access admin — show everything.
   const perms: string[] = session.permissions ?? [];
+  const restricted = perms.length > 0;
   const navItems = NAV.filter((item) => {
     const required = permissionForPath(item.href);
-    return required === null || hasPermission(perms, required);
+    return required === null || !restricted || hasPermission(perms, required);
   });
 
   return (

@@ -24,9 +24,10 @@ export default async function AdminDashboard({
   const counts = await getCounts();
   const session: any = await auth();
   const perms: string[] = session?.permissions ?? [];
+  const restricted = perms.length > 0;
   const allowed = (href: string) => {
     const req = permissionForPath(href);
-    return req === null || hasPermission(perms, req);
+    return req === null || !restricted || hasPermission(perms, req);
   };
 
   const deniedKey = searchParams?.denied;

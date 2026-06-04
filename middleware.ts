@@ -11,9 +11,11 @@ export default auth((req) => {
   }
 
   // Per-section permission check. Owners carry ['all'] and pass everything.
+  // Empty permissions array = legacy full-access admin (no restrictions set).
   const perms: string[] = session.permissions ?? [];
+  const restricted = perms.length > 0;
   const required = permissionForPath(req.nextUrl.pathname);
-  if (required && !hasPermission(perms, required)) {
+  if (restricted && required && !hasPermission(perms, required)) {
     // Signed in, but not allowed in this section — send to the dashboard.
     const home = new URL('/admin', req.nextUrl.origin);
     home.searchParams.set('denied', required);
