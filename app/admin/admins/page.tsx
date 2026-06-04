@@ -6,7 +6,6 @@ import { logActivity } from '@/lib/activity';
 
 export const dynamic = 'force-dynamic';
 
-// Env "owner" admins — read from ADMIN_EMAILS, shown but not editable/removable.
 function getEnvAdmins(): string[] {
   return (process.env.ADMIN_EMAILS ?? '')
     .split(',')
@@ -34,7 +33,7 @@ async function addAdmin(formData: FormData) {
   const permissions = formData.getAll('permissions').map(String).filter(Boolean);
 
   if (!email || !email.includes('@')) return;
-  if (getEnvAdmins().includes(email)) return; // already a permanent owner
+  if (getEnvAdmins().includes(email)) return;
 
   await prisma.adminUser.upsert({
     where: { email },
@@ -62,7 +61,6 @@ async function updateAdmin(formData: FormData) {
   const note = (formData.get('note') as string || '').trim() || null;
   let permissions = formData.getAll('permissions').map(String).filter(Boolean);
 
-  // Only env-level owners may grant the special 'all' wildcard permission.
   const { isEnvAdmin: checkEnvAdmin } = await import('@/auth');
   if (permissions.includes('all') && !checkEnvAdmin(session.user?.email)) {
     permissions = permissions.filter((p) => p !== 'all');
@@ -115,10 +113,14 @@ export default async function AdminAdminsPage() {
         Google account using the email below.
       </p>
 
-      {/* Owners (from .env) */}
+      {/* ── Owners ── */}
       <h2 className="text-sm font-semibold text-neutral-300 uppercase tracking-wide mb-2">
         Owners
       </h2>
+      <p className="text-xs text-neutral-500 mb-3">
+        Set via the <code className="text-neutral-400 bg-neutral-800 px-1 py-0.5 rounded">ADMIN_EMAILS</code> environment variable.
+        Owners always have full access to everything — their permissions cannot be restricted.
+      </p>
       <div className="space-y-2 mb-8">
         {envAdmins.length === 0 ? (
           <p className="text-sm text-neutral-500">None configured.</p>
@@ -128,16 +130,21 @@ export default async function AdminAdminsPage() {
               key={email}
               className="flex items-center justify-between gap-4 p-4 rounded-xl border border-neutral-800 bg-neutral-900/40"
             >
-              <div>
-                <div className="font-medium text-neutral-100">
-                  {email}
-                  {email === currentEmail && (
-                    <span className="ml-2 text-xs text-amber-400">(you)</span>
-                  )}
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-amber-900/40 border border-amber-800/40 flex items-center justify-center text-xs font-semibold text-amber-300 flex-shrink-0">
+                  {email.charAt(0).toUpperCase()}
                 </div>
-                <div className="text-xs text-neutral-500">Permanent owner · cannot be removed</div>
+                <div>
+                  <div className="font-medium text-neutral-100 text-sm">
+                    {email}
+                    {email === currentEmail && (
+                      <span className="ml-2 text-xs text-amber-400">(you)</span>
+                    )}
+                  </div>
+                  <div className="text-xs text-neutral-500 mt-0.5">Permanent owner · full access · cannot be removed</div>
+                </div>
               </div>
-              <span className="text-xs px-2 py-1 rounded-full bg-amber-900/40 text-amber-300 flex-shrink-0">
+              <span className="text-xs px-2.5 py-1 rounded-full bg-amber-900/40 text-amber-300 border border-amber-800/40 flex-shrink-0">
                 Owner
               </span>
             </div>
@@ -145,93 +152,116 @@ export default async function AdminAdminsPage() {
         )}
       </div>
 
-      {/* Managed admins */}
+      {/* ── Added admins (collapsible) ── */}
       <h2 className="text-sm font-semibold text-neutral-300 uppercase tracking-wide mb-2">
         Added admins
       </h2>
-      <div className="space-y-3 mb-8">
+      <div className="space-y-2 mb-8">
         {admins.length === 0 ? (
           <p className="text-sm text-neutral-500">No extra admins yet. Add one below.</p>
         ) : (
           admins.map((a) => (
-            <div
+            <details
               key={a.id}
-              className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60"
+              className="rounded-xl border border-neutral-800 bg-neutral-900/60 overflow-hidden"
             >
-              <form action={updateAdmin} className="space-y-3">
-                <input type="hidden" name="id" value={a.id} />
-                <div className="flex items-center justify-between gap-3">
-                  <div className="font-medium text-neutral-100">
-                    {a.email}
-                    {a.email.toLowerCase() === currentEmail && (
-                      <span className="ml-2 text-xs text-amber-400">(you)</span>
-                    )}
+              <summary className="flex items-center justify-between gap-3 p-4 cursor-pointer select-none hover:bg-neutral-800/40 transition-colors">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-xs font-semibold text-neutral-300 flex-shrink-0">
+                    {(a.name || a.email).charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-medium text-neutral-100 text-sm truncate">
+                      {a.email}
+                      {a.email.toLowerCase() === currentEmail && (
+                        <span className="ml-2 text-xs text-amber-400">(you)</span>
+                      )}
+                    </div>
+                    <div className="text-xs text-neutral-500 mt-0.5">
+                      {a.name ? `${a.name} · ` : ''}{a.role}
+                    </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <span className="text-xs text-neutral-600 hidden sm:block">
+                    {(a.permissions ?? []).length === 0
+                      ? 'Full access'
+                      : `${(a.permissions ?? []).length} section${(a.permissions ?? []).length !== 1 ? 's' : ''}`}
+                  </span>
+                  <svg className="details-chevron text-neutral-600 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+              </summary>
+
+              <div className="px-4 pb-4 pt-3 border-t border-neutral-800/60">
+                <form action={updateAdmin} className="space-y-3">
+                  <input type="hidden" name="id" value={a.id} />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className={labelCls}>Name</label>
+                      <input name="name" defaultValue={a.name ?? ''} className={inputCls} />
+                    </div>
+                    <div>
+                      <label className={labelCls}>Role</label>
+                      <input name="role" defaultValue={a.role} className={inputCls} />
+                    </div>
+                  </div>
                   <div>
-                    <label className={labelCls}>Name</label>
-                    <input name="name" defaultValue={a.name ?? ''} className={inputCls} />
+                    <label className={labelCls}>Note</label>
+                    <input
+                      name="note"
+                      defaultValue={a.note ?? ''}
+                      className={inputCls}
+                      placeholder="e.g. manages song uploads"
+                    />
                   </div>
                   <div>
-                    <label className={labelCls}>Role</label>
-                    <input name="role" defaultValue={a.role} className={inputCls} />
+                    <label className={labelCls}>Allowed sections</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
+                      {ADMIN_SECTIONS.map((s) => (
+                        <label
+                          key={s.key}
+                          className="flex items-center gap-2 text-sm text-neutral-300 px-2 py-1.5 rounded-md border border-neutral-800 bg-neutral-900/40 cursor-pointer hover:border-neutral-600"
+                        >
+                          <input
+                            type="checkbox"
+                            name="permissions"
+                            value={s.key}
+                            defaultChecked={(a.permissions ?? []).includes(s.key)}
+                            className="accent-amber-500"
+                          />
+                          {s.label}
+                        </label>
+                      ))}
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-1">
+                      Leave all unchecked for full access. Check specific sections to restrict this admin to only those areas.
+                    </p>
                   </div>
-                </div>
-                <div>
-                  <label className={labelCls}>Note</label>
-                  <input
-                    name="note"
-                    defaultValue={a.note ?? ''}
-                    className={inputCls}
-                    placeholder="e.g. manages song uploads"
-                  />
-                </div>
-                <div>
-                  <label className={labelCls}>Allowed sections</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
-                    {ADMIN_SECTIONS.map((s) => (
-                      <label
-                        key={s.key}
-                        className="flex items-center gap-2 text-sm text-neutral-300 px-2 py-1.5 rounded-md border border-neutral-800 bg-neutral-900/40 cursor-pointer hover:border-neutral-600"
-                      >
-                        <input
-                          type="checkbox"
-                          name="permissions"
-                          value={s.key}
-                          defaultChecked={(a.permissions ?? []).includes(s.key)}
-                          className="accent-amber-500"
-                        />
-                        {s.label}
-                      </label>
-                    ))}
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="submit"
+                      className="text-sm px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition"
+                    >
+                      Save changes
+                    </button>
+                    <button
+                      type="submit"
+                      formAction={removeAdmin}
+                      className="text-sm px-4 py-2 border border-red-900/60 text-red-400 rounded-md hover:bg-red-950/40 transition"
+                    >
+                      Remove admin
+                    </button>
                   </div>
-                  <p className="text-xs text-neutral-500 mt-1">
-                    Unchecked sections are hidden and blocked for this admin.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="submit"
-                    className="text-sm px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="submit"
-                    formAction={removeAdmin}
-                    className="text-sm px-4 py-2 border border-red-900/60 text-red-400 rounded-md hover:bg-red-950/40 transition"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </form>
-            </div>
+                </form>
+              </div>
+            </details>
           ))
         )}
       </div>
 
-      {/* Add new */}
+      {/* ── Add new admin ── */}
       <h2 className="text-sm font-semibold text-neutral-300 uppercase tracking-wide mb-3">
         Add an admin
       </h2>
@@ -285,7 +315,7 @@ export default async function AdminAdminsPage() {
             ))}
           </div>
           <p className="text-xs text-neutral-500 mt-1">
-            Pick which sections this admin can open. Leave all unchecked for dashboard-only access.
+            Leave all unchecked for full access to all sections.
           </p>
         </div>
         <button
@@ -295,6 +325,15 @@ export default async function AdminAdminsPage() {
           Add admin
         </button>
       </form>
+
+      <style>{`
+        summary { list-style: none; }
+        summary::-webkit-details-marker { display: none; }
+        summary::marker { display: none; }
+        .details-chevron { transition: transform .2s ease; }
+        details[open] .details-chevron { transform: rotate(180deg); }
+        details[open] { border-color: rgb(64 64 64 / 0.6); }
+      `}</style>
     </div>
   );
 }
