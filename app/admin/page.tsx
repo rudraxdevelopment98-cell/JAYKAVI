@@ -6,13 +6,14 @@ import { ADMIN_SECTIONS, permissionForPath, hasPermission } from '@/lib/permissi
 export const dynamic = 'force-dynamic';
 
 async function getCounts() {
-  const [singers, collections, songs, journey] = await Promise.all([
+  const [singers, collections, songs, journey, notes] = await Promise.all([
     prisma.singer.count(),
     prisma.collection.count(),
     prisma.song.count(),
     prisma.journeyMilestone.count(),
+    prisma.note.count().catch(() => 0),
   ]);
-  return { singers, collections, songs, journey };
+  return { singers, collections, songs, journey, notes };
 }
 
 export default async function AdminDashboard({
@@ -38,6 +39,7 @@ export default async function AdminDashboard({
     { label: 'Singers', value: counts.singers, href: '/admin/singers' },
     { label: 'Collections', value: counts.collections, href: '/admin/collections' },
     { label: 'Journey events', value: counts.journey, href: '/admin/journey' },
+    { label: 'Notebook', value: counts.notes, href: '/admin/notebook', emoji: '📓' },
   ].filter((t) => allowed(t.href));
 
   return (
@@ -60,6 +62,7 @@ export default async function AdminDashboard({
             href={t.href}
             className="block p-6 bg-neutral-900 border border-neutral-800 rounded-xl hover:border-neutral-700 transition"
           >
+            {(t as any).emoji && <div className="text-2xl mb-1">{(t as any).emoji}</div>}
             <div className="text-3xl font-semibold">{t.value}</div>
             <div className="text-sm text-neutral-400 mt-1">{t.label}</div>
           </Link>
@@ -77,6 +80,12 @@ export default async function AdminDashboard({
           )}
           {allowed('/admin/songs') && (
             <li>· <Link href="/admin/songs" className="underline hover:text-white">Manage songs</Link></li>
+          )}
+          {allowed('/admin/notebook') && (
+            <li>· <Link href="/admin/notebook" className="underline hover:text-white">Open notebook</Link></li>
+          )}
+          {allowed('/admin/harvester') && (
+            <li>· <Link href="/admin/harvester" className="underline hover:text-white">Song harvester</Link></li>
           )}
         </ul>
       </div>

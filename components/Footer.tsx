@@ -85,6 +85,12 @@ export default async function Footer() {
         <Link href="/songs" style={linkStyle}>
           <MusicIcon />Songs
         </Link>
+        <Link href="/collections" style={linkStyle}>
+          <JourneyIcon />Collections
+        </Link>
+        <Link href="/singers" style={linkStyle}>
+          <LyricsIcon />Singers
+        </Link>
         <Link href="/journey" style={linkStyle}>
           <JourneyIcon />Journey
         </Link>
@@ -145,7 +151,9 @@ function TraditionalFooter({
           <div className="tf-links">
             <Link href="/" className="tf-link">Home</Link>
             <Link href="/about" className="tf-link">About</Link>
-            <Link href="/songs" className="tf-link">Bhajans</Link>
+            <Link href="/songs" className="tf-link">Songs</Link>
+            <Link href="/collections" className="tf-link">Collections</Link>
+            <Link href="/singers" className="tf-link">Singers</Link>
             <Link href="/journey" className="tf-link">Journey</Link>
             <Link href="/lyrics" className="tf-link">Lyrics</Link>
             <Link href="/contact" className="tf-link">Contact</Link>
