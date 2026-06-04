@@ -3,6 +3,10 @@ import Link from 'next/link';
 import NotebookSidebar from './NotebookSidebar';
 import NewNoteButton from './NewNoteButton';
 
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 export const dynamic = 'force-dynamic';
 
 export default async function NotebookPage({
@@ -94,7 +98,7 @@ export default async function NotebookPage({
 
                 {note.content && (
                   <p className="text-xs text-neutral-500 line-clamp-3 leading-relaxed mb-3">
-                    {note.content}
+                    {stripHtml(note.content)}
                   </p>
                 )}
 
