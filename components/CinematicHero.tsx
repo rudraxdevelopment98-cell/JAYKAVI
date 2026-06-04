@@ -67,9 +67,9 @@ export default function CinematicHero({ l }: { l: Lyricist }) {
         .blob-purple { width: 340px; height: 340px; background: #5B2A86; opacity: .5; top: 8%; right: 6%; }
         .blob-blue   { width: 260px; height: 260px; background: #2D6BFF; opacity: .5; bottom: 14%; left: 4%; }
         .hero-content { position: relative; z-index: 2; max-width: 900px; }
-        .hero-eyebrow { text-transform: uppercase; letter-spacing: .42em; font-size: .72rem; font-weight: 600; margin-bottom: 24px; display: block; }
-        .hero-title { font-weight: 600; line-height: .96; font-size: clamp(2.8rem, 10vw, 8.5rem); letter-spacing: -.02em; margin: 0; }
-        .hero-tagline { margin-top: 28px; font-size: clamp(.95rem, 1.5vw, 1.2rem); max-width: 46ch; line-height: 1.7; }
+        .hero-eyebrow { text-transform: uppercase; letter-spacing: .5em; font-size: .68rem; font-weight: 500; margin-bottom: 28px; display: block; font-family: var(--font-hanken), system-ui, sans-serif; }
+        .hero-title { font-weight: 300; line-height: .94; font-size: clamp(3rem, 11vw, 9rem); letter-spacing: -.03em; margin: 0; }
+        .hero-tagline { margin-top: 32px; font-size: clamp(.95rem, 1.5vw, 1.15rem); max-width: 46ch; line-height: 1.85; font-family: var(--font-hanken), system-ui, sans-serif; font-weight: 300; letter-spacing: .01em; }
         .hero-stats { display: flex; gap: 36px; margin-top: 36px; flex-wrap: wrap; }
         .hero-btns  { display: flex; gap: 14px; margin-top: 40px; flex-wrap: wrap; }
         .btn-primary {
@@ -108,8 +108,8 @@ export default function CinematicHero({ l }: { l: Lyricist }) {
 function Stat({ n, label }: { n: string; label: string }) {
   return (
     <div>
-      <div className="font-serif" style={{ fontSize: 'clamp(1.6rem,4vw,2.4rem)', fontWeight: 600 }}>{n}</div>
-      <div className="text-muted" style={{ fontSize: '.72rem', textTransform: 'uppercase', letterSpacing: '.18em', marginTop: 2 }}>{label}</div>
+      <div className="font-serif" style={{ fontSize: 'clamp(1.8rem,4vw,2.6rem)', fontWeight: 300, letterSpacing: '-.02em' }}>{n}</div>
+      <div className="text-muted" style={{ fontSize: '.65rem', textTransform: 'uppercase', letterSpacing: '.22em', marginTop: 4, fontFamily: 'var(--font-hanken), system-ui, sans-serif' }}>{label}</div>
     </div>
   );
 }

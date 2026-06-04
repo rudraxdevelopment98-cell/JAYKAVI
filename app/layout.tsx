@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Fraunces, Hanken_Grotesk } from 'next/font/google';
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google';
 import './globals.css';
 import { getLyricist, getActiveTheme } from '@/lib/data';
 import Nav from '@/components/Nav';
@@ -9,8 +9,19 @@ import HideOnAdmin from '@/components/HideOnAdmin';
 import OrnateFrame from '@/components/traditional/OrnateFrame';
 import { siteUrl } from '@/lib/seo';
 
-const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', display: 'swap' });
-const hanken = Hanken_Grotesk({ subsets: ['latin'], variable: '--font-hanken', display: 'swap' });
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+  weight: ['300', '400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+});
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-hanken',
+  display: 'swap',
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const l = await getLyricist();
@@ -63,7 +74,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${fraunces.variable} ${hanken.variable}`}>
+      <body className={`${cormorant.variable} ${dmSans.variable}`}>
         {activeTheme === 'traditional' && (
           <HideOnAdmin>
             <OrnateFrame />

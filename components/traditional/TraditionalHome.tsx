@@ -311,17 +311,18 @@ function TraditionalHomeStyles() {
         margin: 0 0 20px; text-transform: uppercase;
       }
       .th-name {
-        font-size: clamp(2.2rem, 10vw, 6rem);
-        font-weight: 800; line-height: 1.08;
-        margin: 0 0 18px; letter-spacing: -.01em;
+        font-size: clamp(2.4rem, 11vw, 6.5rem);
+        font-weight: 300; line-height: 1.06;
+        margin: 0 0 18px; letter-spacing: -.03em;
         word-break: break-word;
       }
       .th-name-first { display: block; color: var(--text); }
       .th-name-rest  { display: block; }
       .th-tagline {
-        font-family: var(--font-fraunces), serif;
-        font-size: clamp(.95rem, 3vw, 1.2rem);
-        color: var(--muted); margin: 0 0 28px; line-height: 1.6;
+        font-family: var(--font-hanken), system-ui, sans-serif;
+        font-weight: 300; letter-spacing: .02em;
+        font-size: clamp(.92rem, 3vw, 1.1rem);
+        color: var(--muted); margin: 0 0 28px; line-height: 1.9;
       }
       .th-stats {
         display: flex; flex-wrap: wrap; gap: 8px;

@@ -72,6 +72,26 @@ body::before {
 
 .font-serif { font-family: var(--font-fraunces), Georgia, serif; }
 
+/* ── Cormorant Garamond display tuning ──────────────────────────────── */
+/* The font earns its drama through extreme stroke contrast — let it breathe */
+h1, h2, h3, h4 {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+/* Large display text: go lighter for max cinematic contrast */
+.text-5xl, .text-6xl, .text-7xl, .text-8xl,
+[class*='text-['] {
+  letter-spacing: -0.025em;
+}
+/* Italic variant looks spectacular — use it on song/lyric titles */
+.font-serif-italic {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-style: italic;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+}
+
 a { color: inherit; }
 
 .glass {
@@ -272,7 +292,7 @@ a { color: inherit; }
   --line:       rgba(200,165,90,.18);
 }
 
-[data-theme-skin='traditional'] .nav-logo { letter-spacing: 1px; }
+[data-theme-skin='traditional'] .nav-logo { letter-spacing: -.01em; font-weight: 400; font-style: italic; }
 [data-theme-skin='traditional'] .nav-link.active { border-bottom-color: var(--gold); }
 [data-theme-skin='traditional'] .nav-book {
   display: inline-flex; align-items: center; gap: 7px;
@@ -366,12 +386,18 @@ a { color: inherit; }
   border-radius: 100px; letter-spacing: .12em; text-transform: uppercase; z-index: 1;
 }
 .sc-art-title {
-  font-size: 1.4rem; line-height: 1.15; color: #fff;
-  text-shadow: 0 2px 20px rgba(0,0,0,.6); z-index: 1;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.5rem; font-weight: 300; font-style: italic;
+  line-height: 1.15; color: #fff;
+  text-shadow: 0 2px 20px rgba(0,0,0,.7); z-index: 1; letter-spacing: -.01em;
 }
 .sc-info { padding: 16px 18px 20px; }
-.sc-title { font-size: 1.2rem; font-weight: 600; margin: 0; line-height: 1.3; }
-.sc-sub { font-size: .82rem; margin-top: 5px; }
+.sc-title {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.25rem; font-weight: 400; font-style: italic;
+  margin: 0; line-height: 1.25; letter-spacing: -.01em;
+}
+.sc-sub { font-size: .78rem; margin-top: 5px; font-family: var(--font-hanken), system-ui, sans-serif; letter-spacing: .02em; }
 .sc-platforms { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
 .sc-platform {
   font-size: .67rem; padding: 4px 10px; border-radius: 100px;
