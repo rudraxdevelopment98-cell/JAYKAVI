@@ -11,6 +11,7 @@ export const ADMIN_SECTIONS = [
   { key: 'songs', label: 'Songs', path: '/admin/songs' },
   { key: 'journey', label: 'Journey', path: '/admin/journey' },
   { key: 'blog', label: 'Blog', path: '/admin/blog' },
+  { key: 'notebook', label: 'Notebook', path: '/admin/notebook' },
   { key: 'harvester', label: 'Song Harvester', path: '/admin/harvester' },
   { key: 'analytics', label: 'Analytics', path: '/admin/analytics' },
   { key: 'admins', label: 'Admins', path: '/admin/admins' },
