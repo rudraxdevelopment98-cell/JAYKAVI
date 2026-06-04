@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { syncViews } from '@/app/api/cron/sync-views/route';
+import { syncViews } from '@/lib/sync-views';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;

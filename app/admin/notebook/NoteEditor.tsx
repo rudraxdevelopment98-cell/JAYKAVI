@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
-import Underline from '@tiptap/extension-underline';
 import { saveNote, deleteNote } from './actions';
 
 interface Folder { id: string; title: string; }
@@ -21,8 +20,8 @@ interface NoteData {
   updatedAt: string;
 }
 
-// ─── Toolbar button ────────────────────────────────────────────────────────────
-function Btn({
+// ─── Toolbar button ─────────────────────────────────────────────────
+ function Btn({
   onClick,
   active,
   title,
@@ -53,7 +52,7 @@ function Sep() {
   return <span className="w-px h-5 bg-neutral-800 mx-0.5 flex-shrink-0" />;
 }
 
-// ─── Word download ─────────────────────────────────────────────────────────────
+// ─── Word download ────────────────────────────────────────────────
 function downloadAsWord(title: string, html: string) {
   const doc = `
 <html xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -90,7 +89,7 @@ ${html}
   URL.revokeObjectURL(url);
 }
 
-// ─── PDF download ──────────────────────────────────────────────────────────────
+// ─── PDF download ──────────────────────────────────────────────────
 function downloadAsPDF(title: string, html: string) {
   const win = window.open('', '_blank');
   if (!win) return;
@@ -139,7 +138,7 @@ ${html}
   win.document.close();
 }
 
-// ─── Main editor ───────────────────────────────────────────────────────────────
+// ─── Main editor ──────────────────────────────────────────────────
 export default function NoteEditor({
   note,
   folders,
@@ -157,9 +156,11 @@ export default function NoteEditor({
   const isDirty = useRef(false);
 
   const editor = useEditor({
+    // Required by Tiptap v3 under Next.js SSR to avoid hydration mismatches.
+    immediatelyRender: false,
     extensions: [
+      // StarterKit (v3) already bundles Underline, so it is not added again here.
       StarterKit,
-      Underline,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
     ],
     content: note.content || '<p></p>',
