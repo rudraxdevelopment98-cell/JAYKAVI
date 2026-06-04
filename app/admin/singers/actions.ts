@@ -18,11 +18,19 @@ function strOrNull(v: FormDataEntryValue | null): string | null {
   return s === '' ? null : s;
 }
 
-export async function createSinger(formData: FormData) {
+export async function createSinger(formData: FormData): Promise<{ error: string } | void> {
   const session = await auth();
   assertAdmin(session);
   const name = str(formData.get('name'));
-  if (!name) throw new Error('Name is required');
+  if (!name) return { error: 'Name is required' };
+
+  const duplicate = await prisma.singer.findFirst({
+    where: { name: { equals: name, mode: 'insensitive' } },
+    select: { id: true, name: true },
+  });
+  if (duplicate) {
+    return { error: `Singer "${duplicate.name}" already exists.` };
+  }
 
   const singer = await prisma.singer.create({
     data: {
