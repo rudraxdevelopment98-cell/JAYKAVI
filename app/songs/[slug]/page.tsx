@@ -117,7 +117,7 @@ export default async function SongDetail({ params }: { params: { slug: string } 
       <JsonLd data={breadcrumbLd} />
       <TrackView slug={song.slug} />
       {/* ── Hero ── */}
-      <div className="song-hero" style={{
+      <div className={`song-hero${isSafeUrl(song.artworkUrl) ? ' song-hero--art' : ''}`} style={{
         background: isSafeUrl(song.artworkUrl)
           ? `linear-gradient(to bottom, rgba(10,10,11,.65) 0%, rgba(10,10,11,.9) 70%, var(--bg) 100%), url(${song.artworkUrl}) center/cover no-repeat`
           : 'var(--hero-grad)',
@@ -200,6 +200,13 @@ export default async function SongDetail({ params }: { params: { slug: string } 
         .song-hero {
           padding: clamp(100px,16vh,180px) clamp(20px,6vw,96px) clamp(40px,6vh,80px);
         }
+        /* When the hero sits over an artwork image (always darkened), force a
+           light text palette so headings stay readable in BOTH light & dark mode. */
+        .song-hero--art { --text: #F4F1EA; --muted: rgba(244,241,234,.72); }
+        .song-hero--art h1,
+        .song-hero--art p,
+        .song-hero--art strong { color: #F4F1EA; text-shadow: 0 1px 18px rgba(0,0,0,.45); }
+        .song-hero--art .text-muted { color: rgba(244,241,234,.72) !important; }
         .song-hero-inner { max-width: 800px; }
         .song-body-wrap {
           max-width: 1100px; margin: 0 auto;

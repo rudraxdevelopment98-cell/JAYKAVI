@@ -101,6 +101,24 @@ a { color: inherit; }
 .text-muted { color: var(--muted); }
 .accent { color: var(--accent); }
 
+/* ── Default-theme nav legibility over hero / images ──────────────────────
+   The floating (un-scrolled) nav can sit over a dark hero gradient or an
+   uploaded background image. We add a faint top scrim + a soft text-shadow
+   so logo and links stay readable on ANY background, in light OR dark mode. */
+[data-theme-skin='default'] .site-nav:not(.scrolled)::before,
+:root:not([data-theme-skin]) .site-nav:not(.scrolled)::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.28) 0%, transparent 100%);
+}
+[data-theme='light'] .site-nav:not(.scrolled)::before {
+  background: linear-gradient(180deg, rgba(0,0,0,.14) 0%, transparent 100%);
+}
+.site-nav { position: fixed; }
+[data-theme-skin='default'] .site-nav:not(.scrolled) .nav-logo,
+[data-theme-skin='default'] .site-nav:not(.scrolled) .nav-link {
+  text-shadow: 0 1px 12px rgba(0,0,0,.35);
+}
+
 ::-webkit-scrollbar { height: 8px; width: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 10px; }
 
