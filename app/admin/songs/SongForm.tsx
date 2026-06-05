@@ -428,7 +428,7 @@ export default function SongForm({
         </div>
       </section>
 
-      <div className="pt-2 sticky bottom-0 bg-neutral-950/95 backdrop-blur py-4 border-t border-neutral-800 -mx-8 px-8">
+      <div className="pt-2 sticky bottom-0 bg-neutral-950/95 backdrop-blur py-4 border-t border-neutral-800 -mx-4 px-4 md:-mx-8 md:px-8">
         <button
           type="submit"
           className="px-5 py-2.5 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition"

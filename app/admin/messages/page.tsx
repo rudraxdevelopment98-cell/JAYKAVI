@@ -36,7 +36,7 @@ export default async function AdminMessagesPage() {
 
   return (
     <div className="max-w-4xl">
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold">Contact Messages</h1>
           <p className="text-neutral-400 mt-1">
@@ -52,7 +52,7 @@ export default async function AdminMessagesPage() {
           <form action={markAllRead}>
             <button
               type="submit"
-              className="text-sm px-3 py-1.5 border border-neutral-700 rounded-md hover:bg-neutral-800 transition"
+              className="shrink-0 text-sm px-3 py-1.5 border border-neutral-700 rounded-md hover:bg-neutral-800 transition"
             >
               Mark all read
             </button>

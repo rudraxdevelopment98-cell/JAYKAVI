@@ -42,7 +42,8 @@ export default async function NotebookPage({
       : 'All Notes';
 
   return (
-    <div className="flex gap-0 -m-8 min-h-[calc(100vh-5rem)]">
+    <div className="flex flex-col md:flex-row gap-0 -m-4 md:-m-8 min-h-[calc(100vh-5rem)]">
+      {/* ── Sidebar ── */}
       <NotebookSidebar
         folders={folders}
         activeFolderId={folderId}
@@ -53,7 +54,9 @@ export default async function NotebookPage({
           drafts: await prisma.note.count({ where: { published: false } }),
         }}
       />
-      <div className="flex-1 p-8">
+
+      {/* ── Notes list ── */}
+      <div className="flex-1 p-4 md:p-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-semibold">{activeLabel}</h1>

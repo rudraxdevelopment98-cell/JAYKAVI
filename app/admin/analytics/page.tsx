@@ -100,8 +100,8 @@ export default async function AnalyticsPage() {
         {topSongs.length === 0 ? (
           <p className="text-neutral-400 text-sm">No song views recorded yet.</p>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-neutral-800">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto rounded-xl border border-neutral-800">
+            <table className="w-full text-sm min-w-[420px]">
               <thead className="bg-neutral-900 text-neutral-400 text-left">
                 <tr>
                   <th className="px-4 py-2 font-medium w-10">#</th>

@@ -257,7 +257,7 @@ export default function NoteEditor({
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-5rem)] -m-8">
+    <div className="flex flex-col h-[calc(100vh-5rem)] -m-4 md:-m-8">
 
       {/* ── Top action bar ── */}
       <div className="flex items-center gap-2 px-5 py-2.5 border-b border-neutral-800 bg-neutral-950/90 backdrop-blur flex-shrink-0 flex-wrap">

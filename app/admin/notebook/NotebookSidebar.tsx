@@ -65,7 +65,7 @@ export default function NotebookSidebar({ folders, activeFolderId, activeFilter,
     }`;
 
   return (
-    <aside className="w-56 flex-shrink-0 border-r border-neutral-800 bg-neutral-900/30 p-4 min-h-full">
+    <aside className="w-full md:w-56 flex-shrink-0 border-b border-neutral-800 md:border-b-0 md:border-r bg-neutral-900/30 p-4 md:min-h-full">
       <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2 px-1">View</p>
 
       <Link href="/admin/notebook" className={linkCls(!activeFolderId && !activeFilter)}>

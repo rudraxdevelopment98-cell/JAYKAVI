@@ -39,18 +39,18 @@ export default async function SongsAdminPage({
             {total} songs total{q && ` · showing ${songs.length} matching "${q}"`}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <form action="/admin/songs" method="GET">
             <input
               name="q"
               defaultValue={q}
               placeholder="Search title or slug…"
-              className="px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-md text-sm w-64 focus:outline-none focus:border-neutral-600"
+              className="px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-md text-sm w-48 sm:w-64 focus:outline-none focus:border-neutral-600"
             />
           </form>
           <Link
             href="/admin/songs/new"
-            className="px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition text-sm"
+            className="shrink-0 px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition text-sm"
           >
             + New Song
           </Link>

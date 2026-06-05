@@ -83,7 +83,7 @@ export default function CandidateCard({ c, onDismiss }: { c: Candidate; onDismis
   return (
     <div className="border border-neutral-800 rounded-xl overflow-hidden bg-neutral-900">
       {/* Main row */}
-      <div className="flex items-start gap-4 p-4">
+      <div className="flex items-start gap-3 p-4 flex-wrap sm:flex-nowrap">
         {c.thumbnailUrl && (
           <img
             src={c.thumbnailUrl}
@@ -120,7 +120,7 @@ export default function CandidateCard({ c, onDismiss }: { c: Candidate; onDismis
             )}
           </div>
         </div>
-        <div className="flex gap-2 flex-shrink-0">
+        <div className="flex gap-2 flex-shrink-0 ml-auto sm:ml-0">
           <button
             onClick={() => { setOpen((v) => !v); setDupWarning(null); }}
             className="px-3 py-1.5 text-xs border border-neutral-700 rounded-md hover:bg-neutral-800 transition"
