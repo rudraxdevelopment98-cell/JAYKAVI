@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { getActiveTheme } from '@/lib/data';
@@ -13,7 +12,14 @@ export const metadata: Metadata = {
   alternates: { canonical: absoluteUrl('/explore') },
 };
 
-export default async function ExplorePage() {
+export default async function ExplorePage({
+  searchParams,
+}: {
+  searchParams: { tab?: string };
+}) {
+  const rawTab = searchParams.tab;
+  const initialTab = rawTab === 'singers' ? 'singers' : 'collections';
+
   const [activeTheme, collectionsRaw, singersRaw] = await Promise.all([
     getActiveTheme(),
     prisma.collection
@@ -51,18 +57,11 @@ export default async function ExplorePage() {
     }));
 
   return (
-    <Suspense
-      fallback={
-        <div style={{ padding: 'clamp(110px,15vh,170px) clamp(20px,6vw,80px) 100px', maxWidth: 1200, margin: '0 auto' }}>
-          <p style={{ color: 'var(--muted)' }}>Loading…</p>
-        </div>
-      }
-    >
-      <ExploreTabs
-        collections={collections}
-        singers={singers}
-        traditional={activeTheme === 'traditional'}
-      />
-    </Suspense>
+    <ExploreTabs
+      collections={collections}
+      singers={singers}
+      traditional={activeTheme === 'traditional'}
+      initialTab={initialTab}
+    />
   );
 }

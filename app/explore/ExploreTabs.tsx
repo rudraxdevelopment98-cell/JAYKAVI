@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 
 interface CollectionLite {
   id: string; slug: string; title: string; description: string;
@@ -19,28 +18,21 @@ const TABS: { key: Tab; label: string; tradLabel: string }[] = [
 ];
 
 export default function ExploreTabs({
-  collections, singers, traditional,
+  collections, singers, traditional, initialTab,
 }: {
   collections: CollectionLite[];
   singers: SingerLite[];
   traditional: boolean;
+  initialTab: Tab;
 }) {
-  const params = useSearchParams();
-  const initial = (params.get('tab') as Tab) || 'collections';
-  const [tab, setTab] = useState<Tab>(
-    ['collections', 'singers'].includes(initial) ? initial : 'collections',
-  );
+  const [tab, setTab] = useState<Tab>(initialTab);
 
-  // Tabs are pure client state. Sync the URL with history.replaceState so the
-  // deep-link stays shareable WITHOUT a Next.js navigation (which, on this
-  // force-dynamic page, would re-run the server and flash the Suspense fallback).
   function selectTab(t: Tab) {
     setTab(t);
-    if (typeof window !== 'undefined') {
-      const sp = new URLSearchParams(window.location.search);
-      sp.set('tab', t);
-      window.history.replaceState(null, '', `${window.location.pathname}?${sp.toString()}`);
-    }
+    // Update the URL without any Next.js navigation — no server round-trip, no flicker.
+    const sp = new URLSearchParams(window.location.search);
+    sp.set('tab', t);
+    window.history.replaceState(null, '', `${window.location.pathname}?${sp.toString()}`);
   }
 
   return (
