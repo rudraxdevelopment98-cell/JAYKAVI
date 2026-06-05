@@ -19,6 +19,7 @@ export default function HeritageForm({
   const [galleryInput, setGalleryInput] = useState('');
   const [uploading, setUploading] = useState(false);
   const [events, setEvents] = useState(settings.events ?? []);
+  const [stats, setStats] = useState(settings.stats ?? []);
 
   async function uploadGallery(file: File) {
     setUploading(true);
@@ -67,18 +68,77 @@ export default function HeritageForm({
         </div>
       </section>
 
+      {/* ── Stat strip ── */}
+      <section className="p-5 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-base">Stat Strip</h2>
+          <button type="button" onClick={() => setStats((s) => [...s, { value: '', label: '' }])}
+            className="px-3 py-1.5 text-sm bg-neutral-800 border border-neutral-700 rounded-md hover:bg-neutral-700 transition">+ Add stat</button>
+        </div>
+        <p className="text-xs text-neutral-500">The four-up counter strip below the hero (e.g. <span className="text-neutral-300">25+ · વર્ષોની પરંપરા</span>).</p>
+        <div className="space-y-3">
+          {stats.map((st, i) => (
+            <div key={i} className="grid grid-cols-1 sm:grid-cols-[120px_1fr_auto] gap-2 items-center">
+              <input value={st.value} placeholder="25+"
+                onChange={(e) => setStats((arr) => arr.map((x, j) => j === i ? { ...x, value: e.target.value } : x))}
+                className={inputCls} />
+              <input value={st.label} placeholder="વર્ષોની પરંપરા"
+                onChange={(e) => setStats((arr) => arr.map((x, j) => j === i ? { ...x, label: e.target.value } : x))}
+                className={inputCls} />
+              <button type="button" onClick={() => setStats((arr) => arr.filter((_, j) => j !== i))}
+                className="px-3 py-2 text-sm text-red-400 border border-red-900/50 rounded-md hover:bg-red-950/40 transition">✕</button>
+            </div>
+          ))}
+        </div>
+        <input type="hidden" name="statsJson" value={JSON.stringify(stats)} />
+      </section>
+
+      {/* ── About + Vintage Player ── */}
+      <section className="p-5 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-5">
+        <h2 className="font-semibold text-base">About &amp; Vintage Player</h2>
+        <ImageField name="aboutPhoto" label="About Photo (optional)" defaultValue={settings.aboutPhoto}
+          note="Small portrait shown inside the About card. Falls back to the hero photo." />
+        <div>
+          <label className={labelCls}>About Paragraph (optional)</label>
+          <textarea name="aboutBody" defaultValue={settings.aboutBody ?? ''} rows={4} className={inputCls}
+            placeholder="Defaults to the artist bio if left blank." />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Player Heading</label>
+            <input name="audioTitle" defaultValue={settings.audioTitle} className={inputCls} placeholder="હાલ સાંભળો" />
+          </div>
+          <div>
+            <label className={labelCls}>Featured Track</label>
+            <input name="audioTrack" defaultValue={settings.audioTrack ?? ''} className={inputCls} placeholder="રામ નામ નો સરગમ" />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Closing quote ── */}
+      <section className="p-5 rounded-xl border border-neutral-800 bg-neutral-900/50 space-y-4">
+        <h2 className="font-semibold text-base">Closing Quote</h2>
+        <div>
+          <label className={labelCls}>Footer Devotional Quote (optional)</label>
+          <input name="footerQuote" defaultValue={settings.footerQuote ?? ''} className={inputCls}
+            placeholder="॥ સંગીત એ સાધના છે, અને ભજન એ આત્માની ભાષા છે ॥" />
+        </div>
+      </section>
+
       {/* ── Sections visibility ── */}
       <section className="p-5 rounded-xl border border-neutral-800 bg-neutral-900/50">
         <h2 className="font-semibold text-base mb-3">Homepage Sections</h2>
         <p className="text-xs text-neutral-500 mb-4">Toggle which sections appear on the Heritage homepage.</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {([
-            ['showBhajans', 'Bhajans & Songs', settings.show.bhajans],
-            ['showPoetry', 'Poetry & Lyrics', settings.show.poetry],
-            ['showVideos', 'Films & Videos', settings.show.videos],
-            ['showGallery', 'Gallery', settings.show.gallery],
-            ['showLegacy', 'Legacy', settings.show.legacy],
+            ['showStats', 'Stat Strip', settings.show.stats],
+            ['showBhajans', 'Bhajan Collections', settings.show.bhajans],
+            ['showAudio', 'About & Player', settings.show.audio],
+            ['showVideos', 'Video Gallery', settings.show.videos],
+            ['showGallery', 'Photo Gallery', settings.show.gallery],
+            ['showLegacy', 'Legacy Timeline', settings.show.legacy],
             ['showEvents', 'Events', settings.show.events],
+            ['showPoetry', 'Poetry & Lyrics', settings.show.poetry],
           ] as const).map(([name, label, on]) => (
             <label key={name} className="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" name={name} defaultChecked={on} className="w-4 h-4 accent-amber-500" />

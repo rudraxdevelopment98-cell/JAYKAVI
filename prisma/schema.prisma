@@ -297,12 +297,20 @@ model SiteSettings {
   herTitle          String   @default("Jayesh Prajapati")
   herSubtitle       String   @default("A living archive of Gujarati verse, bhajan and lyric.")
   herQuote          String?  // featured literary quote
+  herStatsJson      String?  // JSON array of { value, label } shown in the stat strip
+  herAboutPhoto     String?  // small portrait shown in the About card
+  herAboutBody      String?  // About-section paragraph (overrides bio)
+  herAudioTitle     String?  // vintage player heading
+  herAudioTrack     String?  // featured track title in the player
+  herFooterQuote    String?  // closing devotional quote line
   herGallery        String[] @default([]) // gallery image URLs
   herEventsJson     String?  // JSON array of { date, title, place }
   herLegacyTitle    String   @default("The Legacy")
   herLegacyBody     String?  // legacy paragraph
+  herShowStats      Boolean  @default(true)
   herShowBhajans    Boolean  @default(true)
   herShowPoetry     Boolean  @default(true)
+  herShowAudio      Boolean  @default(true)
   herShowVideos     Boolean  @default(true)
   herShowGallery    Boolean  @default(true)
   herShowEvents     Boolean  @default(true)

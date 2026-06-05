@@ -199,35 +199,39 @@ a { color: inherit; }
    ════════════════════════════════════════════════════════════════════ */
 [data-theme-skin='heritage'][data-theme='dark'],
 [data-theme-skin='heritage']:not([data-theme='light']) {
-  --bg: #0F0800;
-  --panel: rgba(32, 22, 6, 0.66);
-  --panel-solid: #1A1204;
-  --text: #F3E9D2;
-  --muted: #9C8458;
-  --line: rgba(212, 175, 55, 0.16);
+  --bg: #0F0B08;
+  --panel: rgba(28, 21, 16, 0.78);
+  --panel-solid: #1C1510;
+  --paper: #1A120C;
+  --text: #F0F5EE;
+  --muted: #C9B998;
+  --line: #3A2A14;
   --gold: #D4AF37;
-  --gold-soft: #EBD27A;
+  --gold-soft: #E6C76B;
+  --crimson: #C90C2A;
   --accent: #D4AF37;
   --glow: 0 0 70px rgba(212,175,55,.20);
   --hero-grad:
-    radial-gradient(70% 60% at 50% -5%, rgba(212,175,55,.20) 0%, transparent 60%),
-    radial-gradient(50% 50% at 100% 100%, rgba(120,80,10,.18) 0%, transparent 65%),
-    linear-gradient(170deg, #1c1203 0%, #0f0800 55%, #080500 100%);
+    radial-gradient(70% 60% at 50% -5%, rgba(212,175,55,.18) 0%, transparent 60%),
+    radial-gradient(50% 50% at 100% 100%, rgba(120,80,10,.16) 0%, transparent 65%),
+    linear-gradient(170deg, #1c1510 0%, #0f0b08 55%, #0a0704 100%);
 }
 [data-theme-skin='heritage'][data-theme='light'] {
-  --bg: #FAF3E7;
-  --panel: rgba(255, 250, 240, 0.7);
-  --panel-solid: #FFFBF3;
-  --text: #2A1E08;
-  --muted: #8A6E3C;
-  --line: rgba(184, 134, 11, 0.18);
+  --bg: #FAF6EC;
+  --panel: rgba(255, 255, 255, 0.82);
+  --panel-solid: #FFFFFF;
+  --paper: #F4E7C6;
+  --text: #2C180F;
+  --muted: #6B4E2E;
+  --line: #E5D7B8;
   --gold: #B8860B;
-  --gold-soft: #C99A2E;
+  --gold-soft: #E8C972;
+  --crimson: #B0202E;
   --accent: #B8860B;
   --glow: 0 20px 60px rgba(184,134,11,.18);
   --hero-grad:
-    radial-gradient(70% 60% at 50% -5%, rgba(184,134,11,.16) 0%, transparent 60%),
-    linear-gradient(170deg, #fbf5ea 0%, #f6ecdb 60%, #f1e6d2 100%);
+    radial-gradient(70% 60% at 50% -5%, rgba(184,134,11,.14) 0%, transparent 60%),
+    linear-gradient(170deg, #fdf8ee 0%, #f9f1e0 60%, #f4e7c6 100%);
 }
 [data-theme-skin='heritage'] .gradient-text,
 [data-theme-skin='heritage'] .her-gold-text {

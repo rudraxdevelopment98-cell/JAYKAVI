@@ -1,5 +1,8 @@
 import Link from 'next/link';
-import { getLyricist, getAllSongs, getJourney, getSocial, type HeritageSettings } from '@/lib/data';
+import {
+  getLyricist, getAllSongs, getAllCollections, getJourney, getSocial,
+  type HeritageSettings,
+} from '@/lib/data';
 
 function safeUrl(u?: string | null): string | null {
   if (!u) return null;
@@ -7,134 +10,170 @@ function safeUrl(u?: string | null): string | null {
   catch { return null; }
 }
 
-function SectionHead({ tag, title, link, linkLabel }: { tag: string; title: string; link?: string; linkLabel?: string }) {
+/* Warm leather spine colours, cycled across the collection "books". */
+const SPINES = ['#7A2E22', '#2C4A36', '#8A6A2E', '#9B5A20', '#4A2438', '#5A3A1E'];
+
+function SectionHead({ title, link, linkLabel }: { title: string; link?: string; linkLabel?: string }) {
   return (
     <div className="her-sechead">
-      <div>
-        <span className="her-eyebrow">{tag}</span>
-        <h2 className="font-serif her-gold-text her-sectitle">{title}</h2>
-      </div>
-      {link && <Link href={link} className="her-seclink">{linkLabel ?? 'View all'} →</Link>}
+      <span className="her-orn" aria-hidden>❖</span>
+      <h2 className="font-serif her-gold-text her-sectitle">{title}</h2>
+      <span className="her-orn" aria-hidden>❖</span>
+      {link && <Link href={link} className="her-seclink">{linkLabel ?? 'VIEW ALL'}</Link>}
     </div>
   );
 }
 
 export default async function HeritageHome({ settings }: { settings: HeritageSettings }) {
-  const [l, songs, journey, social] = await Promise.all([
+  const [l, songs, collections, journey, social] = await Promise.all([
     getLyricist(),
     getAllSongs(),
+    getAllCollections(),
     getJourney(),
     getSocial(),
   ]);
 
   const heroPhoto = safeUrl(settings.heroPhoto);
   const heroVideo = safeUrl(settings.heroVideo);
+  const aboutPhoto = safeUrl(settings.aboutPhoto) ?? heroPhoto;
 
-  const bhajans = songs.slice(0, 8);
-  const lyricSongs = songs.filter((s) => s.lyrics && s.lyrics.trim()).slice(0, 6);
-  const videoSongs = songs.filter((s) => s.embed?.youtubeId).slice(0, 4);
+  const books = collections.slice(0, 5);
+  const videoSongs = songs.filter((s) => s.embed?.youtubeId).slice(0, 5);
   const gallery = (settings.gallery ?? []).map(safeUrl).filter(Boolean) as string[];
+  const aboutBody = settings.aboutBody || l.bio;
   const youtubeUrl = social.youtube || 'https://www.youtube.com';
 
   return (
     <div className="her-root">
       <div className="her-frame" aria-hidden />
 
-      {/* ════════ HERO ════════ */}
+      {/* ════════ HERO — split: portrait left, words right ════════ */}
       <header className="her-hero">
         {heroVideo ? (
-          <video className="her-hero-media" src={heroVideo} autoPlay muted loop playsInline />
-        ) : heroPhoto ? (
-          <div className="her-hero-media" style={{ backgroundImage: `url(${heroPhoto})` }} />
-        ) : null}
+          <video className="her-hero-bg" src={heroVideo} autoPlay muted loop playsInline />
+        ) : (
+          <div className="her-hero-bg her-hero-bg--img" style={heroPhoto ? { backgroundImage: `url(${heroPhoto})` } : undefined} />
+        )}
         <div className="her-hero-veil" />
 
         <div className="her-hero-inner">
-          <span className="her-hero-eyebrow">❖ {settings.eyebrow} ❖</span>
-          <h1 className="font-serif her-hero-title">
-            <span className="her-gold-text">{settings.title}</span>
-          </h1>
-          <p className="her-hero-sub">{settings.subtitle}</p>
-          {settings.quote && <p className="her-hero-quote">&ldquo;{settings.quote}&rdquo;</p>}
-          <div className="her-hero-ctas">
-            <Link href="/explore?tab=songs" className="her-btn-gold">Enter the Library</Link>
-            <Link href="/about" className="her-btn-ghost">About the Poet</Link>
+          <div className="her-hero-portrait">
+            {heroPhoto
+              ? <div className="her-hero-portrait-img" style={{ backgroundImage: `url(${heroPhoto})` }} />
+              : <div className="her-hero-portrait-img her-hero-portrait-ph"><span>📖</span></div>}
           </div>
-          <div className="her-hero-stats">
-            <span><strong>{songs.length}</strong> works</span>
-            <span className="her-dot" />
-            <span><strong>{lyricSongs.length ? songs.filter((s)=>s.lyrics?.trim()).length : 0}</strong> with lyrics</span>
-            {l.careerStartYear && <><span className="her-dot" /><span>since <strong>{l.careerStartYear}</strong></span></>}
+
+          <div className="her-hero-copy">
+            <p className="her-hero-eyebrow">{settings.eyebrow}</p>
+            <h1 className="font-serif her-hero-title her-gold-text">{settings.title}</h1>
+            <p className="her-hero-sub">{settings.subtitle}</p>
+            {settings.quote && <p className="her-hero-quote">“{settings.quote}”</p>}
+            <div className="her-hero-ctas">
+              <Link href="/lyrics" className="her-btn-gold">
+                <span className="her-btn-icon" aria-hidden>▶</span> LISTEN BHAJANS
+              </Link>
+              <Link href="/explore?tab=songs" className="her-btn-ghost">EXPLORE LIBRARY</Link>
+            </div>
           </div>
+
+          <div className="her-hero-quill" aria-hidden>🪶</div>
         </div>
-        <div className="her-hero-fade" />
       </header>
 
-      {/* ════════ BHAJANS ════════ */}
-      {settings.show.bhajans && bhajans.length > 0 && (
-        <section className="her-section">
-          <SectionHead tag="The Collection" title="Bhajans &amp; Songs" link="/explore?tab=songs" linkLabel="Full catalogue" />
-          <div className="her-grid her-grid-songs">
-            {bhajans.map((s) => (
-              <Link key={s.id} href={`/songs/${s.slug}`} className="her-card">
-                <div className="her-card-art" style={safeUrl(s.artworkUrl) ? { backgroundImage: `url(${s.artworkUrl})` } : undefined}>
-                  {!safeUrl(s.artworkUrl) && <span className="her-card-art-ph">❖</span>}
+      {/* ════════ STATS STRIP ════════ */}
+      {settings.show.stats && settings.stats.length > 0 && (
+        <section className="her-stats-wrap">
+          <div className="her-stats">
+            {settings.stats.map((st, i) => (
+              <div key={i} className="her-stat">
+                <span className="her-stat-orn" aria-hidden>❖</span>
+                <div>
+                  <span className="font-serif her-stat-value her-gold-text">{st.value}</span>
+                  <span className="her-stat-label">{st.label}</span>
                 </div>
-                <div className="her-card-body">
-                  <h3 className="font-serif her-card-title">{s.title}</h3>
-                  {s.performingSingers?.length > 0 && (
-                    <p className="her-card-sub">{s.performingSingers.join(', ')}</p>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ════════ POETRY / LYRICS ════════ */}
-      {settings.show.poetry && lyricSongs.length > 0 && (
-        <section className="her-section her-section-alt">
-          <SectionHead tag="In His Words" title="Poetry &amp; Lyrics" link="/lyrics" linkLabel="The lyric library" />
-          <div className="her-poetry">
-            {lyricSongs.map((s) => (
-              <Link key={s.id} href={`/songs/${s.slug}`} className="her-poem">
-                <span className="her-poem-quote">❝</span>
-                <h3 className="font-serif her-poem-title">{s.title}</h3>
-                <p className="her-poem-excerpt" data-i18n>
-                  {s.lyrics.split('\n').filter((x) => x.trim()).slice(0, 3).join(' · ')}
-                </p>
-                <span className="her-poem-read">Read lyric →</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ════════ VIDEOS ════════ */}
-      {settings.show.videos && videoSongs.length > 0 && (
-        <section className="her-section">
-          <SectionHead tag="Watch & Listen" title="Films &amp; Performances" link={youtubeUrl} linkLabel="YouTube" />
-          <div className="her-grid her-grid-video">
-            {videoSongs.map((s) => (
-              <div key={s.id} className="her-video">
-                <div className="her-video-frame">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${s.embed!.youtubeId}`}
-                    title={s.title} allowFullScreen loading="lazy"
-                  />
-                </div>
-                <p className="font-serif her-video-title">{s.title}</p>
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* ════════ GALLERY ════════ */}
+      {/* ════════ BHAJAN SANGRAH — book collections ════════ */}
+      {settings.show.bhajans && books.length > 0 && (
+        <section className="her-section">
+          <SectionHead title="ભજન સંગ્રહ" link="/explore?tab=collections" linkLabel="VIEW ALL" />
+          <div className="her-books">
+            {books.map((c, i) => (
+              <Link key={c.id} href={`/collections/${c.slug}`} className="her-book">
+                <span className="her-book-spine" style={{ background: SPINES[i % SPINES.length] }} />
+                <div
+                  className="her-book-face"
+                  style={{
+                    background: safeUrl(c.coverUrl)
+                      ? `linear-gradient(160deg, rgba(0,0,0,.18), rgba(0,0,0,.42)), url(${c.coverUrl})`
+                      : `linear-gradient(160deg, ${SPINES[i % SPINES.length]}, color-mix(in srgb, ${SPINES[i % SPINES.length]} 60%, #000))`,
+                  }}
+                >
+                  <h3 className="font-serif her-book-title">{c.title}</h3>
+                </div>
+                <span className="her-book-cta">VIEW COLLECTION</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ════════ ABOUT + VINTAGE PLAYER ════════ */}
+      {settings.show.audio && (
+        <section className="her-section">
+          <div className="her-about">
+            <article className="her-paper">
+              <p className="her-paper-eyebrow">{settings.legacyTitle}</p>
+              <h2 className="font-serif her-paper-name her-gold-text">{settings.title}</h2>
+              {aboutPhoto && <div className="her-paper-photo" style={{ backgroundImage: `url(${aboutPhoto})` }} />}
+              <p className="her-paper-body">{aboutBody}</p>
+              <Link href="/about" className="her-btn-gold her-paper-btn">ABOUT {settings.title}</Link>
+            </article>
+
+            <aside className="her-player">
+              <p className="her-player-label font-serif">{settings.audioTitle}</p>
+              <p className="her-player-track her-gold-text font-serif">{settings.audioTrack}</p>
+              <div className="her-player-controls">
+                <button className="her-player-btn" aria-label="Previous" type="button">⏮</button>
+                <Link href="/lyrics" className="her-player-play" aria-label="Play">▶</Link>
+                <button className="her-player-btn" aria-label="Next" type="button">⏭</button>
+              </div>
+              <div className="her-player-bar"><span /></div>
+              <div className="her-player-time"><span>00:00</span><span className="her-gramophone" aria-hidden>📯</span></div>
+            </aside>
+          </div>
+        </section>
+      )}
+
+      {/* ════════ VIDEO GALLERY ════════ */}
+      {settings.show.videos && videoSongs.length > 0 && (
+        <section className="her-section">
+          <SectionHead title="વિડિયો ગેલેરી" link={youtubeUrl} linkLabel="VIEW ALL" />
+          <div className="her-videos">
+            {videoSongs.map((s) => (
+              <Link
+                key={s.id}
+                href={`/songs/${s.slug}`}
+                className="her-vid"
+                style={{ backgroundImage: `url(https://i.ytimg.com/vi/${s.embed!.youtubeId}/hqdefault.jpg)` }}
+              >
+                <span className="her-vid-scrim" />
+                <span className="her-vid-play" aria-hidden>▶</span>
+                <span className="her-vid-title">{s.title}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ════════ GALLERY (optional) ════════ */}
       {settings.show.gallery && gallery.length > 0 && (
-        <section className="her-section her-section-alt">
-          <SectionHead tag="The Archive" title="Gallery" />
+        <section className="her-section">
+          <SectionHead title="ગેલેરી" />
           <div className="her-gallery">
             {gallery.map((src, i) => (
               <div key={i} className="her-gallery-item" style={{ backgroundImage: `url(${src})` }} />
@@ -143,11 +182,10 @@ export default async function HeritageHome({ settings }: { settings: HeritageSet
         </section>
       )}
 
-      {/* ════════ LEGACY ════════ */}
-      {settings.show.legacy && (journey.length > 0 || settings.legacyBody) && (
+      {/* ════════ EVENTS / LEGACY TIMELINE (optional) ════════ */}
+      {settings.show.legacy && journey.length > 0 && (
         <section className="her-section">
-          <SectionHead tag="A Life in Letters" title={settings.legacyTitle} link="/journey" linkLabel="Full journey" />
-          {settings.legacyBody && <p className="her-legacy-body">{settings.legacyBody}</p>}
+          <SectionHead title="વારસો" link="/journey" linkLabel="VIEW ALL" />
           <div className="her-timeline">
             {journey.slice(0, 5).map((m) => (
               <div key={m.id} className="her-tl-row">
@@ -163,10 +201,9 @@ export default async function HeritageHome({ settings }: { settings: HeritageSet
         </section>
       )}
 
-      {/* ════════ EVENTS ════════ */}
       {settings.show.events && settings.events.length > 0 && (
-        <section className="her-section her-section-alt">
-          <SectionHead tag="Gatherings" title="Events" />
+        <section className="her-section">
+          <SectionHead title="કાર્યક્રમો" />
           <div className="her-events">
             {settings.events.map((e, i) => (
               <div key={i} className="her-event">
@@ -181,12 +218,14 @@ export default async function HeritageHome({ settings }: { settings: HeritageSet
         </section>
       )}
 
-      {/* ════════ CONTACT CTA ════════ */}
-      <section className="her-cta">
-        <h2 className="font-serif her-gold-text her-cta-title">Continue the conversation</h2>
-        <p className="her-cta-sub">For bookings, collaborations or a word of appreciation.</p>
-        <Link href="/contact" className="her-btn-gold">Get in touch</Link>
-      </section>
+      {/* ════════ CLOSING QUOTE BAND ════════ */}
+      {settings.footerQuote && (
+        <section className="her-quoteband">
+          <span className="her-diya" aria-hidden>🪔</span>
+          <p className="font-serif her-quoteband-text">{settings.footerQuote}</p>
+          <p className="her-quoteband-by">— {settings.title}</p>
+        </section>
+      )}
 
       <style>{styles}</style>
     </div>
@@ -196,131 +235,195 @@ export default async function HeritageHome({ settings }: { settings: HeritageSet
 const styles = `
   .her-root { position: relative; }
 
-  /* HERO */
+  /* ── HERO ── */
   .her-hero {
-    position: relative; min-height: 100svh; display: flex; align-items: center; justify-content: center;
-    text-align: center; padding: 120px 6vw 90px; overflow: hidden;
+    position: relative; min-height: 92svh; display: flex; align-items: center;
+    padding: clamp(110px,16vh,170px) clamp(20px,6vw,80px) clamp(50px,7vh,90px); overflow: hidden;
   }
-  .her-hero-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-    background-size: cover; background-position: center; filter: brightness(.5) saturate(1.05); }
-  .her-hero-veil { position: absolute; inset: 0;
+  .her-hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+  .her-hero-bg--img { background-size: cover; background-position: center; }
+  .her-hero-bg, .her-hero-bg--img { filter: brightness(.42) saturate(1.05); }
+  [data-theme='light'] .her-hero-bg { filter: brightness(.92) saturate(1.02); }
+  .her-hero-veil { position: absolute; inset: 0; z-index: 1;
     background:
-      radial-gradient(60% 60% at 50% 30%, transparent 0%, rgba(8,5,0,.55) 100%),
-      linear-gradient(180deg, rgba(8,5,0,.4) 0%, rgba(8,5,0,.2) 40%, var(--bg) 100%); }
+      linear-gradient(90deg, rgba(8,5,2,.78) 0%, rgba(8,5,2,.35) 45%, rgba(8,5,2,.6) 100%),
+      linear-gradient(180deg, transparent 60%, var(--bg) 100%); }
   [data-theme='light'] .her-hero-veil {
     background:
-      radial-gradient(60% 60% at 50% 30%, transparent 0%, rgba(250,243,231,.35) 100%),
-      linear-gradient(180deg, rgba(250,243,231,.25) 0%, transparent 40%, var(--bg) 100%); }
-  .her-hero-inner { position: relative; z-index: 2; max-width: 880px; }
-  .her-hero-eyebrow { display: inline-block; letter-spacing: .34em; text-transform: uppercase;
-    font-size: .72rem; font-weight: 600; color: var(--gold); margin-bottom: 26px; }
-  .her-hero-title { font-size: clamp(2.8rem, 9vw, 7rem); font-weight: 700; line-height: 1; margin: 0; letter-spacing: -.02em; }
-  .her-hero-sub { font-size: clamp(1rem, 2vw, 1.35rem); margin: 24px auto 0; max-width: 40ch; line-height: 1.7; color: var(--text); opacity: .9; }
-  .her-hero-quote { font-style: italic; font-family: var(--font-fraunces), Georgia, serif;
-    font-size: clamp(1.05rem,2vw,1.5rem); margin: 22px auto 0; max-width: 38ch; color: var(--gold-soft); opacity: .92; }
-  .her-hero-ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
-  .her-hero-stats { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;
-    margin-top: 40px; font-size: .9rem; color: var(--muted); }
-  .her-hero-stats strong { color: var(--text); font-weight: 700; }
-  .her-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); opacity: .6; }
-  .her-hero-fade { position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
-    background: linear-gradient(transparent, var(--bg)); z-index: 1; }
+      linear-gradient(90deg, rgba(250,246,236,.55) 0%, rgba(250,246,236,.15) 45%, rgba(250,246,236,.4) 100%),
+      linear-gradient(180deg, transparent 60%, var(--bg) 100%); }
 
-  /* Buttons */
+  .her-hero-inner {
+    position: relative; z-index: 2; width: 100%; max-width: 1240px; margin: 0 auto;
+    display: grid; grid-template-columns: 0.9fr 1.1fr; align-items: center; gap: clamp(24px,5vw,70px);
+  }
+  .her-hero-portrait { position: relative; }
+  .her-hero-portrait-img {
+    position: relative; aspect-ratio: 4/5; border-radius: 14px; background-size: cover; background-position: center top;
+    border: 1px solid var(--gold); box-shadow: 0 26px 70px rgba(0,0,0,.5), inset 0 0 0 6px rgba(212,175,55,.12);
+  }
+  .her-hero-portrait-ph { display: flex; align-items: center; justify-content: center; font-size: 4rem;
+    background: var(--panel-solid); }
+
+  .her-hero-copy { text-align: center; }
+  .her-hero-eyebrow { letter-spacing: .12em; font-size: clamp(.85rem,1.6vw,1.1rem); font-weight: 600;
+    color: var(--gold); margin: 0 0 14px; }
+  .her-hero-title { font-size: clamp(2.6rem,7vw,5.4rem); font-weight: 800; line-height: 1.04; margin: 0;
+    letter-spacing: -.01em; }
+  .her-hero-sub { font-size: clamp(1rem,2vw,1.45rem); margin: 16px auto 0; color: var(--text); opacity: .9; }
+  .her-hero-quote { font-style: italic; font-size: clamp(1rem,1.8vw,1.3rem); color: var(--gold-soft);
+    margin: 14px auto 0; max-width: 40ch; }
+  .her-hero-ctas { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 34px; }
+  .her-hero-quill { position: absolute; right: -6px; bottom: 4px; font-size: 2.6rem; opacity: .7;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,.4)); }
+
+  /* ── Buttons ── */
   .her-btn-gold, .her-btn-ghost {
-    display: inline-flex; align-items: center; padding: 14px 30px; border-radius: 4px;
-    font-weight: 600; font-size: .92rem; text-decoration: none; letter-spacing: .02em;
-    transition: transform .25s, box-shadow .25s, background .25s; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 9px; padding: 14px 28px; border-radius: 12px;
+    font-weight: 700; font-size: .86rem; letter-spacing: .06em; text-decoration: none; white-space: nowrap;
+    transition: transform .22s, box-shadow .22s, background .22s; text-transform: uppercase;
   }
   .her-btn-gold { background: linear-gradient(120deg, var(--gold-soft), var(--gold)); color: #1a1200;
-    box-shadow: 0 8px 26px rgba(212,175,55,.28); }
-  .her-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(212,175,55,.42); }
-  .her-btn-ghost { border: 1px solid var(--gold); color: var(--gold); background: transparent; }
-  .her-btn-ghost:hover { background: color-mix(in srgb, var(--gold) 12%, transparent); transform: translateY(-2px); }
+    box-shadow: 0 10px 26px rgba(212,175,55,.32); }
+  .her-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(212,175,55,.46); }
+  .her-btn-icon { font-size: .72rem; }
+  .her-btn-ghost { border: 1.5px solid var(--gold); color: var(--gold); background: color-mix(in srgb, var(--bg) 70%, transparent); }
+  .her-btn-ghost:hover { background: color-mix(in srgb, var(--gold) 14%, transparent); transform: translateY(-2px); }
 
-  /* Sections */
-  .her-section { max-width: 1200px; margin: 0 auto; padding: clamp(60px,9vh,110px) clamp(20px,6vw,80px); }
-  .her-section-alt { background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--gold) 5%, transparent), transparent); }
-  .her-sechead { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 38px; }
-  .her-eyebrow { display: block; text-transform: uppercase; letter-spacing: .28em; font-size: .68rem; font-weight: 700; color: var(--gold); margin-bottom: 10px; }
-  .her-sectitle { font-size: clamp(1.8rem,4vw,3rem); font-weight: 700; margin: 0; letter-spacing: -.01em; }
-  .her-seclink { color: var(--gold); text-decoration: none; font-size: .9rem; font-weight: 600; white-space: nowrap;
-    border-bottom: 1px solid transparent; transition: border-color .2s; }
-  .her-seclink:hover { border-color: var(--gold); }
+  /* ── Stats strip ── */
+  .her-stats-wrap { max-width: 1180px; margin: -40px auto 0; padding: 0 clamp(20px,6vw,80px); position: relative; z-index: 5; }
+  .her-stats { display: grid; grid-template-columns: repeat(4, 1fr);
+    background: var(--panel-solid); border: 1px solid var(--gold); border-radius: 16px;
+    padding: 24px 10px; box-shadow: var(--glow); }
+  .her-stat { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 6px 10px;
+    border-right: 1px solid var(--line); }
+  .her-stat:last-child { border-right: none; }
+  .her-stat-orn { color: var(--gold); font-size: 1.1rem; opacity: .6; }
+  .her-stat-value { display: block; font-size: clamp(1.4rem,3vw,2.1rem); font-weight: 800; line-height: 1; }
+  .her-stat-label { display: block; font-size: clamp(.66rem,1.3vw,.82rem); color: var(--muted); margin-top: 5px; }
 
-  /* Song grid */
-  .her-grid { display: grid; gap: 22px; }
-  .her-grid-songs { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
-  .her-card { text-decoration: none; color: var(--text); background: var(--panel); border: 1px solid var(--line);
-    border-radius: 12px; overflow: hidden; transition: transform .25s, box-shadow .25s, border-color .25s; }
-  .her-card:hover { transform: translateY(-6px); border-color: var(--gold); box-shadow: 0 18px 44px rgba(0,0,0,.32); }
-  .her-card-art { aspect-ratio: 1; background-size: cover; background-position: center; background-color: var(--panel-solid);
-    display: flex; align-items: center; justify-content: center; }
-  .her-card-art-ph { font-size: 2.2rem; color: var(--gold); opacity: .45; }
-  .her-card-body { padding: 14px 16px 16px; }
-  .her-card-title { font-size: 1.1rem; font-weight: 600; margin: 0 0 4px; line-height: 1.25; }
-  .her-card-sub { font-size: .8rem; color: var(--muted); margin: 0;
-    display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+  /* ── Sections ── */
+  .her-section { max-width: 1200px; margin: 0 auto; padding: clamp(56px,8vh,100px) clamp(20px,6vw,80px) 0; }
+  .her-sechead { position: relative; display: flex; align-items: center; justify-content: center; gap: 14px;
+    flex-wrap: wrap; margin-bottom: 40px; }
+  .her-orn { color: var(--gold); opacity: .55; font-size: 1rem; }
+  .her-sectitle { font-size: clamp(1.7rem,4vw,2.8rem); font-weight: 800; margin: 0; text-align: center; }
+  .her-seclink { position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    border: 1px solid var(--gold); color: var(--gold); text-decoration: none; font-size: .72rem; font-weight: 700;
+    letter-spacing: .08em; padding: 7px 16px; border-radius: 8px; transition: background .2s; }
+  .her-seclink:hover { background: color-mix(in srgb, var(--gold) 14%, transparent); }
 
-  /* Poetry */
-  .her-poetry { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-  .her-poem { position: relative; text-decoration: none; color: var(--text);
-    background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 26px 24px 22px;
-    transition: transform .25s, border-color .25s; overflow: hidden; }
-  .her-poem:hover { transform: translateY(-4px); border-color: var(--gold); }
-  .her-poem-quote { position: absolute; top: 8px; right: 16px; font-size: 4rem; color: var(--gold); opacity: .12; font-family: Georgia, serif; }
-  .her-poem-title { font-size: 1.25rem; font-weight: 600; margin: 0 0 12px; font-style: italic; }
-  .her-poem-excerpt { font-size: .92rem; line-height: 1.7; color: var(--muted); margin: 0 0 16px;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-  .her-poem-read { font-size: .82rem; font-weight: 600; color: var(--gold); }
+  /* ── Book collections ── */
+  .her-books { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(14px,2vw,26px); }
+  .her-book { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px;
+    text-decoration: none; color: var(--text); transition: transform .28s; }
+  .her-book:hover { transform: translateY(-8px); }
+  .her-book-spine { position: absolute; left: 50%; top: 0; transform: translateX(calc(-50% - 50%)); width: 14px;
+    height: calc(100% - 36px); border-radius: 3px 0 0 3px; box-shadow: inset -3px 0 6px rgba(0,0,0,.4); display: none; }
+  .her-book-face { position: relative; width: 100%; aspect-ratio: 3/4; border-radius: 6px 10px 10px 6px;
+    background-size: cover !important; background-position: center !important;
+    border: 1px solid var(--gold); border-left: 6px solid color-mix(in srgb, var(--gold) 60%, #000);
+    display: flex; align-items: center; justify-content: center; padding: 16px 14px; text-align: center;
+    box-shadow: 0 16px 38px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.06);
+    transition: box-shadow .28s, border-color .28s; }
+  .her-book:hover .her-book-face { box-shadow: 0 24px 54px rgba(0,0,0,.55); }
+  .her-book-title { color: #fff; font-size: clamp(.95rem,1.5vw,1.25rem); font-weight: 700; line-height: 1.25;
+    text-shadow: 0 2px 8px rgba(0,0,0,.7); margin: 0; }
+  .her-book-cta { font-size: .64rem; font-weight: 700; letter-spacing: .08em; color: var(--gold);
+    border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; }
 
-  /* Videos */
-  .her-grid-video { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-  .her-video-frame { position: relative; padding-bottom: 56.25%; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
-  .her-video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-  .her-video-title { font-size: 1rem; font-weight: 600; margin: 12px 2px 0; }
+  /* ── About + player ── */
+  .her-about { display: grid; grid-template-columns: 1.6fr 1fr; gap: clamp(20px,3vw,34px); align-items: stretch; }
+  .her-paper { position: relative; background: var(--paper); border: 1px solid var(--gold); border-radius: 14px;
+    padding: clamp(26px,4vw,42px); box-shadow: inset 0 0 60px rgba(0,0,0,.18); overflow: hidden; }
+  .her-paper-eyebrow { text-transform: uppercase; letter-spacing: .16em; font-size: .72rem; font-weight: 700;
+    color: var(--muted); margin: 0 0 6px; }
+  .her-paper-name { font-size: clamp(1.6rem,3.4vw,2.4rem); font-weight: 800; margin: 0 0 18px; }
+  .her-paper-photo { float: left; width: 120px; height: 150px; margin: 0 20px 12px 0; border-radius: 10px;
+    background-size: cover; background-position: center; border: 1px solid var(--gold); }
+  .her-paper-body { font-size: .98rem; line-height: 1.85; color: var(--text); opacity: .92; margin: 0 0 22px; }
+  .her-paper-btn { font-size: .76rem; }
 
-  /* Gallery */
+  .her-player { background: var(--panel-solid); border: 1px solid var(--gold); border-radius: 14px;
+    padding: clamp(24px,3vw,34px); display: flex; flex-direction: column; justify-content: center; text-align: center;
+    box-shadow: var(--glow); }
+  .her-player-label { font-size: .9rem; color: var(--muted); margin: 0 0 6px; }
+  .her-player-track { font-size: clamp(1.2rem,2.4vw,1.7rem); font-weight: 800; margin: 0 0 22px; }
+  .her-player-controls { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 22px; }
+  .her-player-btn { background: none; border: none; color: var(--gold); font-size: 1.4rem; cursor: pointer; opacity: .8; transition: opacity .2s; }
+  .her-player-btn:hover { opacity: 1; }
+  .her-player-play { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px;
+    border-radius: 50%; background: linear-gradient(120deg, var(--gold-soft), var(--gold)); color: #1a1200;
+    font-size: 1.3rem; text-decoration: none; box-shadow: 0 8px 22px rgba(212,175,55,.4); transition: transform .2s; }
+  .her-player-play:hover { transform: scale(1.07); }
+  .her-player-bar { height: 5px; border-radius: 100px; background: var(--line); overflow: hidden; margin-bottom: 10px; }
+  .her-player-bar span { display: block; width: 32%; height: 100%; background: linear-gradient(90deg, var(--gold-soft), var(--gold)); }
+  .her-player-time { display: flex; justify-content: space-between; align-items: center; font-size: .78rem; color: var(--muted); }
+  .her-gramophone { font-size: 1.4rem; }
+
+  /* ── Videos ── */
+  .her-videos { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(12px,1.6vw,18px); }
+  .her-vid { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; text-decoration: none;
+    background-size: cover; background-position: center; border: 1px solid var(--gold);
+    display: flex; align-items: flex-end; transition: transform .25s, box-shadow .25s; }
+  .her-vid:hover { transform: translateY(-5px); box-shadow: 0 18px 40px rgba(0,0,0,.45); }
+  .her-vid-scrim { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.82), transparent 65%); }
+  .her-vid-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 44px; height: 44px; border-radius: 50%; background: rgba(212,175,55,.92); color: #1a1200;
+    display: flex; align-items: center; justify-content: center; font-size: 1rem; padding-left: 3px; }
+  .her-vid-title { position: relative; z-index: 1; color: #fff; font-size: .8rem; font-weight: 600; padding: 12px;
+    line-height: 1.3; text-shadow: 0 2px 6px rgba(0,0,0,.8); }
+
+  /* ── Gallery ── */
   .her-gallery { columns: 4 200px; column-gap: 14px; }
   .her-gallery-item { break-inside: avoid; margin-bottom: 14px; border-radius: 12px; border: 1px solid var(--line);
-    background-size: cover; background-position: center; height: 200px;
-    transition: transform .3s, box-shadow .3s; }
+    background-size: cover; background-position: center; height: 200px; transition: transform .3s; }
   .her-gallery-item:nth-child(3n) { height: 260px; }
-  .her-gallery-item:nth-child(4n) { height: 170px; }
-  .her-gallery-item:hover { transform: scale(1.02); box-shadow: 0 14px 36px rgba(0,0,0,.32); }
+  .her-gallery-item:hover { transform: scale(1.02); }
 
-  /* Legacy timeline */
-  .her-legacy-body { max-width: 760px; font-size: 1.05rem; line-height: 1.9; color: var(--text); opacity: .9; margin: 0 0 36px; }
-  .her-timeline { max-width: 820px; }
+  /* ── Timeline / Events ── */
+  .her-timeline { max-width: 820px; margin: 0 auto; }
   .her-tl-row { display: grid; grid-template-columns: 80px 24px 1fr; gap: 8px; }
-  .her-tl-year { font-size: 1.3rem; font-weight: 700; padding-top: 2px; }
+  .her-tl-year { font-size: 1.3rem; font-weight: 800; padding-top: 2px; }
   .her-tl-line { position: relative; display: flex; justify-content: center; }
-  .her-tl-line::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); margin-top: 8px; flex-shrink: 0; }
+  .her-tl-line::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); margin-top: 8px; }
   .her-tl-line::after { content: ""; position: absolute; top: 17px; bottom: -8px; width: 1px; background: var(--line); }
   .her-tl-row:last-child .her-tl-line::after { display: none; }
   .her-tl-content { padding: 0 0 30px 6px; }
-  .her-tl-title { font-size: 1.2rem; font-weight: 600; margin: 0 0 6px; }
+  .her-tl-title { font-size: 1.2rem; font-weight: 700; margin: 0 0 6px; }
   .her-tl-desc { font-size: .95rem; line-height: 1.7; color: var(--muted); margin: 0; }
-
-  /* Events */
   .her-events { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-  .her-event { display: flex; gap: 16px; align-items: flex-start; padding: 20px; border: 1px solid var(--line);
-    border-radius: 12px; background: var(--panel); }
-  .her-event-date { font-size: 1.05rem; font-weight: 700; white-space: nowrap; }
-  .her-event-title { font-size: 1.08rem; font-weight: 600; margin: 0 0 4px; }
+  .her-event { display: flex; gap: 16px; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+  .her-event-date { font-size: 1.05rem; font-weight: 800; white-space: nowrap; }
+  .her-event-title { font-size: 1.08rem; font-weight: 700; margin: 0 0 4px; }
   .her-event-place { font-size: .85rem; color: var(--muted); margin: 0; }
 
-  /* CTA */
-  .her-cta { text-align: center; padding: clamp(70px,11vh,130px) 6vw;
-    background: radial-gradient(60% 100% at 50% 0%, color-mix(in srgb, var(--gold) 10%, transparent), transparent); }
-  .her-cta-title { font-size: clamp(1.9rem,5vw,3.2rem); font-weight: 700; margin: 0 0 12px; }
-  .her-cta-sub { color: var(--muted); font-size: 1.05rem; margin: 0 0 28px; }
+  /* ── Closing quote band ── */
+  .her-quoteband { text-align: center; margin-top: clamp(60px,9vh,110px);
+    padding: clamp(50px,8vh,90px) 6vw; border-top: 1px solid var(--line);
+    background: radial-gradient(60% 130% at 50% 0%, color-mix(in srgb, var(--gold) 10%, transparent), transparent); }
+  .her-diya { font-size: 2.4rem; display: block; margin-bottom: 16px; }
+  .her-quoteband-text { font-size: clamp(1.3rem,3vw,2rem); font-style: italic; font-weight: 700; color: var(--gold-soft); margin: 0 auto; max-width: 30ch; line-height: 1.5; }
+  .her-quoteband-by { color: var(--muted); margin: 14px 0 0; font-size: .95rem; }
 
-  @media (max-width: 640px) {
-    .her-sechead { align-items: flex-start; }
-    .her-grid-songs { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
-    .her-tl-row { grid-template-columns: 60px 20px 1fr; }
-    .her-tl-year { font-size: 1.05rem; }
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .her-hero-inner { grid-template-columns: 1fr; gap: 30px; }
+    .her-hero-portrait { max-width: 320px; margin: 0 auto; }
+    .her-stats { grid-template-columns: repeat(2, 1fr); }
+    .her-stat:nth-child(2) { border-right: none; }
+    .her-stat:nth-child(1), .her-stat:nth-child(2) { border-bottom: 1px solid var(--line); padding-bottom: 16px; }
+    .her-stat:nth-child(3), .her-stat:nth-child(4) { padding-top: 16px; }
+    .her-books { grid-template-columns: repeat(3, 1fr); }
+    .her-about { grid-template-columns: 1fr; }
+    .her-videos { grid-template-columns: repeat(3, 1fr); }
+    .her-seclink { position: static; transform: none; margin-top: 6px; }
+  }
+  @media (max-width: 560px) {
+    .her-books { grid-template-columns: repeat(2, 1fr); }
+    .her-videos { grid-template-columns: repeat(2, 1fr); }
     .her-gallery { columns: 2 140px; }
+    .her-tl-row { grid-template-columns: 56px 20px 1fr; }
+    .her-paper-photo { float: none; width: 100%; height: 200px; margin: 0 0 16px; }
   }
 `;

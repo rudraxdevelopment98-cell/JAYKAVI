@@ -408,6 +408,7 @@ export async function setTraditionalSettings(s: TraditionalSettings): Promise<vo
 // ── Heritage Library theme customization ─────────────────────────────────
 
 export interface HeritageEvent { date: string; title: string; place: string }
+export interface HeritageStat { value: string; label: string }
 
 export interface HeritageSettings {
   heroPhoto: string | null;
@@ -416,29 +417,61 @@ export interface HeritageSettings {
   title: string;
   subtitle: string;
   quote: string | null;
+  stats: HeritageStat[];
+  aboutPhoto: string | null;
+  aboutBody: string | null;
+  audioTitle: string;
+  audioTrack: string | null;
+  footerQuote: string | null;
   gallery: string[];
   events: HeritageEvent[];
   legacyTitle: string;
   legacyBody: string | null;
   show: {
-    bhajans: boolean; poetry: boolean; videos: boolean;
-    gallery: boolean; events: boolean; legacy: boolean;
+    stats: boolean; bhajans: boolean; poetry: boolean; audio: boolean;
+    videos: boolean; gallery: boolean; events: boolean; legacy: boolean;
   };
 }
 
 export const HERITAGE_DEFAULTS: HeritageSettings = {
   heroPhoto: null,
   heroVideo: null,
-  eyebrow: 'Digital Heritage Library',
-  title: 'Jayesh Prajapati',
-  subtitle: 'A living archive of Gujarati verse, bhajan and lyric.',
+  eyebrow: '॥ શબ્દો થી સપનાનો સફર ॥',
+  title: 'જયેશ પ્રજાપતિ',
+  subtitle: 'ગુજરાતી ભજન અને કાવ્ય પરંપરા',
   quote: null,
+  stats: [
+    { value: '25+',   label: 'વર્ષોની પરંપરા' },
+    { value: '500+',  label: 'ભજનો' },
+    { value: '300+',  label: 'કવિતાઓ' },
+    { value: '1000+', label: 'સંતવાણી કાર્યક્રમો' },
+  ],
+  aboutPhoto: null,
+  aboutBody: null,
+  audioTitle: 'હાલ સાંભળો',
+  audioTrack: 'રામ નામ નો સરગમ',
+  footerQuote: '॥ સંગીત એ સાધના છે, અને ભજન એ આત્માની ભાષા છે ॥',
   gallery: [],
   events: [],
-  legacyTitle: 'The Legacy',
+  legacyTitle: 'કવિ અને ગાયક',
   legacyBody: null,
-  show: { bhajans: true, poetry: true, videos: true, gallery: true, events: true, legacy: true },
+  show: { stats: true, bhajans: true, poetry: true, audio: true, videos: true, gallery: true, events: true, legacy: true },
 };
+
+function parseStats(raw: string | null | undefined): HeritageStat[] {
+  if (!raw) return HERITAGE_DEFAULTS.stats;
+  try {
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return HERITAGE_DEFAULTS.stats;
+    const out = arr
+      .filter((e) => e && typeof e === 'object')
+      .map((e) => ({ value: String(e.value ?? ''), label: String(e.label ?? '') }))
+      .filter((e) => e.value || e.label);
+    return out.length ? out : HERITAGE_DEFAULTS.stats;
+  } catch {
+    return HERITAGE_DEFAULTS.stats;
+  }
+}
 
 function parseEvents(raw: string | null | undefined): HeritageEvent[] {
   if (!raw) return [];
@@ -470,13 +503,21 @@ export async function getHeritageSettings(): Promise<HeritageSettings> {
       title:       row.herTitle       || d.title,
       subtitle:    row.herSubtitle    || d.subtitle,
       quote:       row.herQuote       || null,
+      stats:       parseStats(row.herStatsJson),
+      aboutPhoto:  row.herAboutPhoto  || null,
+      aboutBody:   row.herAboutBody   || null,
+      audioTitle:  row.herAudioTitle  || d.audioTitle,
+      audioTrack:  row.herAudioTrack  || d.audioTrack,
+      footerQuote: row.herFooterQuote || d.footerQuote,
       gallery:     row.herGallery     ?? [],
       events:      parseEvents(row.herEventsJson),
       legacyTitle: row.herLegacyTitle || d.legacyTitle,
       legacyBody:  row.herLegacyBody  || null,
       show: {
+        stats:   row.herShowStats,
         bhajans: row.herShowBhajans,
         poetry:  row.herShowPoetry,
+        audio:   row.herShowAudio,
         videos:  row.herShowVideos,
         gallery: row.herShowGallery,
         events:  row.herShowEvents,
@@ -496,12 +537,20 @@ export async function setHeritageSettings(s: HeritageSettings): Promise<void> {
     herTitle:       s.title,
     herSubtitle:    s.subtitle,
     herQuote:       s.quote || null,
+    herStatsJson:   JSON.stringify(s.stats ?? []),
+    herAboutPhoto:  s.aboutPhoto || null,
+    herAboutBody:   s.aboutBody || null,
+    herAudioTitle:  s.audioTitle || null,
+    herAudioTrack:  s.audioTrack || null,
+    herFooterQuote: s.footerQuote || null,
     herGallery:     s.gallery,
     herEventsJson:  JSON.stringify(s.events ?? []),
     herLegacyTitle: s.legacyTitle,
     herLegacyBody:  s.legacyBody || null,
+    herShowStats:   s.show.stats,
     herShowBhajans: s.show.bhajans,
     herShowPoetry:  s.show.poetry,
+    herShowAudio:   s.show.audio,
     herShowVideos:  s.show.videos,
     herShowGallery: s.show.gallery,
     herShowEvents:  s.show.events,

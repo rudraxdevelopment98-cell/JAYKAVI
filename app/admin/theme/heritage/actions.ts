@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
-import { setHeritageSettings, type HeritageSettings, type HeritageEvent } from '@/lib/data';
+import { setHeritageSettings, HERITAGE_DEFAULTS, type HeritageSettings, type HeritageEvent, type HeritageStat } from '@/lib/data';
 import { sanitizeText } from '@/lib/security';
 
 function safeHttp(v: string): string | null {
@@ -43,20 +43,40 @@ export async function saveHeritageSettings(formData: FormData) {
     }
   } catch { /* ignore */ }
 
+  let stats: HeritageStat[] = [];
+  try {
+    const s = JSON.parse((formData.get('statsJson') as string) || '[]');
+    if (Array.isArray(s)) {
+      stats = s
+        .map((st: any) => ({ value: sanitizeText(st?.value), label: sanitizeText(st?.label) }))
+        .filter((st) => st.value || st.label);
+    }
+  } catch { /* ignore */ }
+  if (stats.length === 0) stats = HERITAGE_DEFAULTS.stats;
+
+  const D = HERITAGE_DEFAULTS;
   const settings: HeritageSettings = {
     heroPhoto: safeHttp((formData.get('heroPhoto') as string) || ''),
     heroVideo: safeHttp((formData.get('heroVideo') as string) || ''),
-    eyebrow: str('eyebrow', 'Digital Heritage Library'),
-    title: str('title', 'Jayesh Prajapati'),
-    subtitle: str('subtitle', 'A living archive of Gujarati verse, bhajan and lyric.'),
+    eyebrow: str('eyebrow', D.eyebrow),
+    title: str('title', D.title),
+    subtitle: str('subtitle', D.subtitle),
     quote: str('quote') || null,
+    stats,
+    aboutPhoto: safeHttp((formData.get('aboutPhoto') as string) || ''),
+    aboutBody: str('aboutBody') || null,
+    audioTitle: str('audioTitle', D.audioTitle),
+    audioTrack: str('audioTrack') || null,
+    footerQuote: str('footerQuote') || null,
     gallery,
     events,
-    legacyTitle: str('legacyTitle', 'The Legacy'),
+    legacyTitle: str('legacyTitle', D.legacyTitle),
     legacyBody: str('legacyBody') || null,
     show: {
+      stats: bool('showStats'),
       bhajans: bool('showBhajans'),
       poetry: bool('showPoetry'),
+      audio: bool('showAudio'),
       videos: bool('showVideos'),
       gallery: bool('showGallery'),
       events: bool('showEvents'),
