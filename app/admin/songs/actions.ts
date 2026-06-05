@@ -248,6 +248,44 @@ export async function deleteSong(id: string) {
   redirect('/admin/songs');
 }
 
+export async function bulkEditSongs(
+  ids: string[],
+  patch: {
+    collectionId?: string | null;   // undefined = don't touch, null = clear
+    language?: string;
+    genre?: string[];
+    mood?: string[];
+    isTrending?: boolean;
+    releaseYear?: number | null;
+  },
+): Promise<{ updated: number }> {
+  const session = await auth();
+  assertAdmin(session);
+  if (!ids.length) return { updated: 0 };
+
+  const data: Record<string, any> = {};
+  if ('collectionId' in patch) data.collectionId = patch.collectionId ?? null;
+  if (patch.language)          data.language = patch.language;
+  if (patch.genre)             data.genre = patch.genre;
+  if (patch.mood)              data.mood = patch.mood;
+  if (patch.isTrending !== undefined) data.isTrending = patch.isTrending;
+  if ('releaseYear' in patch)  data.releaseYear = patch.releaseYear ?? null;
+
+  if (!Object.keys(data).length) return { updated: 0 };
+
+  const { count } = await prisma.song.updateMany({ where: { id: { in: ids } }, data });
+
+  await logActivity({
+    actorEmail: session?.user?.email,
+    action: 'update',
+    entity: 'Song',
+    label: `Bulk edit — ${count} song${count !== 1 ? 's' : ''}`,
+  });
+  revalidatePath('/admin/songs');
+  revalidatePath('/songs');
+  return { updated: count };
+}
+
 export async function bulkDeleteSongs(ids: string[]): Promise<{ deleted: number }> {
   const session = await auth();
   assertAdmin(session);

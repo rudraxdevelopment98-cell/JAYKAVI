@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import SongsTable from './SongsTable';
+import { getFacets } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,11 @@ export default async function SongsAdminPage({
   searchParams: { q?: string };
 }) {
   const q = searchParams.q?.trim() ?? '';
+
+  const [facets, collections] = await Promise.all([
+    getFacets(),
+    prisma.collection.findMany({ select: { id: true, title: true }, orderBy: { title: 'asc' } }),
+  ]);
 
   const songs = await prisma.song.findMany({
     where: q
@@ -21,8 +27,11 @@ export default async function SongsAdminPage({
         }
       : undefined,
     orderBy: [{ isTrending: 'desc' }, { releaseYear: 'desc' }, { title: 'asc' }],
-    include: {
-      singers: { include: { singer: true } },
+    select: {
+      id: true, title: true, slug: true, releaseYear: true,
+      viewCount: true, isTrending: true, artworkUrl: true,
+      language: true, genre: true, collectionId: true,
+      singers: { select: { singer: { select: { name: true } } } },
       _count: { select: { platformLinks: true } },
     },
     take: 100,
@@ -62,7 +71,7 @@ export default async function SongsAdminPage({
           No songs match &ldquo;{q}&rdquo;.
         </div>
       ) : (
-        <SongsTable songs={songs} />
+        <SongsTable songs={songs} collections={collections} facets={facets} />
       )}
     </div>
   );
