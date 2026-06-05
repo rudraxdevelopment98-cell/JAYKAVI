@@ -155,7 +155,7 @@ export default async function TraditionalHome({ settings }: { settings: Traditio
           )}
 
           <div className="th-hero-ctas">
-            <Link href="/songs" className="th-cta-primary">
+            <Link href="/explore?tab=songs" className="th-cta-primary">
               Browse Collection
             </Link>
             <Link href="/about" className="th-cta-ghost">
@@ -183,7 +183,7 @@ export default async function TraditionalHome({ settings }: { settings: Traditio
           ))}
         </div>
         <div className="th-section-footer">
-          <Link href="/songs" className="th-btn-outline">
+          <Link href="/explore?tab=songs" className="th-btn-outline">
             View Full Catalog <ChevronRight />
           </Link>
         </div>
@@ -249,7 +249,7 @@ export default async function TraditionalHome({ settings }: { settings: Traditio
             ))}
           </div>
           <div className="th-section-footer">
-            <Link href="/songs" className="th-btn-outline">
+            <Link href="/explore?tab=songs" className="th-btn-outline">
               Browse All Songs <ChevronRight />
             </Link>
           </div>
