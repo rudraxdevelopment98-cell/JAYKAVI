@@ -148,9 +148,10 @@ export default function LyricsViewer({
         )}
       </div>
 
-      {/* Lyrics body */}
+      {/* Lyrics body — marked translatable for the site-wide language switcher */}
       <div
         className="font-serif lyrics-body"
+        data-i18n
         style={{ fontSize: `${fontSize}rem`, transition: 'font-size .15s ease' }}
       >
         {renderLyrics(activeText)}

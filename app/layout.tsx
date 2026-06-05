@@ -6,6 +6,7 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import SmoothScroll from '@/components/SmoothScroll';
 import HideOnAdmin from '@/components/HideOnAdmin';
+import Translator from '@/components/Translator';
 import OrnateFrame from '@/components/traditional/OrnateFrame';
 import { siteUrl } from '@/lib/seo';
 
@@ -97,6 +98,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <main>{children}</main>
           <HideOnAdmin>
             <Footer />
+            <Translator />
           </HideOnAdmin>
         </SmoothScroll>
       </body>
