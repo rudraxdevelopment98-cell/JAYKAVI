@@ -279,7 +279,8 @@ model SiteSettings {
   tradMantra        String  @default("॥ જય શ્રી કૃષ્ણ ॥")
   tradHeroPortrait  String? // left hero arch — singer portrait URL
   tradHeroDeity     String? // right hero arch — deity image URL
-  tradHeroBg        String? // optional full-bleed hero background
+  tradHeroBg        String? // optional full-bleed hero background image
+  tradHeroBgVideo   String? // optional full-bleed hero background video
   tradF1Title       String  @default("ભક્તિ")
   tradF1Desc        String  @default("શુદ્ધ ભાવ અને શ્રદ્ધા")
   tradF2Title       String  @default("સંગીત")

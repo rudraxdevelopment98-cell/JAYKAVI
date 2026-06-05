@@ -26,3 +26,19 @@ export async function uploadBuffer(
     stream.end(buffer);
   });
 }
+
+export async function uploadVideoBuffer(
+  buffer: Buffer,
+  folder: UploadFolder
+): Promise<{ url: string; publicId: string }> {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: `jaykavi/${folder}`, resource_type: 'video' },
+      (err, result) => {
+        if (err || !result) return reject(err ?? new Error('Upload failed'));
+        resolve({ url: result.secure_url, publicId: result.public_id });
+      }
+    );
+    stream.end(buffer);
+  });
+}

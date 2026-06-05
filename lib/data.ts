@@ -330,6 +330,7 @@ export interface TraditionalSettings {
   heroPortrait: string | null;
   heroDeity: string | null;
   heroBg: string | null;
+  heroBgVideo: string | null;
   features: [
     { title: string; desc: string },
     { title: string; desc: string },
@@ -343,6 +344,7 @@ export const TRAD_DEFAULTS: TraditionalSettings = {
   heroPortrait: null,
   heroDeity: null,
   heroBg: null,
+  heroBgVideo: null,
   features: [
     { title: 'ભક્તિ',    desc: 'શુદ્ધ ભાવ અને શ્રદ્ધા' },
     { title: 'સંગીત',    desc: 'સુરોથી સર્જાયેલ ભક્તિ' },
@@ -358,9 +360,10 @@ export async function getTraditionalSettings(): Promise<TraditionalSettings> {
     const d = TRAD_DEFAULTS;
     return {
       mantra:       row.tradMantra       || d.mantra,
-      heroPortrait: row.tradHeroPortrait || null,
-      heroDeity:    row.tradHeroDeity    || null,
-      heroBg:       row.tradHeroBg       || null,
+      heroPortrait: row.tradHeroPortrait  || null,
+      heroDeity:    row.tradHeroDeity     || null,
+      heroBg:       row.tradHeroBg        || null,
+      heroBgVideo:  row.tradHeroBgVideo   || null,
       features: [
         { title: row.tradF1Title || d.features[0].title, desc: row.tradF1Desc || d.features[0].desc },
         { title: row.tradF2Title || d.features[1].title, desc: row.tradF2Desc || d.features[1].desc },
@@ -377,10 +380,11 @@ export async function setTraditionalSettings(s: TraditionalSettings): Promise<vo
   await prisma.siteSettings.upsert({
     where: { id: 1 },
     update: {
-      tradMantra:       s.mantra,
-      tradHeroPortrait: s.heroPortrait || null,
-      tradHeroDeity:    s.heroDeity    || null,
-      tradHeroBg:       s.heroBg       || null,
+      tradMantra:        s.mantra,
+      tradHeroPortrait:  s.heroPortrait  || null,
+      tradHeroDeity:     s.heroDeity     || null,
+      tradHeroBg:        s.heroBg        || null,
+      tradHeroBgVideo:   s.heroBgVideo   || null,
       tradF1Title: s.features[0].title, tradF1Desc: s.features[0].desc,
       tradF2Title: s.features[1].title, tradF2Desc: s.features[1].desc,
       tradF3Title: s.features[2].title, tradF3Desc: s.features[2].desc,
@@ -388,10 +392,11 @@ export async function setTraditionalSettings(s: TraditionalSettings): Promise<vo
     },
     create: {
       id: 1,
-      tradMantra:       s.mantra,
-      tradHeroPortrait: s.heroPortrait || null,
-      tradHeroDeity:    s.heroDeity    || null,
-      tradHeroBg:       s.heroBg       || null,
+      tradMantra:        s.mantra,
+      tradHeroPortrait:  s.heroPortrait  || null,
+      tradHeroDeity:     s.heroDeity     || null,
+      tradHeroBg:        s.heroBg        || null,
+      tradHeroBgVideo:   s.heroBgVideo   || null,
       tradF1Title: s.features[0].title, tradF1Desc: s.features[0].desc,
       tradF2Title: s.features[1].title, tradF2Desc: s.features[1].desc,
       tradF3Title: s.features[2].title, tradF3Desc: s.features[2].desc,

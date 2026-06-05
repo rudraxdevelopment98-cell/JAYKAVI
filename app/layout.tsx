@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google';
+import { Playfair_Display, Raleway } from 'next/font/google';
 import './globals.css';
 import { getLyricist, getActiveTheme } from '@/lib/data';
 import Nav from '@/components/Nav';
@@ -9,17 +9,18 @@ import HideOnAdmin from '@/components/HideOnAdmin';
 import OrnateFrame from '@/components/traditional/OrnateFrame';
 import { siteUrl } from '@/lib/seo';
 
-const cormorant = Cormorant_Garamond({
+const playfair = Playfair_Display({
   subsets: ['latin'],
   variable: '--font-fraunces',
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700', '800', '900'],
   style: ['normal', 'italic'],
   display: 'swap',
 });
 
-const dmSans = DM_Sans({
+const raleway = Raleway({
   subsets: ['latin'],
   variable: '--font-hanken',
+  weight: ['300', '400', '500', '600', '700'],
   display: 'swap',
 });
 
@@ -85,7 +86,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${cormorant.variable} ${dmSans.variable}`}>
+      <body className={`${playfair.variable} ${raleway.variable}`}>
         {activeTheme === 'traditional' && (
           <HideOnAdmin>
             <OrnateFrame />

@@ -25,6 +25,7 @@ export async function saveTraditionalSettings(formData: FormData) {
     heroPortrait: nullable('heroPortrait'),
     heroDeity:    nullable('heroDeity'),
     heroBg:       nullable('heroBg'),
+    heroBgVideo:  nullable('heroBgVideo'),
     features: [
       { title: str('f1title', 'ભક્તિ'),    desc: str('f1desc', 'શુદ્ધ ભાવ અને શ્રદ્ધા') },
       { title: str('f2title', 'સંગીત'),    desc: str('f2desc', 'સુરોથી સર્જાયેલ ભક્તિ') },

@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { saveTraditionalSettings } from './actions';
 import ImageField from './ImageField';
+import VideoField from './VideoField';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,9 +69,15 @@ export default async function TraditionalSettingsPage() {
           />
           <ImageField
             name="heroBg"
-            label="Hero Background Image (optional)"
+            label="Hero Background — Photo (optional)"
             defaultValue={s.heroBg}
-            note="Full-bleed hero background. Leave blank to use the gold gradient."
+            note="Full-bleed static background image. If a video is also set, the video takes priority."
+          />
+          <VideoField
+            name="heroBgVideo"
+            label="Hero Background — Video (optional)"
+            defaultValue={s.heroBgVideo}
+            note="Upload an MP4/WebM video for an animated background. Plays muted & looped with blur + gold gradient overlay."
           />
         </section>
 

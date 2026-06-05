@@ -95,9 +95,10 @@ export default async function TraditionalHome({ settings }: { settings: Traditio
   const youtubeUrl = social.youtube || 'https://www.youtube.com';
   const firstSong = bhajans[0];
 
-  const portraitUrl = safeUrl(settings.heroPortrait);
-  const deityUrl    = safeUrl(settings.heroDeity);
-  const heroBgUrl   = safeUrl(settings.heroBg);
+  const portraitUrl  = safeUrl(settings.heroPortrait);
+  const deityUrl     = safeUrl(settings.heroDeity);
+  const heroBgUrl    = safeUrl(settings.heroBg);
+  const heroBgVideo  = safeUrl(settings.heroBgVideo);
 
   const featureIcons = [<BookOpen key="book" />, <MusicNote key="music" />, <Scroll key="scroll" />, <Quill key="quill" />];
   const features = settings.features.map((f, i) => ({ icon: featureIcons[i], t: f.title, d: f.desc }));
@@ -114,12 +115,32 @@ export default async function TraditionalHome({ settings }: { settings: Traditio
       {/* ══════════════ HERO — Library title page ══════════════ */}
       <header
         className="th-hero"
-        style={heroBgUrl ? {
-          backgroundImage: `linear-gradient(to bottom right, rgba(10,7,4,.82) 0%, rgba(8,6,3,.72) 100%), url(${heroBgUrl})`,
+        style={!heroBgVideo && heroBgUrl ? {
+          backgroundImage: `linear-gradient(to bottom right, rgba(10,7,4,.85) 0%, rgba(8,6,3,.75) 100%), url(${heroBgUrl})`,
           backgroundSize: 'cover', backgroundPosition: 'center',
         } : undefined}
       >
-        <div className="th-hero-inner">
+        {heroBgVideo && (
+          <>
+            <video
+              src={heroBgVideo}
+              autoPlay
+              muted
+              loop
+              playsInline
+              style={{
+                position: 'absolute', inset: 0, width: '100%', height: '100%',
+                objectFit: 'cover', filter: 'blur(3px) brightness(0.45)',
+                transform: 'scale(1.05)',
+              }}
+            />
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(to bottom right, rgba(10,7,4,.6) 0%, rgba(30,15,0,.5) 60%, rgba(8,6,3,.7) 100%)',
+            }} />
+          </>
+        )}
+        <div className="th-hero-inner" style={{ position: 'relative', zIndex: 1 }}>
           <p className="th-mantra">{settings.mantra}</p>
           <h1 className="font-serif th-name">
             {firstWord && <span className="th-name-first">{firstWord}</span>}
