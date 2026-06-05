@@ -237,45 +237,49 @@ const styles = `
 
   /* ── HERO ── */
   .her-hero {
-    position: relative; min-height: 92svh; display: flex; align-items: center;
-    padding: clamp(110px,16vh,170px) clamp(20px,6vw,80px) clamp(50px,7vh,90px); overflow: hidden;
+    position: relative; min-height: 86svh; display: flex; align-items: center;
+    padding: clamp(120px,16vh,180px) clamp(20px,6vw,80px) clamp(60px,8vh,100px);
+    overflow: hidden; background: var(--hero-grad);
   }
-  .her-hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+  /* The uploaded photo only appears as a soft, blurred ambient wash so that
+     ANY image (even a busy one) keeps the hero clean and the text readable. */
+  .her-hero-bg {
+    position: absolute; inset: -60px; width: calc(100% + 120px); height: calc(100% + 120px);
+    object-fit: cover; background-size: cover; background-position: center; z-index: 0;
+    filter: blur(34px) brightness(.55) saturate(1.1); opacity: .26; transform: scale(1.12);
+  }
   .her-hero-bg--img { background-size: cover; background-position: center; }
-  .her-hero-bg, .her-hero-bg--img { filter: brightness(.42) saturate(1.05); }
-  [data-theme='light'] .her-hero-bg { filter: brightness(.92) saturate(1.02); }
+  [data-theme='light'] .her-hero-bg { filter: blur(36px) brightness(1.05) saturate(1.05); opacity: .18; }
   .her-hero-veil { position: absolute; inset: 0; z-index: 1;
     background:
-      linear-gradient(90deg, rgba(8,5,2,.78) 0%, rgba(8,5,2,.35) 45%, rgba(8,5,2,.6) 100%),
-      linear-gradient(180deg, transparent 60%, var(--bg) 100%); }
-  [data-theme='light'] .her-hero-veil {
-    background:
-      linear-gradient(90deg, rgba(250,246,236,.55) 0%, rgba(250,246,236,.15) 45%, rgba(250,246,236,.4) 100%),
-      linear-gradient(180deg, transparent 60%, var(--bg) 100%); }
+      radial-gradient(130% 110% at 50% 42%, transparent 0%, color-mix(in srgb, var(--bg) 72%, transparent) 70%, var(--bg) 100%),
+      linear-gradient(180deg, transparent 50%, var(--bg) 100%); }
 
   .her-hero-inner {
-    position: relative; z-index: 2; width: 100%; max-width: 1240px; margin: 0 auto;
-    display: grid; grid-template-columns: 0.9fr 1.1fr; align-items: center; gap: clamp(24px,5vw,70px);
+    position: relative; z-index: 2; width: 100%; max-width: 1180px; margin: 0 auto;
+    display: grid; grid-template-columns: 0.85fr 1.15fr; align-items: center; gap: clamp(28px,5vw,72px);
   }
   .her-hero-portrait { position: relative; }
   .her-hero-portrait-img {
-    position: relative; aspect-ratio: 4/5; border-radius: 14px; background-size: cover; background-position: center top;
-    border: 1px solid var(--gold); box-shadow: 0 26px 70px rgba(0,0,0,.5), inset 0 0 0 6px rgba(212,175,55,.12);
+    position: relative; aspect-ratio: 4/5; border-radius: 16px; background-size: cover; background-position: center top;
+    border: 1px solid var(--gold);
+    box-shadow: 0 30px 70px rgba(0,0,0,.45), inset 0 0 0 6px color-mix(in srgb, var(--gold) 16%, transparent);
   }
   .her-hero-portrait-ph { display: flex; align-items: center; justify-content: center; font-size: 4rem;
     background: var(--panel-solid); }
 
   .her-hero-copy { text-align: center; }
-  .her-hero-eyebrow { letter-spacing: .12em; font-size: clamp(.85rem,1.6vw,1.1rem); font-weight: 600;
-    color: var(--gold); margin: 0 0 14px; }
-  .her-hero-title { font-size: clamp(2.6rem,7vw,5.4rem); font-weight: 800; line-height: 1.04; margin: 0;
+  .her-hero-eyebrow { letter-spacing: .14em; font-size: clamp(.82rem,1.5vw,1.05rem); font-weight: 700;
+    color: var(--gold); margin: 0 0 16px; }
+  .her-hero-title { font-size: clamp(2.4rem,6vw,4.8rem); font-weight: 800; line-height: 1.06; margin: 0;
     letter-spacing: -.01em; }
-  .her-hero-sub { font-size: clamp(1rem,2vw,1.45rem); margin: 16px auto 0; color: var(--text); opacity: .9; }
-  .her-hero-quote { font-style: italic; font-size: clamp(1rem,1.8vw,1.3rem); color: var(--gold-soft);
-    margin: 14px auto 0; max-width: 40ch; }
-  .her-hero-ctas { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 34px; }
-  .her-hero-quill { position: absolute; right: -6px; bottom: 4px; font-size: 2.6rem; opacity: .7;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,.4)); }
+  .her-hero-sub { font-size: clamp(1.05rem,2vw,1.4rem); margin: 18px auto 0; color: var(--text); opacity: .92;
+    max-width: 30ch; }
+  .her-hero-quote { font-style: italic; font-size: clamp(1rem,1.8vw,1.25rem); color: var(--gold-soft);
+    margin: 16px auto 0; max-width: 40ch; }
+  .her-hero-ctas { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 36px; }
+  .her-hero-quill { position: absolute; right: -2px; bottom: 6px; font-size: 2.4rem; opacity: .65;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,.35)); }
 
   /* ── Buttons ── */
   .her-btn-gold, .her-btn-ghost {
