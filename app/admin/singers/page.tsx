@@ -11,14 +11,14 @@ export default async function SingersAdminPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold">Singers</h1>
           <p className="text-neutral-400 mt-1 text-sm">{singers.length} performers</p>
         </div>
         <Link
           href="/admin/singers/new"
-          className="px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition text-sm"
+          className="shrink-0 px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition text-sm"
         >
           + New Singer
         </Link>

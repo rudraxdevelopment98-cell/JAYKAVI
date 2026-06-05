@@ -11,7 +11,7 @@ export default async function CollectionsAdminPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold">Collections</h1>
           <p className="text-neutral-400 mt-1 text-sm">
@@ -20,7 +20,7 @@ export default async function CollectionsAdminPage() {
         </div>
         <Link
           href="/admin/collections/new"
-          className="px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition text-sm"
+          className="shrink-0 px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition text-sm"
         >
           + New Collection
         </Link>

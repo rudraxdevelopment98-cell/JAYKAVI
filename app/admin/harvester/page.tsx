@@ -34,7 +34,7 @@ export default async function HarvesterPage() {
   return (
     <div className="max-w-4xl">
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold">Song Harvester</h1>
           <p className="text-neutral-400 mt-1">
@@ -43,7 +43,7 @@ export default async function HarvesterPage() {
         </div>
         <Link
           href="/admin/harvester/config"
-          className="text-sm px-3 py-1.5 border border-neutral-700 rounded-md hover:bg-neutral-800 transition"
+          className="shrink-0 text-sm px-3 py-1.5 border border-neutral-700 rounded-md hover:bg-neutral-800 transition"
         >
           Configure
         </Link>
@@ -137,8 +137,8 @@ export default async function HarvesterPage() {
         {recent.length === 0 ? (
           <p className="text-neutral-400 text-sm">No runs yet.</p>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-neutral-800">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto rounded-xl border border-neutral-800">
+            <table className="w-full text-sm min-w-[500px]">
               <thead className="bg-neutral-900 text-neutral-400 text-left">
                 <tr>
                   <th className="px-4 py-2 font-medium">Date</th>

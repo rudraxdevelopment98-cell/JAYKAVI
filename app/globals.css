@@ -519,3 +519,6 @@ a { color: inherit; }
 [data-admin-theme='light'] .admin-shell h1,
 [data-admin-theme='light'] .admin-shell h2,
 [data-admin-theme='light'] .admin-shell h3 { color: #111 !important; }
+[data-admin-theme='light'] .admin-shell .hover\:text-neutral-100:hover { color: #111 !important; }
+[data-admin-theme='light'] .admin-shell .hover\:text-neutral-200:hover { color: #222 !important; }
+[data-admin-theme='light'] .admin-shell .hover\:text-neutral-300:hover { color: #333 !important; }
