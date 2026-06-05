@@ -455,7 +455,7 @@ a { color: inherit; }
 .sc-wrap:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,.25); }
 .sc-link { text-decoration: none; display: block; height: 100%; color: inherit; }
 .sc-art {
-  height: 220px; position: relative; overflow: hidden;
+  aspect-ratio: 16 / 9; position: relative; overflow: hidden;
   display: flex; align-items: flex-end; padding: 20px;
   background-color: var(--panel-solid);
 }

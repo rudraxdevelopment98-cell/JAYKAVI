@@ -24,10 +24,10 @@ export default function AdminShell({
   useEffect(() => { setOpen(false); }, [pathname]);
 
   return (
-    <div className="admin-shell min-h-screen bg-neutral-950 text-neutral-100 pt-20">
+    <div className="admin-shell min-h-screen bg-neutral-950 text-neutral-100">
 
-      {/* ── Mobile admin bar (hidden on md+) ── */}
-      <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-neutral-800 bg-neutral-900">
+      {/* ── Mobile admin bar (hidden on md+) — sticky so it stays on scroll ── */}
+      <div className="md:hidden sticky top-0 z-30 flex items-center gap-3 px-4 py-3 border-b border-neutral-800 bg-neutral-900">
         <button
           onClick={() => setOpen(v => !v)}
           className="flex items-center justify-center w-8 h-8 rounded text-neutral-400
@@ -65,10 +65,10 @@ export default function AdminShell({
         {/* ── Sidebar ── */}
         <aside
           className={[
-            // Mobile: fixed overlay panel starting below the site nav
-            'fixed top-20 left-0 z-50 h-[calc(100vh-5rem)] overflow-y-auto',
-            // Desktop: back in flex flow, always visible
-            'md:relative md:top-auto md:h-auto md:z-auto md:min-h-screen',
+            // Mobile: fixed overlay panel
+            'fixed top-0 left-0 z-50 h-screen overflow-y-auto',
+            // Desktop: sticky so the sidebar stays put while the page scrolls
+            'md:sticky md:top-0 md:left-auto md:z-auto md:self-start md:h-screen',
             // Sizing & border
             'w-64 flex-shrink-0 border-r border-neutral-800',
             // Background (lighter on desktop, darker overlay on mobile)

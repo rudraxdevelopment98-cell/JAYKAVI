@@ -366,8 +366,8 @@ const styles = `
   .her-gramophone { font-size: 1.4rem; }
 
   /* ── Videos ── */
-  .her-videos { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(12px,1.6vw,18px); }
-  .her-vid { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; text-decoration: none;
+  .her-videos { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px,1.8vw,22px); }
+  .her-vid { position: relative; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden; text-decoration: none;
     background-size: cover; background-position: center; border: 1px solid var(--gold);
     display: flex; align-items: flex-end; transition: transform .25s, box-shadow .25s; }
   .her-vid:hover { transform: translateY(-5px); box-shadow: 0 18px 40px rgba(0,0,0,.45); }

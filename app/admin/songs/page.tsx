@@ -41,7 +41,7 @@ export default async function SongsAdminPage({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap sticky top-0 z-20 -mx-4 px-4 md:-mx-8 md:px-8 -mt-4 md:-mt-8 pt-4 md:pt-8 pb-4 bg-neutral-950/85 backdrop-blur-md border-b border-neutral-800/60">
         <div>
           <h1 className="text-3xl font-semibold">Songs</h1>
           <p className="text-neutral-400 mt-1 text-sm">

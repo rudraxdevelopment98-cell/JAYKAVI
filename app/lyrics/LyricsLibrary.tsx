@@ -97,6 +97,8 @@ export default function LyricsLibrary({
         </p>
       </header>
 
+      {/* ── Sticky controls: search + filters + toolbar ── */}
+      <div className="lib-controls">
       {/* ── Search ── */}
       <div className="lib-searchbar">
         <svg className="lib-search-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -177,6 +179,7 @@ export default function LyricsLibrary({
           </select>
         </div>
       </div>
+      </div>
 
       {/* ── Tiles ── */}
       {filtered.length === 0 ? (
@@ -245,8 +248,16 @@ const styles = `
   .lib-sub { font-size: 1rem; margin: 0 0 36px; }
 
   /* Search */
+  /* Sticky controls block — search + filters + toolbar pin below the nav */
+  .lib-controls {
+    position: sticky; top: 64px; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    margin: 0 -16px 22px; padding: 16px 16px 0;
+    border-radius: 16px;
+  }
   .lib-searchbar {
-    position: relative; display: flex; align-items: center; margin-bottom: 26px;
+    position: relative; display: flex; align-items: center; margin-bottom: 18px;
   }
   .lib-search-ico { position: absolute; left: 20px; color: var(--muted); pointer-events: none; }
   .lib-searchbar input {
@@ -262,7 +273,7 @@ const styles = `
   }
 
   /* Filters */
-  .lib-filters { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
+  .lib-filters { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
   .lib-chiprow { display: flex; align-items: flex-start; gap: 14px; }
   .lib-chiplabel {
     flex-shrink: 0; width: 86px; padding-top: 8px;
@@ -281,7 +292,7 @@ const styles = `
   /* Toolbar */
   .lib-toolbar {
     display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-    padding: 14px 0; margin-bottom: 22px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    padding: 12px 0; margin-bottom: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
   }
   .lib-toolbar-left { display: flex; align-items: center; gap: 16px; }
   .lib-count { font-size: .9rem; font-weight: 600; }
@@ -305,7 +316,7 @@ const styles = `
   }
   .lib-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 16px 40px rgba(0,0,0,.28); }
   .lib-card-art {
-    position: relative; aspect-ratio: 1 / 1; background-size: cover; background-position: center;
+    position: relative; aspect-ratio: 16 / 9; background-size: cover; background-position: center;
     background-color: var(--panel-solid);
     display: flex; align-items: center; justify-content: center;
   }

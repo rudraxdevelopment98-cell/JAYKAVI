@@ -426,7 +426,7 @@ function TraditionalHomeStyles() {
       }
       .th-catalog-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,.3); }
       .th-catalog-art {
-        height: 130px; /* compact on mobile */
+        aspect-ratio: 16 / 9;
         background-size: cover; background-position: center;
         background-color: var(--panel-solid);
         display: grid; place-items: center; position: relative;
@@ -512,7 +512,7 @@ function TraditionalHomeStyles() {
       }
       .th-vid-card { text-decoration: none; }
       .th-vid-thumb {
-        height: 120px; border-radius: 14px;
+        aspect-ratio: 16 / 9; border-radius: 14px;
         background-size: cover; background-position: center;
         background-color: var(--panel-solid);
         display: grid; place-items: center;
@@ -541,12 +541,10 @@ function TraditionalHomeStyles() {
         .th-hero-ctas { flex-direction: row; width: auto; max-width: none; margin: 0 auto; }
         .th-cta-primary, .th-cta-ghost { min-width: 200px; }
         .th-catalog { grid-template-columns: repeat(3, 1fr); gap: 18px; }
-        .th-catalog-art { height: 155px; }
         .th-about-section { grid-template-columns: 220px 1fr; align-items: start; gap: 48px; }
         .th-about-visual { justify-content: flex-start; }
         .th-about-photo { width: 220px; }
         .th-video-grid { grid-template-columns: repeat(2, 1fr); gap: 18px; }
-        .th-vid-thumb { height: 150px; }
       }
 
       /* ── DESKTOP: 1024px ── */
@@ -562,7 +560,6 @@ function TraditionalHomeStyles() {
         .th-stats { justify-content: flex-start; }
         .th-hero-portrait { display: block; }
         .th-catalog { grid-template-columns: repeat(4, 1fr); }
-        .th-catalog-art { height: 180px; }
         .th-about-section { grid-template-columns: 260px 1fr; gap: 64px; }
         .th-about-photo { width: 260px; }
         .th-features { grid-template-columns: 1fr 1fr; }

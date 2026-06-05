@@ -261,8 +261,15 @@ export default function SongArchive({ songs, facets }: { songs: Song[]; facets: 
 
   return (
     <div>
-      {/* search + filters */}
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginBottom: 28 }}>
+      {/* search + filters — sticky below the nav so they stay while scrolling */}
+      <div style={{
+        display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center',
+        position: 'sticky', top: 64, zIndex: 20,
+        background: 'color-mix(in srgb, var(--bg) 90%, transparent)',
+        backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
+        margin: '0 -12px 24px', padding: '12px',
+        borderRadius: 14,
+      }}>
         <input
           value={q} onChange={(e) => setQ(e.target.value)}
           placeholder="Search title, singer, or lyrics…"

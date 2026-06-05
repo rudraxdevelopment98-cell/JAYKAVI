@@ -132,10 +132,13 @@ const styles = `
   .exp-title { font-size: clamp(2.2rem,6vw,4rem); font-weight: 600; line-height: 1.05; margin: 0 0 28px; letter-spacing: -.015em; }
   .exp--trad .exp-title { font-weight: 800; }
 
-  /* Tab bar */
+  /* Tab bar — sticky below the nav */
   .exp-tabs {
     display: flex; gap: 4px; flex-wrap: wrap;
     border-bottom: 1px solid var(--line); margin-bottom: 34px;
+    position: sticky; top: 64px; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   }
   .exp-tab {
     position: relative; display: inline-flex; align-items: center; gap: 9px;
@@ -169,8 +172,8 @@ const styles = `
     position: relative; background-size: cover; background-position: center;
     background-color: var(--panel-solid); display: flex; align-items: flex-end;
   }
-  .exp-card-cover { height: 165px; }
-  .exp-card-photo { height: 195px; justify-content: center; }
+  .exp-card-cover { aspect-ratio: 16 / 9; }
+  .exp-card-photo { aspect-ratio: 16 / 9; justify-content: center; }
   .exp-card-photo-ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 3rem; opacity: .25; }
   .exp-card-scrim { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.72) 0%, transparent 60%); }
   .exp-card-cover-title {
