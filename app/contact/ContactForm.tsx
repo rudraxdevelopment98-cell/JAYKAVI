@@ -11,17 +11,34 @@ interface Fields {
 interface Errors {
   name?: string;
   email?: string;
+  subject?: string;
   message?: string;
 }
 
+// Letters of any language (incl. Gujarati/Devanagari) plus spaces & basic name punctuation.
+const ALPHA_RE = /^[\p{L}\s.'’-]+$/u;
+
 function validateFields(fields: Fields): Errors {
   const errors: Errors = {};
-  if (!fields.name.trim() || fields.name.trim().length < 2) {
-    errors.name = 'Name must be at least 2 characters.';
+  const name = fields.name.trim();
+  const subject = fields.subject.trim();
+
+  if (name.length < 5) {
+    errors.name = 'Name must be at least 5 characters.';
+  } else if (!ALPHA_RE.test(name)) {
+    errors.name = 'Name must contain letters only.';
   }
+
   if (!fields.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim())) {
     errors.email = 'Please enter a valid email address.';
   }
+
+  if (subject.length < 5) {
+    errors.subject = 'Subject must be at least 5 characters.';
+  } else if (!ALPHA_RE.test(subject)) {
+    errors.subject = 'Subject must contain letters only.';
+  }
+
   if (!fields.message.trim() || fields.message.trim().length < 10) {
     errors.message = 'Message must be at least 10 characters.';
   }
@@ -54,7 +71,7 @@ export default function ContactForm({ social }: { social: Record<string, string>
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setTouched({ name: true, email: true, message: true });
+    setTouched({ name: true, email: true, subject: true, message: true });
     const validationErrors = validateFields(fields);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
@@ -203,16 +220,21 @@ export default function ContactForm({ social }: { social: Record<string, string>
           }
         </div>
 
-        {/* Subject (optional) */}
-        <div style={{ marginBottom: 16 }}>
+        {/* Subject */}
+        <div style={{ marginBottom: 4 }}>
           <input
-            style={inputBase}
+            style={{ ...inputBase, borderColor: touched.subject && errors.subject ? '#e53935' : 'var(--line)' }}
             name="subject"
-            placeholder="Subject (optional)"
+            placeholder="Subject"
             value={fields.subject}
             onChange={handleChange}
+            onBlur={handleBlur}
             autoComplete="off"
           />
+          {touched.subject && errors.subject
+            ? <p style={errorStyle}>{errors.subject}</p>
+            : <div style={{ marginBottom: 16 }} />
+          }
         </div>
 
         {/* Message */}
