@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { getAllSongs, getFacets, getActiveTheme } from '@/lib/data';
@@ -52,12 +53,20 @@ export default async function ExplorePage() {
     }));
 
   return (
-    <ExploreTabs
-      songs={songs}
-      facets={facets}
-      collections={collections}
-      singers={singers}
-      traditional={activeTheme === 'traditional'}
-    />
+    <Suspense
+      fallback={
+        <div style={{ padding: 'clamp(110px,15vh,170px) clamp(20px,6vw,80px) 100px', maxWidth: 1200, margin: '0 auto' }}>
+          <p style={{ color: 'var(--muted)' }}>Loading…</p>
+        </div>
+      }
+    >
+      <ExploreTabs
+        songs={songs}
+        facets={facets}
+        collections={collections}
+        singers={singers}
+        traditional={activeTheme === 'traditional'}
+      />
+    </Suspense>
   );
 }

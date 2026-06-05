@@ -78,7 +78,6 @@ export default function ExploreTabs({
             </button>
           );
         })}
-        <span className="exp-tab-underline" data-tab={tab} aria-hidden />
       </div>
 
       {/* ── Panels ── */}
@@ -155,32 +154,24 @@ const styles = `
 
   /* Tab bar */
   .exp-tabs {
-    position: relative; display: flex; gap: 6px; flex-wrap: wrap;
+    display: flex; gap: 4px; flex-wrap: wrap;
     border-bottom: 1px solid var(--line); margin-bottom: 34px;
   }
   .exp-tab {
     position: relative; display: inline-flex; align-items: center; gap: 9px;
     background: none; border: none; cursor: pointer;
-    padding: 14px 20px; font-size: 1rem; font-weight: 600; color: var(--muted);
-    transition: color .2s; font-family: inherit;
+    padding: 14px 20px 12px; font-size: 1rem; font-weight: 600; color: var(--muted);
+    transition: color .2s; font-family: inherit; border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
   }
   .exp-tab:hover { color: var(--text); }
-  .exp-tab.active { color: var(--text); }
+  .exp-tab.active { color: var(--text); border-bottom-color: var(--accent); }
   .exp-tab-count {
     font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 100px;
     background: var(--panel); color: var(--muted); border: 1px solid var(--line);
   }
   .exp-tab.active .exp-tab-count { background: var(--accent); color: var(--bg); border-color: var(--accent); }
   .exp--trad .exp-tab.active .exp-tab-count { color: #1a1200; }
-  .exp-tab-underline {
-    position: absolute; bottom: -1px; height: 2px; background: var(--accent);
-    width: 33.33%; transition: transform .3s cubic-bezier(.4,0,.2,1); border-radius: 2px;
-  }
-  /* underline driven by which tab is active */
-  .exp-tab-underline[data-tab='songs'] { transform: translateX(0); }
-  .exp-tab-underline[data-tab='collections'] { transform: translateX(100%); }
-  .exp-tab-underline[data-tab='singers'] { transform: translateX(200%); }
-  @media (max-width: 560px) { .exp-tab-underline { display: none; } .exp-tab.active { border-bottom: 2px solid var(--accent); } }
 
   /* Grids */
   .exp-grid { display: grid; gap: 20px; }
