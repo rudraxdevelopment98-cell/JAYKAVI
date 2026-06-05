@@ -1,38 +1,25 @@
-import { getSongsWithLyrics, getAllSongs } from '@/lib/data';
-import LyricsList from './LyricsList';
+import { getAllSongs, getAllCollections, getActiveTheme } from '@/lib/data';
+import LyricsLibrary from './LyricsLibrary';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = { title: 'Lyrics — JAYKAVI' };
+export const metadata = {
+  title: 'Lyric Library — JAYKAVI',
+  description: 'The complete lyric library — search, filter and read the lyrics of every song written by JAYKAVI.',
+};
 
 export default async function LyricsPage() {
-  const [withLyrics, all] = await Promise.all([getSongsWithLyrics(), getAllSongs()]);
+  const [songs, collections, activeTheme] = await Promise.all([
+    getAllSongs(),
+    getAllCollections(),
+    getActiveTheme(),
+  ]);
 
   return (
-    <div className="page-wrap page-wrap-narrow">
-      <p
-        className="accent"
-        style={{
-          textTransform: 'uppercase',
-          letterSpacing: '.3em',
-          fontSize: '.76rem',
-          fontWeight: 600,
-        }}
-      >
-        Lyrics
-      </p>
-      <h1
-        className="font-serif"
-        style={{
-          fontSize: 'clamp(2.2rem,5vw,3.6rem)',
-          fontWeight: 600,
-          margin: '12px 0 28px',
-        }}
-      >
-        The lyric library
-      </h1>
-
-      <LyricsList withLyrics={withLyrics} all={all} />
-    </div>
+    <LyricsLibrary
+      songs={songs}
+      collections={collections}
+      traditional={activeTheme === 'traditional'}
+    />
   );
 }
