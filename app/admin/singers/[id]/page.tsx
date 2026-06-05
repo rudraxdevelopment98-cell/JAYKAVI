@@ -3,15 +3,22 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SingerForm from '../SingerForm';
 import DeleteButton from '../../_components/DeleteButton';
-import { updateSinger, deleteSinger } from '../actions';
+import SongMultiSelect from '../../_components/SongMultiSelect';
+import { updateSinger, deleteSinger, setSingerSongs } from '../actions';
 
 export const dynamic = 'force-dynamic';
 
 export default async function EditSingerPage({ params }: { params: { id: string } }) {
-  const singer = await prisma.singer.findUnique({
-    where: { id: params.id },
-    include: { songs: { include: { song: true } } },
-  });
+  const [singer, allSongs] = await Promise.all([
+    prisma.singer.findUnique({
+      where: { id: params.id },
+      include: { songs: { include: { song: true } } },
+    }),
+    prisma.song.findMany({
+      orderBy: { title: 'asc' },
+      select: { id: true, title: true, releaseYear: true },
+    }),
+  ]);
   if (!singer) notFound();
 
   return (
@@ -33,22 +40,17 @@ export default async function EditSingerPage({ params }: { params: { id: string 
         submitLabel="Save changes"
       />
 
-      {singer.songs.length > 0 && (
-        <div className="mt-8 p-4 bg-neutral-900/60 border border-neutral-800 rounded-xl">
-          <div className="text-sm font-medium mb-2">
-            Performs on {singer.songs.length}{' '}
-            {singer.songs.length === 1 ? 'song' : 'songs'}
-          </div>
-          <ul className="text-xs text-neutral-400 space-y-1">
-            {singer.songs.slice(0, 5).map((s) => (
-              <li key={s.songId}>· {s.song.title}</li>
-            ))}
-            {singer.songs.length > 5 && (
-              <li className="text-neutral-600">…and {singer.songs.length - 5} more</li>
-            )}
-          </ul>
-        </div>
-      )}
+      <SongMultiSelect
+        allSongs={allSongs.map((s) => ({
+          id: s.id,
+          title: s.title,
+          subtitle: s.releaseYear ? String(s.releaseYear) : undefined,
+        }))}
+        selectedIds={singer.songs.map((s) => s.songId)}
+        action={setSingerSongs.bind(null, singer.id)}
+        label="Songs this singer performs"
+        saveLabel="Save songs"
+      />
 
       <div className="mt-8 pt-6 border-t border-neutral-800">
         <DeleteButton

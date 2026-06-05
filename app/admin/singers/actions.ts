@@ -88,3 +88,33 @@ export async function deleteSinger(id: string) {
   revalidatePath('/admin/singers');
   redirect('/admin/singers');
 }
+
+// Sync which songs this singer performs on (SongSinger join table).
+// Adds newly-selected songs, removes deselected ones.
+export async function setSingerSongs(
+  singerId: string,
+  songIds: string[],
+): Promise<{ error?: string } | void> {
+  assertAdmin(await auth());
+  const ids = Array.from(new Set(songIds.filter((s) => typeof s === 'string' && s)));
+
+  try {
+    await prisma.$transaction([
+      // remove links no longer selected
+      prisma.songSinger.deleteMany({
+        where: { singerId, songId: { notIn: ids.length ? ids : ['__none__'] } },
+      }),
+      // add new links (skip duplicates)
+      prisma.songSinger.createMany({
+        data: ids.map((songId) => ({ singerId, songId })),
+        skipDuplicates: true,
+      }),
+    ]);
+  } catch {
+    return { error: 'Could not update songs. Please try again.' };
+  }
+
+  revalidatePath(`/admin/singers/${singerId}`);
+  revalidatePath('/admin/singers');
+  revalidatePath('/explore');
+}

@@ -3,15 +3,22 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import CollectionForm from '../CollectionForm';
 import DeleteButton from '../../_components/DeleteButton';
-import { updateCollection, deleteCollection } from '../actions';
+import SongMultiSelect from '../../_components/SongMultiSelect';
+import { updateCollection, deleteCollection, setCollectionSongs } from '../actions';
 
 export const dynamic = 'force-dynamic';
 
 export default async function EditCollectionPage({ params }: { params: { id: string } }) {
-  const c = await prisma.collection.findUnique({
-    where: { id: params.id },
-    include: { songs: true },
-  });
+  const [c, allSongs] = await Promise.all([
+    prisma.collection.findUnique({
+      where: { id: params.id },
+      include: { songs: true },
+    }),
+    prisma.song.findMany({
+      orderBy: { title: 'asc' },
+      select: { id: true, title: true, releaseYear: true },
+    }),
+  ]);
   if (!c) notFound();
 
   return (
@@ -35,18 +42,17 @@ export default async function EditCollectionPage({ params }: { params: { id: str
         submitLabel="Save changes"
       />
 
-      {c.songs.length > 0 && (
-        <div className="mt-8 p-4 bg-neutral-900/60 border border-neutral-800 rounded-xl">
-          <div className="text-sm font-medium mb-2">
-            Contains {c.songs.length} {c.songs.length === 1 ? 'song' : 'songs'}
-          </div>
-          <ul className="text-xs text-neutral-400 space-y-1">
-            {c.songs.slice(0, 8).map((s) => (
-              <li key={s.id}>· {s.title}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <SongMultiSelect
+        allSongs={allSongs.map((s) => ({
+          id: s.id,
+          title: s.title,
+          subtitle: s.releaseYear ? String(s.releaseYear) : undefined,
+        }))}
+        selectedIds={c.songs.map((s) => s.id)}
+        action={setCollectionSongs.bind(null, c.id)}
+        label="Songs in this collection"
+        saveLabel="Save songs"
+      />
 
       <div className="mt-8 pt-6 border-t border-neutral-800">
         <DeleteButton

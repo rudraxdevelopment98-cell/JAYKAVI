@@ -93,3 +93,34 @@ export async function deleteCollection(id: string) {
   revalidatePath('/admin/collections');
   redirect('/admin/collections');
 }
+
+// Assign a set of songs to this collection. Songs newly selected get attached;
+// songs that were in this collection but are now unselected get detached.
+export async function setCollectionSongs(
+  collectionId: string,
+  songIds: string[],
+): Promise<{ error?: string } | void> {
+  assertAdmin(await auth());
+  const ids = Array.from(new Set(songIds.filter((s) => typeof s === 'string' && s)));
+
+  try {
+    await prisma.$transaction([
+      // detach songs currently in this collection that are no longer selected
+      prisma.song.updateMany({
+        where: { collectionId, id: { notIn: ids.length ? ids : ['__none__'] } },
+        data: { collectionId: null },
+      }),
+      // attach all selected songs to this collection
+      prisma.song.updateMany({
+        where: { id: { in: ids.length ? ids : ['__none__'] } },
+        data: { collectionId },
+      }),
+    ]);
+  } catch {
+    return { error: 'Could not update songs. Please try again.' };
+  }
+
+  revalidatePath(`/admin/collections/${collectionId}`);
+  revalidatePath('/admin/collections');
+  revalidatePath('/explore');
+}
