@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import type { Song } from '@/lib/types';
 import SongArchive from '@/components/SongArchive';
 
@@ -34,18 +34,22 @@ export default function ExploreTabs({
   singers: SingerLite[];
   traditional: boolean;
 }) {
-  const router = useRouter();
   const params = useSearchParams();
   const initial = (params.get('tab') as Tab) || 'songs';
   const [tab, setTab] = useState<Tab>(
     ['songs', 'collections', 'singers'].includes(initial) ? initial : 'songs',
   );
 
+  // Tabs are pure client state. Sync the URL with history.replaceState so the
+  // deep-link stays shareable WITHOUT a Next.js navigation (which, on this
+  // force-dynamic page, would re-run the server and flash the Suspense fallback).
   function selectTab(t: Tab) {
     setTab(t);
-    const sp = new URLSearchParams(Array.from(params.entries()));
-    sp.set('tab', t);
-    router.replace(`/explore?${sp.toString()}`, { scroll: false });
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      sp.set('tab', t);
+      window.history.replaceState(null, '', `${window.location.pathname}?${sp.toString()}`);
+    }
   }
 
   return (

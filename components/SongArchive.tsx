@@ -1,6 +1,6 @@
 'use client';
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Song } from '@/lib/types';
 import SongCard from './SongCard';
@@ -172,33 +172,41 @@ function FilterDropdown({ value, options, onChange, placeholder = 'All' }: Filte
 // ---- SongArchive ----
 
 export default function SongArchive({ songs, facets }: { songs: Song[]; facets: Facets }) {
-  const router = useRouter();
   const params = useSearchParams();
-  const pathname = usePathname();
 
+  // All filters live in React state so filtering is instant and 100% client-side.
+  // We sync them into the URL with history.replaceState (NO Next.js navigation),
+  // which keeps deep-links shareable without triggering a server round-trip /
+  // Suspense reload of the whole section on every keystroke.
   const [q, setQ] = useState(params.get('q') ?? '');
-  const singer = params.get('singer') ?? '';
-  const genre = params.get('genre') ?? '';
-  const year = params.get('year') ?? '';
-  const sort = params.get('sort') ?? 'most-viewed';
-  const view = params.get('view') ?? 'grid';
+  const [singer, setSinger] = useState(params.get('singer') ?? '');
+  const [genre, setGenre] = useState(params.get('genre') ?? '');
+  const [year, setYear] = useState(params.get('year') ?? '');
+  const [sort, setSort] = useState(params.get('sort') ?? 'most-viewed');
+  const [view, setView] = useState(params.get('view') ?? 'grid');
 
-  // debounce the search box into the URL — only when it actually changed,
-  // so we never fire a navigation on mount (which would loop via redirects).
+  // debounce search input before it touches the URL
+  const [debouncedQ, setDebouncedQ] = useState(q);
   useEffect(() => {
-    const current = params.get('q') ?? '';
-    if (q === current) return;
-    const t = setTimeout(() => setParam('q', q || null), 250);
+    const t = setTimeout(() => setDebouncedQ(q), 200);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q]);
 
-  function setParam(key: string, value: string | null) {
-    const next = new URLSearchParams(Array.from(params.entries()));
-    if (value) next.set(key, value); else next.delete(key);
-    const qs = next.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }
+  // keep the URL in sync for shareable links — without any navigation
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const sp = new URLSearchParams(window.location.search);
+    const set = (k: string, v: string) => { if (v) sp.set(k, v); else sp.delete(k); };
+    set('q', debouncedQ.trim());
+    set('singer', singer);
+    set('genre', genre);
+    set('year', year);
+    set('sort', sort === 'most-viewed' ? '' : sort);
+    set('view', view === 'grid' ? '' : view);
+    const qs = sp.toString();
+    const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+    window.history.replaceState(null, '', url);
+  }, [debouncedQ, singer, genre, year, sort, view]);
 
   const filtered = useMemo(() => {
     let list = [...songs];
@@ -264,33 +272,33 @@ export default function SongArchive({ songs, facets }: { songs: Song[]; facets: 
           <FilterDropdown
             value={singer}
             options={singerOptions}
-            onChange={(val) => setParam('singer', val || null)}
+            onChange={setSinger}
             placeholder="All singers"
           />
           <FilterDropdown
             value={genre}
             options={genreOptions}
-            onChange={(val) => setParam('genre', val || null)}
+            onChange={setGenre}
             placeholder="All genres"
           />
           {facets.years.length > 0 && (
             <FilterDropdown
               value={year}
               options={yearOptions}
-              onChange={(val) => setParam('year', val || null)}
+              onChange={setYear}
               placeholder="All years"
             />
           )}
           <FilterDropdown
             value={sort}
             options={sortOptions}
-            onChange={(val) => setParam('sort', val)}
+            onChange={setSort}
             placeholder="Sort"
           />
           <div style={{ display: 'flex', gap: 4 }}>
             <button
               type="button"
-              onClick={() => setParam('view', 'grid')}
+              onClick={() => setView('grid')}
               style={{ ...selectStyle, opacity: view === 'grid' ? 1 : .45, padding: '9px 13px' }}
               aria-label="Grid view"
             >
@@ -301,7 +309,7 @@ export default function SongArchive({ songs, facets }: { songs: Song[]; facets: 
             </button>
             <button
               type="button"
-              onClick={() => setParam('view', 'list')}
+              onClick={() => setView('list')}
               style={{ ...selectStyle, opacity: view === 'list' ? 1 : .45, padding: '9px 13px' }}
               aria-label="List view"
             >
