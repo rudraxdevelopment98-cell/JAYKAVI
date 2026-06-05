@@ -87,7 +87,7 @@ export default async function SiteThemePage() {
       {/* Per-theme configuration links */}
       {current === 'traditional' && (
         <div className="mt-8 p-4 rounded-xl border border-amber-900/50 bg-amber-950/20">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <p className="text-sm font-semibold text-amber-300">Traditional Theme is active</p>
               <p className="text-xs text-neutral-400 mt-1">
@@ -96,6 +96,25 @@ export default async function SiteThemePage() {
             </div>
             <Link
               href="/admin/theme/traditional"
+              className="flex-shrink-0 px-4 py-2 rounded-lg border border-amber-700 text-amber-300 text-sm font-medium hover:bg-amber-950/40 transition"
+            >
+              Configure →
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {current === 'heritage' && (
+        <div className="mt-8 p-4 rounded-xl border border-amber-900/50 bg-amber-950/20">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="text-sm font-semibold text-amber-300">Heritage Library Theme is active</p>
+              <p className="text-xs text-neutral-400 mt-1">
+                Configure the hero banner, homepage sections, gallery and events for the Heritage Library theme.
+              </p>
+            </div>
+            <Link
+              href="/admin/theme/heritage"
               className="flex-shrink-0 px-4 py-2 rounded-lg border border-amber-700 text-amber-300 text-sm font-medium hover:bg-amber-950/40 transition"
             >
               Configure →

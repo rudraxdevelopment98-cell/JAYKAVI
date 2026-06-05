@@ -193,6 +193,68 @@ a { color: inherit; }
   color: transparent;
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   HERITAGE LIBRARY THEME — Gujarati literary archive
+   Deep gold on near-black (dark) / warm parchment (light).
+   ════════════════════════════════════════════════════════════════════ */
+[data-theme-skin='heritage'][data-theme='dark'],
+[data-theme-skin='heritage']:not([data-theme='light']) {
+  --bg: #0F0800;
+  --panel: rgba(32, 22, 6, 0.66);
+  --panel-solid: #1A1204;
+  --text: #F3E9D2;
+  --muted: #9C8458;
+  --line: rgba(212, 175, 55, 0.16);
+  --gold: #D4AF37;
+  --gold-soft: #EBD27A;
+  --accent: #D4AF37;
+  --glow: 0 0 70px rgba(212,175,55,.20);
+  --hero-grad:
+    radial-gradient(70% 60% at 50% -5%, rgba(212,175,55,.20) 0%, transparent 60%),
+    radial-gradient(50% 50% at 100% 100%, rgba(120,80,10,.18) 0%, transparent 65%),
+    linear-gradient(170deg, #1c1203 0%, #0f0800 55%, #080500 100%);
+}
+[data-theme-skin='heritage'][data-theme='light'] {
+  --bg: #FAF3E7;
+  --panel: rgba(255, 250, 240, 0.7);
+  --panel-solid: #FFFBF3;
+  --text: #2A1E08;
+  --muted: #8A6E3C;
+  --line: rgba(184, 134, 11, 0.18);
+  --gold: #B8860B;
+  --gold-soft: #C99A2E;
+  --accent: #B8860B;
+  --glow: 0 20px 60px rgba(184,134,11,.18);
+  --hero-grad:
+    radial-gradient(70% 60% at 50% -5%, rgba(184,134,11,.16) 0%, transparent 60%),
+    linear-gradient(170deg, #fbf5ea 0%, #f6ecdb 60%, #f1e6d2 100%);
+}
+[data-theme-skin='heritage'] .gradient-text,
+[data-theme-skin='heritage'] .her-gold-text {
+  background: linear-gradient(100deg, var(--gold-soft), var(--gold));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Heritage nav — gilded, with a thin gold rule once scrolled */
+[data-theme-skin='heritage'] .site-nav.scrolled {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 94%, transparent), color-mix(in srgb, var(--bg) 80%, transparent));
+  border-color: var(--line);
+}
+[data-theme-skin='heritage'] .nav-logo { font-style: italic; }
+[data-theme-skin='heritage'] .nav-logo .accent,
+[data-theme-skin='heritage'] .nav-link.active { color: var(--gold); }
+[data-theme-skin='heritage'] .nav-link.active::after,
+[data-theme-skin='heritage'] .nav-link:hover::after {
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+/* Gold top frame on every heritage page */
+[data-theme-skin='heritage'] body::after,
+[data-theme-skin='heritage'] .her-frame {
+  content: ""; position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 300;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--gold-soft), var(--gold), transparent);
+  opacity: .8; pointer-events: none;
+}
+
 /* =====================================================================
    TRADITIONAL THEME — site-wide ornamental chrome
    These rules only activate under [data-theme-skin='traditional'] and give

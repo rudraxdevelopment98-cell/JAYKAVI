@@ -24,4 +24,11 @@ export const SITE_THEMES: ThemeDefinition[] = [
     darkPreview: 'linear-gradient(135deg, #08090B 40%, #D4AF37 80%, #FF9933 100%)',
     lightPreview: 'linear-gradient(135deg, #FDFBF6 40%, #A65D00 80%, #FF9933 100%)',
   },
+  {
+    key: 'heritage',
+    label: 'Heritage Library',
+    description: 'A digital heritage library — Gujarati literary archive aesthetic with deep gold, parchment textures and a grand artist banner.',
+    darkPreview: 'linear-gradient(135deg, #0F0800 45%, #D4AF37 100%)',
+    lightPreview: 'linear-gradient(135deg, #FAF3E7 45%, #B8860B 100%)',
+  },
 ];

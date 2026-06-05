@@ -404,3 +404,112 @@ export async function setTraditionalSettings(s: TraditionalSettings): Promise<vo
     },
   });
 }
+
+// ── Heritage Library theme customization ─────────────────────────────────
+
+export interface HeritageEvent { date: string; title: string; place: string }
+
+export interface HeritageSettings {
+  heroPhoto: string | null;
+  heroVideo: string | null;
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  quote: string | null;
+  gallery: string[];
+  events: HeritageEvent[];
+  legacyTitle: string;
+  legacyBody: string | null;
+  show: {
+    bhajans: boolean; poetry: boolean; videos: boolean;
+    gallery: boolean; events: boolean; legacy: boolean;
+  };
+}
+
+export const HERITAGE_DEFAULTS: HeritageSettings = {
+  heroPhoto: null,
+  heroVideo: null,
+  eyebrow: 'Digital Heritage Library',
+  title: 'Jayesh Prajapati',
+  subtitle: 'A living archive of Gujarati verse, bhajan and lyric.',
+  quote: null,
+  gallery: [],
+  events: [],
+  legacyTitle: 'The Legacy',
+  legacyBody: null,
+  show: { bhajans: true, poetry: true, videos: true, gallery: true, events: true, legacy: true },
+};
+
+function parseEvents(raw: string | null | undefined): HeritageEvent[] {
+  if (!raw) return [];
+  try {
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .filter((e) => e && typeof e === 'object')
+      .map((e) => ({
+        date: String(e.date ?? ''),
+        title: String(e.title ?? ''),
+        place: String(e.place ?? ''),
+      }))
+      .filter((e) => e.title);
+  } catch {
+    return [];
+  }
+}
+
+export async function getHeritageSettings(): Promise<HeritageSettings> {
+  try {
+    const row = await prisma.siteSettings.findFirst({ where: { id: 1 } });
+    if (!row) return HERITAGE_DEFAULTS;
+    const d = HERITAGE_DEFAULTS;
+    return {
+      heroPhoto:   row.herHeroPhoto   || null,
+      heroVideo:   row.herHeroVideo   || null,
+      eyebrow:     row.herEyebrow     || d.eyebrow,
+      title:       row.herTitle       || d.title,
+      subtitle:    row.herSubtitle    || d.subtitle,
+      quote:       row.herQuote       || null,
+      gallery:     row.herGallery     ?? [],
+      events:      parseEvents(row.herEventsJson),
+      legacyTitle: row.herLegacyTitle || d.legacyTitle,
+      legacyBody:  row.herLegacyBody  || null,
+      show: {
+        bhajans: row.herShowBhajans,
+        poetry:  row.herShowPoetry,
+        videos:  row.herShowVideos,
+        gallery: row.herShowGallery,
+        events:  row.herShowEvents,
+        legacy:  row.herShowLegacy,
+      },
+    };
+  } catch {
+    return HERITAGE_DEFAULTS;
+  }
+}
+
+export async function setHeritageSettings(s: HeritageSettings): Promise<void> {
+  const data = {
+    herHeroPhoto:   s.heroPhoto || null,
+    herHeroVideo:   s.heroVideo || null,
+    herEyebrow:     s.eyebrow,
+    herTitle:       s.title,
+    herSubtitle:    s.subtitle,
+    herQuote:       s.quote || null,
+    herGallery:     s.gallery,
+    herEventsJson:  JSON.stringify(s.events ?? []),
+    herLegacyTitle: s.legacyTitle,
+    herLegacyBody:  s.legacyBody || null,
+    herShowBhajans: s.show.bhajans,
+    herShowPoetry:  s.show.poetry,
+    herShowVideos:  s.show.videos,
+    herShowGallery: s.show.gallery,
+    herShowEvents:  s.show.events,
+    herShowLegacy:  s.show.legacy,
+  };
+  await prisma.siteSettings.upsert({
+    where: { id: 1 },
+    update: data,
+    create: { id: 1, ...data },
+  });
+}

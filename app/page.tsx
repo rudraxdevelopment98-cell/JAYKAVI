@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
-import { getLyricist, getTrendingSongs, getTopSongs, getJourney, getActiveTheme, getTraditionalSettings, getSocial } from '@/lib/data';
+import { getLyricist, getTrendingSongs, getTopSongs, getJourney, getActiveTheme, getTraditionalSettings, getHeritageSettings, getSocial } from '@/lib/data';
 import CinematicHero from '@/components/CinematicHero';
 import HorizontalScrollRow from '@/components/HorizontalScrollRow';
 import SectionHead from '@/components/SectionHead';
 import { FadeUp } from '@/components/Reveal';
 import JsonLd from '@/components/JsonLd';
 import TraditionalHome from '@/components/traditional/TraditionalHome';
+import HeritageHome from '@/components/heritage/HeritageHome';
 import { siteUrl, absoluteUrl } from '@/lib/seo';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -29,6 +30,10 @@ export default async function Home() {
   if (activeTheme === 'traditional') {
     const tradSettings = await getTraditionalSettings();
     return <TraditionalHome settings={tradSettings} />;
+  }
+  if (activeTheme === 'heritage') {
+    const heritageSettings = await getHeritageSettings();
+    return <HeritageHome settings={heritageSettings} />;
   }
 
   const [l, trendingAll, topAll, journeyAll, social] = await Promise.all([

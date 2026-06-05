@@ -289,6 +289,25 @@ model SiteSettings {
   tradF3Desc        String  @default("ગુજરાતી સંસ્કૃતિનો સંગમ")
   tradF4Title       String   @default("સેવા")
   tradF4Desc        String   @default("સંગીત દ્વારા સેવા અને સમર્પણ")
+
+  // Heritage Library theme customization (all optional / defaulted)
+  herHeroPhoto      String?  // grand artist banner photo
+  herHeroVideo      String?  // optional hero background video
+  herEyebrow        String   @default("Digital Heritage Library")
+  herTitle          String   @default("Jayesh Prajapati")
+  herSubtitle       String   @default("A living archive of Gujarati verse, bhajan and lyric.")
+  herQuote          String?  // featured literary quote
+  herGallery        String[] @default([]) // gallery image URLs
+  herEventsJson     String?  // JSON array of { date, title, place }
+  herLegacyTitle    String   @default("The Legacy")
+  herLegacyBody     String?  // legacy paragraph
+  herShowBhajans    Boolean  @default(true)
+  herShowPoetry     Boolean  @default(true)
+  herShowVideos     Boolean  @default(true)
+  herShowGallery    Boolean  @default(true)
+  herShowEvents     Boolean  @default(true)
+  herShowLegacy     Boolean  @default(true)
+
   viewsSyncedAt     DateTime? // last time YouTube view counts were refreshed
 }
 
