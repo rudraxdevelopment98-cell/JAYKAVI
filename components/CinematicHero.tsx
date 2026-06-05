@@ -12,6 +12,19 @@ export default function CinematicHero({ l }: { l: Lyricist }) {
 
   return (
     <header className="ch-root">
+      {/* Web3-style animated ambience: drifting aurora orbs + grid + particles */}
+      <div className="ch-ambient" aria-hidden>
+        <span className="ch-orb ch-orb-1" />
+        <span className="ch-orb ch-orb-2" />
+        <span className="ch-orb ch-orb-3" />
+        <div className="ch-grid" />
+        <div className="ch-particles">
+          {Array.from({ length: 14 }).map((_, i) => (
+            <span key={i} className="ch-particle" style={{ ['--i' as any]: i }} />
+          ))}
+        </div>
+      </div>
+
       {/* Thin left accent line */}
       <div className="ch-edge" aria-hidden />
 
@@ -108,6 +121,63 @@ export default function CinematicHero({ l }: { l: Lyricist }) {
           position: relative;
           overflow: hidden;
           background: var(--hero-grad);
+        }
+
+        /* ── Web3 ambient layer ───────────────────────────────────────────── */
+        .ch-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+
+        .ch-orb {
+          position: absolute; border-radius: 50%; filter: blur(70px); opacity: .5;
+          mix-blend-mode: screen; will-change: transform;
+        }
+        .ch-orb-1 { width: 42vw; height: 42vw; top: -8%; right: -6%;
+          background: radial-gradient(circle at 30% 30%, #5B2A86, transparent 70%);
+          animation: chDrift1 22s ease-in-out infinite; }
+        .ch-orb-2 { width: 36vw; height: 36vw; bottom: -10%; left: -8%;
+          background: radial-gradient(circle at 50% 50%, #2D6BFF, transparent 70%);
+          animation: chDrift2 28s ease-in-out infinite; }
+        .ch-orb-3 { width: 28vw; height: 28vw; top: 30%; left: 40%;
+          background: radial-gradient(circle at 50% 50%, var(--accent), transparent 72%);
+          opacity: .28; animation: chDrift3 25s ease-in-out infinite; }
+        [data-theme='light'] .ch-orb { opacity: .3; mix-blend-mode: multiply; }
+
+        @keyframes chDrift1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-5%,6%) scale(1.12); } }
+        @keyframes chDrift2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(7%,-5%) scale(1.15); } }
+        @keyframes chDrift3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-8%,-7%) scale(.9); } }
+
+        /* faint moving tech grid */
+        .ch-grid {
+          position: absolute; inset: -2px;
+          background-image:
+            linear-gradient(var(--line) 1px, transparent 1px),
+            linear-gradient(90deg, var(--line) 1px, transparent 1px);
+          background-size: 64px 64px; opacity: .5;
+          mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 25%, transparent 80%);
+          -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 25%, transparent 80%);
+          animation: chGrid 30s linear infinite;
+        }
+        @keyframes chGrid { from { background-position: 0 0, 0 0; } to { background-position: 64px 64px, 64px 64px; } }
+
+        /* floating particles */
+        .ch-particles { position: absolute; inset: 0; }
+        .ch-particle {
+          position: absolute; width: 3px; height: 3px; border-radius: 50%;
+          background: var(--accent); opacity: .35;
+          left: calc((var(--i) * 7%) + 4%);
+          bottom: -10px;
+          animation: chRise calc(14s + (var(--i) * 1.3s)) linear infinite;
+          animation-delay: calc(var(--i) * -1.7s);
+          box-shadow: 0 0 8px var(--accent);
+        }
+        @keyframes chRise {
+          0% { transform: translateY(0) translateX(0); opacity: 0; }
+          12% { opacity: .5; }
+          88% { opacity: .5; }
+          100% { transform: translateY(-104vh) translateX(28px); opacity: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .ch-orb, .ch-grid, .ch-particle { animation: none !important; }
         }
 
         /* Left accent bar */

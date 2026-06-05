@@ -123,15 +123,35 @@ export default function Nav({ skin = 'default' }: { skin?: string }) {
           display: flex; gap: 30px; list-style: none; align-items: center; margin: 0; padding: 0;
         }
         .nav-link {
+          position: relative;
           font-family: var(--font-hanken), system-ui, sans-serif;
           text-decoration: none; font-size: .78rem; font-weight: 500;
           letter-spacing: .08em; text-transform: uppercase;
-          opacity: .7; padding-bottom: 3px;
-          border-bottom: 1px solid transparent;
-          transition: opacity .25s, border-color .25s;
+          opacity: .72; padding-bottom: 4px;
+          transition: opacity .25s ease, letter-spacing .3s ease, transform .25s ease;
         }
-        .nav-link:hover { opacity: 1; }
-        .nav-link.active { opacity: 1; border-bottom-color: var(--accent); }
+        /* Animated gradient underline that sweeps out from the centre */
+        .nav-link::after {
+          content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1.5px;
+          background: linear-gradient(90deg, transparent, var(--accent), transparent);
+          transform: scaleX(0); transform-origin: center;
+          transition: transform .38s cubic-bezier(.65,0,.35,1);
+        }
+        /* Soft glow dot that fades in above the link on hover */
+        .nav-link::before {
+          content: ""; position: absolute; top: -7px; left: 50%; width: 4px; height: 4px;
+          border-radius: 50%; background: var(--accent); opacity: 0;
+          transform: translateX(-50%) scale(.4);
+          box-shadow: 0 0 10px var(--accent);
+          transition: opacity .3s ease, transform .3s ease;
+        }
+        .nav-link:hover {
+          opacity: 1; letter-spacing: .11em; transform: translateY(-1px);
+        }
+        .nav-link:hover::after { transform: scaleX(1); }
+        .nav-link:hover::before { opacity: 1; transform: translateX(-50%) scale(1); }
+        .nav-link.active { opacity: 1; }
+        .nav-link.active::after { transform: scaleX(1); }
 
         /* ── Mobile right ── */
         .nav-mobile-right {
