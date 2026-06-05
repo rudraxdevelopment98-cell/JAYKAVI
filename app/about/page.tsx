@@ -1,10 +1,22 @@
 import type { Metadata } from 'next';
 import { getLyricist } from '@/lib/data';
 import { FadeUp } from '@/components/Reveal';
+import { absoluteUrl } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = { title: 'About — JAYKAVI' };
+export async function generateMetadata(): Promise<Metadata> {
+  const l = await getLyricist();
+  const name = l.displayName ?? l.name;
+  const desc = `Learn about ${name} — ${l.title ?? 'Gujarati lyricist'}. ${l.bio?.slice(0, 140) ?? ''}`;
+  return {
+    title: `About ${name}`,
+    description: desc,
+    keywords: [name, l.penName ?? '', 'JAYKAVI', 'Jayesh Prajapati', 'Gujarati lyricist', 'ગીતકાર', 'biography', l.bornPlace ?? ''].filter(Boolean),
+    alternates: { canonical: absoluteUrl('/about') },
+    openGraph: { title: `About ${name}`, description: desc, url: absoluteUrl('/about') },
+  };
+}
 
 export default async function AboutPage() {
   const l = await getLyricist();

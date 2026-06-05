@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
+import Underline from '@tiptap/extension-underline';
 import { saveNote, deleteNote } from './actions';
 
 interface Folder { id: string; title: string; }
@@ -21,8 +21,8 @@ interface NoteData {
   updatedAt: string;
 }
 
-// ─── Toolbar button ─────────────────────────────────────────────────
- function Btn({
+// ─── Toolbar button ────────────────────────────────────────────────────────────
+function Btn({
   onClick,
   active,
   title,
@@ -53,7 +53,7 @@ function Sep() {
   return <span className="w-px h-5 bg-neutral-800 mx-0.5 flex-shrink-0" />;
 }
 
-// ─── Word download ────────────────────────────────────────────────
+// ─── Word download ─────────────────────────────────────────────────────────────
 function downloadAsWord(title: string, html: string) {
   const doc = `
 <html xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -90,7 +90,7 @@ ${html}
   URL.revokeObjectURL(url);
 }
 
-// ─── PDF download ──────────────────────────────────────────────────
+// ─── PDF download ──────────────────────────────────────────────────────────────
 function downloadAsPDF(title: string, html: string) {
   const win = window.open('', '_blank');
   if (!win) return;
@@ -139,7 +139,7 @@ ${html}
   win.document.close();
 }
 
-// ─── Main editor ──────────────────────────────────────────────────
+// ─── Main editor ───────────────────────────────────────────────────────────────
 export default function NoteEditor({
   note,
   folders,
@@ -256,7 +256,7 @@ export default function NoteEditor({
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-5rem)] -m-4 md:-m-8">
+<div className="flex flex-col h-[calc(100vh-5rem)] -m-8">
 
       {/* ── Top action bar ── */}
       <div className="flex items-center gap-2 px-5 py-2.5 border-b border-neutral-800 bg-neutral-950/90 backdrop-blur flex-shrink-0 flex-wrap">

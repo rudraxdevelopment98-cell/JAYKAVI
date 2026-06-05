@@ -33,10 +33,18 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-export async function createCollection(formData: FormData) {
+export async function createCollection(formData: FormData): Promise<{ error: string } | void> {
   assertAdmin(await auth());
   const title = str(formData.get('title'));
-  if (!title) throw new Error('Title is required');
+  if (!title) return { error: 'Title is required' };
+
+  const duplicate = await prisma.collection.findFirst({
+    where: { title: { equals: title, mode: 'insensitive' } },
+    select: { id: true, title: true },
+  });
+  if (duplicate) {
+    return { error: `Collection "${duplicate.title}" already exists.` };
+  }
 
   const baseSlug = str(formData.get('slug')) || slugify(title);
   let slug = baseSlug;

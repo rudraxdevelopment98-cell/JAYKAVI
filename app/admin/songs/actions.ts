@@ -117,11 +117,25 @@ function buildPayload(formData: FormData): SongPayload & {
   };
 }
 
-export async function createSong(formData: FormData) {
+export async function createSong(formData: FormData): Promise<{ error: string } | void> {
   const session = await auth();
   assertAdmin(session);
   const p = buildPayload(formData);
-  if (!p.title) throw new Error('Title is required');
+  if (!p.title) return { error: 'Title is required' };
+
+  const dupConditions: any[] = [{ title: { equals: p.title, mode: 'insensitive' } }];
+  if (p.youtubeId) dupConditions.push({ youtubeId: p.youtubeId });
+  const duplicate = await prisma.song.findFirst({
+    where: { OR: dupConditions },
+    select: { title: true, youtubeId: true, slug: true },
+  });
+  if (duplicate) {
+    const reason =
+      duplicate.youtubeId && duplicate.youtubeId === p.youtubeId
+        ? `A song with this YouTube ID already exists: "${duplicate.title}"`
+        : `Song "${duplicate.title}" already exists.`;
+    return { error: reason };
+  }
 
   const slug = await uniqueSlug(p.slug);
 

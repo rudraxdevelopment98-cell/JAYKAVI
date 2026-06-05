@@ -213,6 +213,47 @@ export async function getSongsWithLyrics(): Promise<Song[]> {
   return all.filter((s) => s.lyrics && s.lyrics.trim().length > 0);
 }
 
+export async function getSongsByCollection(collectionDbId: string): Promise<Song[]> {
+  return tryDb(
+    async () => {
+      const rows = await prisma.song.findMany({
+        where: { collectionId: collectionDbId },
+        include: songInclude,
+        orderBy: [{ releaseYear: 'desc' }, { title: 'asc' }],
+      });
+      return rows.map(dbSongToJson);
+    },
+    () => [],
+  );
+}
+
+export async function getSongsBySingerDbId(singerDbId: string): Promise<Song[]> {
+  return tryDb(
+    async () => {
+      const rows = await prisma.song.findMany({
+        where: { singers: { some: { singerId: singerDbId } } },
+        include: songInclude,
+        orderBy: [{ releaseYear: 'desc' }, { title: 'asc' }],
+      });
+      return rows.map(dbSongToJson);
+    },
+    () => [],
+  );
+}
+
+export async function getSingerByParam(idOrLegacyId: string): Promise<{ id: string; legacyId: string | null; name: string; photoUrl: string | null; bio: string | null } | null> {
+  return tryDb(
+    async () => {
+      const row = await prisma.singer.findFirst({
+        where: { OR: [{ id: idOrLegacyId }, { legacyId: idOrLegacyId }] },
+        select: { id: true, legacyId: true, name: true, photoUrl: true, bio: true },
+      });
+      return row ?? null;
+    },
+    () => null,
+  );
+}
+
 // -------- Journey --------
 
 export async function getJourney(): Promise<JourneyMilestone[]> {

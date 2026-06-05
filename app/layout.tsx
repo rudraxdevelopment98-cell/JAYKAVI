@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Fraunces, Hanken_Grotesk } from 'next/font/google';
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google';
 import './globals.css';
 import { getLyricist, getActiveTheme } from '@/lib/data';
 import Nav from '@/components/Nav';
@@ -9,36 +9,58 @@ import HideOnAdmin from '@/components/HideOnAdmin';
 import OrnateFrame from '@/components/traditional/OrnateFrame';
 import { siteUrl } from '@/lib/seo';
 
-const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', display: 'swap' });
-const hanken = Hanken_Grotesk({ subsets: ['latin'], variable: '--font-hanken', display: 'swap' });
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+  weight: ['300', '400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+});
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-hanken',
+  display: 'swap',
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const l = await getLyricist();
   const name = l.displayName ?? l.name;
+  const base = siteUrl();
   return {
-    metadataBase: new URL(siteUrl()),
+    metadataBase: new URL(base),
     title: {
       default: `${name} — ${l.tagline}`,
       template: `%s — ${name}`,
     },
     description: l.bio,
     keywords: [
-      name, l.name, l.penName ?? '', 'Gujarati lyricist', 'Gujarati songs',
-      'lyrics', 'ગીતકાર', ...(l.languages ?? []), ...(l.genres ?? []),
+      name, l.name, l.penName ?? '',
+      'JAYKAVI', 'Jayesh Prajapati', 'jaykavi', 'jayesh prajapati',
+      'Gujarati lyricist', 'Gujarati songs', 'Gujarati geet', 'Gujarati kavya',
+      'ગીતકાર', 'ગુજરાતી ગીત', 'જયકવિ', 'ગુજરાતી કવિ',
+      'lyrics', 'song writer', 'bhajan', 'garba', 'lagna geet',
+      ...(l.languages ?? []), ...(l.genres ?? []),
     ].filter(Boolean),
-    alternates: { canonical: '/' },
+    authors: [{ name }],
+    creator: name,
+    alternates: { canonical: base },
     openGraph: {
       title: name,
       description: l.tagline,
       type: 'website',
       siteName: name,
       locale: 'gu_IN',
+      url: base,
     },
     twitter: {
       card: 'summary_large_image',
       title: name,
       description: l.tagline,
     },
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
+      : {}),
   };
 }
 
@@ -63,7 +85,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${fraunces.variable} ${hanken.variable}`}>
+      <body className={`${cormorant.variable} ${dmSans.variable}`}>
         {activeTheme === 'traditional' && (
           <HideOnAdmin>
             <OrnateFrame />

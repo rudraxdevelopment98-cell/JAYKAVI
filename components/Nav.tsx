@@ -7,10 +7,11 @@ import ThemeToggle from './ThemeToggle';
 const links = [
   { href: '/', label: 'Home' },
   { href: '/about', label: 'About' },
-  { href: '/journey', label: 'Journey' },
   { href: '/songs', label: 'Songs' },
+  { href: '/collections', label: 'Collections' },
+  { href: '/singers', label: 'Singers' },
   { href: '/lyrics', label: 'Lyrics' },
-  { href: '/blog', label: 'Blog' },
+  { href: '/journey', label: 'Journey' },
   { href: '/contact', label: 'Contact' },
 ];
 
@@ -114,7 +115,8 @@ export default function Nav({ skin = 'default' }: { skin?: string }) {
 
         /* ── Logo ── */
         .nav-logo {
-          font-weight: 600; font-size: 1.3rem; letter-spacing: .5px;
+          font-family: var(--font-fraunces), Georgia, serif;
+          font-weight: 400; font-size: 1.45rem; letter-spacing: -.01em;
           text-decoration: none; z-index: 2;
         }
 
@@ -123,9 +125,11 @@ export default function Nav({ skin = 'default' }: { skin?: string }) {
           display: flex; gap: 30px; list-style: none; align-items: center; margin: 0; padding: 0;
         }
         .nav-link {
-          text-decoration: none; font-size: .9rem; font-weight: 500;
-          opacity: .8; padding-bottom: 3px;
-          border-bottom: 2px solid transparent;
+          font-family: var(--font-hanken), system-ui, sans-serif;
+          text-decoration: none; font-size: .78rem; font-weight: 500;
+          letter-spacing: .08em; text-transform: uppercase;
+          opacity: .7; padding-bottom: 3px;
+          border-bottom: 1px solid transparent;
           transition: opacity .25s, border-color .25s;
         }
         .nav-link:hover { opacity: 1; }
@@ -168,7 +172,8 @@ export default function Nav({ skin = 'default' }: { skin?: string }) {
           display: flex; flex-direction: column; gap: 4px;
         }
         .mobile-link {
-          font-size: clamp(2rem, 8vw, 3rem); font-weight: 600;
+          font-family: var(--font-fraunces), Georgia, serif;
+          font-size: clamp(2.2rem, 9vw, 3.5rem); font-weight: 300; letter-spacing: -.02em;
           text-decoration: none; padding: 10px 0;
           border-bottom: 1px solid var(--line);
           opacity: 0; transform: translateY(16px);
