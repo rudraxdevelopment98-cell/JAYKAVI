@@ -225,6 +225,11 @@ model AdminUser {
   role        String   @default("Admin")
   note        String?
   permissions String[] @default([]) // section keys this admin may edit; see lib/permissions.ts
+  // Personal profile fields each admin can edit themselves
+  title       String? // job title / designation
+  phone       String?
+  photoUrl    String?
+  bio         String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

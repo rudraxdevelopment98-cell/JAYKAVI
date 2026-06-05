@@ -9,6 +9,7 @@ import { FadeUp } from '@/components/Reveal';
 import JsonLd from '@/components/JsonLd';
 import TraditionalHome from '@/components/traditional/TraditionalHome';
 import HeritageHome from '@/components/heritage/HeritageHome';
+import HeroLuma from '@/components/HeroLuma';
 import { siteUrl, absoluteUrl } from '@/lib/seo';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -29,11 +30,21 @@ export default async function Home() {
   const activeTheme = await getActiveTheme();
   if (activeTheme === 'traditional') {
     const tradSettings = await getTraditionalSettings();
-    return <TraditionalHome settings={tradSettings} />;
+    return (
+      <>
+        <HeroLuma mode="dark" />
+        <TraditionalHome settings={tradSettings} />
+      </>
+    );
   }
   if (activeTheme === 'heritage') {
     const heritageSettings = await getHeritageSettings();
-    return <HeritageHome settings={heritageSettings} />;
+    return (
+      <>
+        <HeroLuma mode="image" image={heritageSettings.heroPhoto} />
+        <HeritageHome settings={heritageSettings} />
+      </>
+    );
   }
 
   const [l, trendingAll, topAll, journeyAll, social] = await Promise.all([
@@ -89,6 +100,7 @@ export default async function Home() {
     <>
       <JsonLd data={personLd} />
       <JsonLd data={websiteLd} />
+      <HeroLuma mode="dark" />
       <CinematicHero l={l} />
 
       {trending.length > 0 && (

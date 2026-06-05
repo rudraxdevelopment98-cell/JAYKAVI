@@ -6,7 +6,8 @@ import AdminShell from './_components/AdminShell';
 
 const NAV = [
   { href: '/admin', label: 'Dashboard' },
-  { href: '/admin/profile', label: 'Profile' },
+  { href: '/admin/account', label: '👤 My Profile' },
+  { href: '/admin/profile', label: 'Artist Profile' },
   { href: '/admin/contact', label: 'Contact & Social' },
   { href: '/admin/messages', label: '✉️ Contact Messages' },
   { href: '/admin/singers', label: 'Singers' },

@@ -146,6 +146,26 @@ a { color: inherit; }
   background: linear-gradient(180deg, rgba(250,247,242,.35) 0%, transparent 100%);
 }
 
+/* ── Home hero: nav text auto-adapts to the hero brightness behind it ──────
+   <HeroLuma> sets data-hero-luma on <html>; only affects the floating
+   (un-scrolled) nav on the home page. */
+[data-hero-luma='dark'] .site-nav:not(.scrolled) .nav-logo,
+[data-hero-luma='dark'] .site-nav:not(.scrolled) .nav-link {
+  color: #f4efe4 !important;
+  text-shadow: 0 1px 14px rgba(0,0,0,.45) !important;
+}
+[data-hero-luma='light'] .site-nav:not(.scrolled) .nav-logo,
+[data-hero-luma='light'] .site-nav:not(.scrolled) .nav-link {
+  color: #1b1209 !important;
+  text-shadow: none !important;
+}
+/* Brand accent stays gold regardless of hero brightness */
+[data-hero-luma] .site-nav:not(.scrolled) .nav-logo .accent {
+  color: var(--accent) !important;
+}
+[data-hero-luma='dark'] .site-nav:not(.scrolled) .burger-line { background: #f4efe4 !important; }
+[data-hero-luma='light'] .site-nav:not(.scrolled) .burger-line { background: #1b1209 !important; }
+
 /* =====================================================================
    THEME SKINS
    Each skin overrides the CSS variables for --bg, --accent, --panel,
