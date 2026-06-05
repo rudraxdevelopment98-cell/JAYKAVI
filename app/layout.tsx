@@ -94,7 +94,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </HideOnAdmin>
         )}
         <SmoothScroll>
-          <Nav skin={activeTheme} />
+          <HideOnAdmin>
+            <Nav skin={activeTheme} />
+          </HideOnAdmin>
           <main>{children}</main>
           <HideOnAdmin>
             <Footer />

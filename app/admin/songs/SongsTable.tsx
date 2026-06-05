@@ -201,12 +201,12 @@ export default function SongsTable({
                   <td className="px-4 py-2.5 text-neutral-300 max-w-[160px] truncate hidden sm:table-cell">
                     {s.singers.map((sg) => sg.singer.name).join(', ') || '—'}
                   </td>
-                  <td className="px-4 py-2.5 text-neutral-400 text-xs hidden md:table-cell">
+                  <td className="px-4 py-2.5 text-xs hidden md:table-cell">
                     {coll ? (
-                      <span className="px-2 py-0.5 rounded-full bg-neutral-800 border border-neutral-700">
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-700 dark:text-amber-300 whitespace-nowrap">
                         {coll.title}
                       </span>
-                    ) : '—'}
+                    ) : <span className="text-neutral-400">—</span>}
                   </td>
                   <td className="px-4 py-2.5 text-neutral-300 hidden md:table-cell">{s.releaseYear ?? '—'}</td>
                   <td className="px-4 py-2.5 text-neutral-300 hidden md:table-cell">{s.viewCount?.toLocaleString() ?? '—'}</td>
