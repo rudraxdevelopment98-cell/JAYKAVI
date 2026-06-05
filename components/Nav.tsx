@@ -36,9 +36,17 @@ export default function Nav({ skin = 'default' }: { skin?: string }) {
   // Close on route change
   useEffect(() => { setOpen(false); }, [pathname]);
 
+  // The fully-transparent "floating over the hero" look is only wanted on the
+  // home page (which has a full-bleed hero). On every other page the nav floats
+  // over normal content, so we give it its solid theme background immediately
+  // — that keeps the links readable (var(--text) on the nav panel) in every
+  // theme and light/dark mode, instead of depending on whatever sits behind it.
+  const isHome = pathname === '/';
+  const solid = scrolled || !isHome;
+
   return (
     <>
-      <nav className={`site-nav${scrolled ? ' scrolled' : ''}`}>
+      <nav className={`site-nav${solid ? ' scrolled' : ''}`}>
         {/* Logo */}
         <Link href="/" className="nav-logo font-serif" onClick={() => setOpen(false)}>
           JAY<span className="accent">KAVI</span>
