@@ -72,7 +72,7 @@ export default async function HeritageHome({ settings }: { settings: HeritageSet
               <Link href="/lyrics" className="her-btn-gold">
                 <span className="her-btn-icon" aria-hidden>▶</span> LISTEN BHAJANS
               </Link>
-              <Link href="/explore?tab=songs" className="her-btn-ghost">EXPLORE LIBRARY</Link>
+              <Link href="/songs" className="her-btn-ghost">EXPLORE LIBRARY</Link>
             </div>
           </div>
 

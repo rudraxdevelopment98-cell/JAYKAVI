@@ -1,22 +1,20 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
-import { getAllSongs, getFacets, getActiveTheme } from '@/lib/data';
+import { getActiveTheme } from '@/lib/data';
 import { absoluteUrl } from '@/lib/seo';
 import ExploreTabs from './ExploreTabs';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Explore — Songs, Collections & Singers',
-  description: 'Browse every song, collection and singer in the JAYKAVI catalogue — all in one place.',
+  title: 'Collections & Singers — JAYKAVI',
+  description: 'Browse every collection and singer in the JAYKAVI catalogue.',
   alternates: { canonical: absoluteUrl('/explore') },
 };
 
 export default async function ExplorePage() {
-  const [songs, facets, activeTheme, collectionsRaw, singersRaw] = await Promise.all([
-    getAllSongs(),
-    getFacets(),
+  const [activeTheme, collectionsRaw, singersRaw] = await Promise.all([
     getActiveTheme(),
     prisma.collection
       .findMany({
@@ -61,8 +59,6 @@ export default async function ExplorePage() {
       }
     >
       <ExploreTabs
-        songs={songs}
-        facets={facets}
         collections={collections}
         singers={singers}
         traditional={activeTheme === 'traditional'}

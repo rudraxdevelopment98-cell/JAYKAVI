@@ -1,15 +1,9 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import type { Song } from '@/lib/types';
-import SongArchive from '@/components/SongArchive';
 
-interface Facets {
-  languages: string[]; genres: string[]; moods: string[];
-  years: number[]; singers: string[]; platforms: string[];
-}
 interface CollectionLite {
   id: string; slug: string; title: string; description: string;
   coverUrl: string; year: number | null; songCount: number;
@@ -18,26 +12,23 @@ interface SingerLite {
   id: string; param: string; name: string; photoUrl: string; songCount: number;
 }
 
-type Tab = 'songs' | 'collections' | 'singers';
+type Tab = 'collections' | 'singers';
 const TABS: { key: Tab; label: string; tradLabel: string }[] = [
-  { key: 'songs',       label: 'Songs',       tradLabel: 'ભજન' },
   { key: 'collections', label: 'Collections', tradLabel: 'સંગ્રહ' },
   { key: 'singers',     label: 'Singers',     tradLabel: 'ગાયક' },
 ];
 
 export default function ExploreTabs({
-  songs, facets, collections, singers, traditional,
+  collections, singers, traditional,
 }: {
-  songs: Song[];
-  facets: Facets;
   collections: CollectionLite[];
   singers: SingerLite[];
   traditional: boolean;
 }) {
   const params = useSearchParams();
-  const initial = (params.get('tab') as Tab) || 'songs';
+  const initial = (params.get('tab') as Tab) || 'collections';
   const [tab, setTab] = useState<Tab>(
-    ['songs', 'collections', 'singers'].includes(initial) ? initial : 'songs',
+    ['collections', 'singers'].includes(initial) ? initial : 'collections',
   );
 
   // Tabs are pure client state. Sync the URL with history.replaceState so the
@@ -58,7 +49,7 @@ export default function ExploreTabs({
       <header className="exp-head">
         <p className="exp-eyebrow">{traditional ? 'સંગ્રહાલય' : 'Browse'}</p>
         <h1 className="font-serif exp-title">
-          {traditional ? 'સંગ્રહ' : 'Explore the catalogue'}
+          {traditional ? 'સંગ્રહ' : 'Collections & Singers'}
         </h1>
       </header>
 
@@ -66,8 +57,7 @@ export default function ExploreTabs({
       <div className="exp-tabs" role="tablist">
         {TABS.map((t) => {
           const count =
-            t.key === 'songs' ? songs.length
-            : t.key === 'collections' ? collections.length
+            t.key === 'collections' ? collections.length
             : singers.length;
           return (
             <button
@@ -86,12 +76,6 @@ export default function ExploreTabs({
 
       {/* ── Panels ── */}
       <div className="exp-panel">
-        {tab === 'songs' && (
-          <Suspense fallback={<p className="text-muted">Loading…</p>}>
-            <SongArchive songs={songs} facets={facets} />
-          </Suspense>
-        )}
-
         {tab === 'collections' && (
           collections.length === 0 ? (
             <p className="text-muted">No collections yet.</p>

@@ -7,7 +7,8 @@ import ThemeToggle from './ThemeToggle';
 const links = [
   { href: '/', label: 'Home' },
   { href: '/about', label: 'About' },
-  { href: '/explore', label: 'Explore' },
+  { href: '/songs', label: 'Songs' },
+  { href: '/explore', label: 'Collections' },
   { href: '/lyrics', label: 'Lyrics' },
   { href: '/journey', label: 'Journey' },
   { href: '/contact', label: 'Contact' },

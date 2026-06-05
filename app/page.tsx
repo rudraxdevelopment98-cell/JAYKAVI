@@ -93,7 +93,7 @@ export default async function Home() {
 
       {trending.length > 0 && (
         <section className="section-pad" style={{ position: 'relative', zIndex: 2 }}>
-          <SectionHead tag="Now Trending" title="Songs being loved right now" href="/explore?tab=songs" hrefLabel="View all songs →" />
+          <SectionHead tag="Now Trending" title="Songs being loved right now" href="/songs" hrefLabel="View all songs →" />
           <HorizontalScrollRow songs={trending} />
         </section>
       )}

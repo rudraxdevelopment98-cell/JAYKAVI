@@ -87,7 +87,7 @@ export default function CinematicHero({ l }: { l: Lyricist }) {
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.25 }}>
           <Link href="/journey" className="ch-btn-primary">Explore the Journey</Link>
-          <Link href="/explore?tab=songs"   className="ch-btn-ghost">Browse Songs</Link>
+          <Link href="/songs"   className="ch-btn-ghost">Browse Songs</Link>
         </motion.div>
       </div>
 

@@ -82,7 +82,7 @@ export default async function Footer() {
   return (
     <footer style={{ textAlign: 'center', padding: '6vh 6vw', borderTop: '1px solid var(--line)', position: 'relative', zIndex: 2 }}>
       <div style={{ display: 'flex', gap: 26, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 18 }}>
-        <Link href="/explore?tab=songs" style={linkStyle}>
+        <Link href="/songs" style={linkStyle}>
           <MusicIcon />Songs
         </Link>
         <Link href="/explore?tab=collections" style={linkStyle}>
@@ -151,7 +151,7 @@ function TraditionalFooter({
           <div className="tf-links">
             <Link href="/" className="tf-link">Home</Link>
             <Link href="/about" className="tf-link">About</Link>
-            <Link href="/explore?tab=songs" className="tf-link">Songs</Link>
+            <Link href="/songs" className="tf-link">Songs</Link>
             <Link href="/explore?tab=collections" className="tf-link">Collections</Link>
             <Link href="/explore?tab=singers" className="tf-link">Singers</Link>
             <Link href="/journey" className="tf-link">Journey</Link>
