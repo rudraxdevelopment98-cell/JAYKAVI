@@ -16,21 +16,35 @@ export default async function NotebookPage({
 }) {
   const { folder: folderId, filter } = searchParams;
 
-  const [folders, notes] = await Promise.all([
-    prisma.noteFolder.findMany({ orderBy: { sortOrder: 'asc' } }),
-    prisma.note.findMany({
-      where:
-        folderId
-          ? { folderId }
-          : filter === 'published'
-          ? { published: true }
-          : filter === 'drafts'
-          ? { published: false }
-          : undefined,
-      orderBy: { updatedAt: 'desc' },
-      include: { folder: { select: { title: true } } },
-    }),
-  ]);
+  let folders: any[] = [];
+  let notes: any[] = [];
+  let noteCounts = { all: 0, published: 0, drafts: 0 };
+  let dbError = false;
+
+  try {
+    [folders, notes, noteCounts] = await Promise.all([
+      prisma.noteFolder.findMany({ orderBy: { sortOrder: 'asc' } }),
+      prisma.note.findMany({
+        where:
+          folderId
+            ? { folderId }
+            : filter === 'published'
+            ? { published: true }
+            : filter === 'drafts'
+            ? { published: false }
+            : undefined,
+        orderBy: { updatedAt: 'desc' },
+        include: { folder: { select: { title: true } } },
+      }),
+      Promise.all([
+        prisma.note.count(),
+        prisma.note.count({ where: { published: true } }),
+        prisma.note.count({ where: { published: false } }),
+      ]).then(([all, published, drafts]) => ({ all, published, drafts })),
+    ]);
+  } catch {
+    dbError = true;
+  }
 
   const activeLabel =
     folderId
@@ -41,6 +55,18 @@ export default async function NotebookPage({
       ? 'Drafts'
       : 'All Notes';
 
+  if (dbError) {
+    return (
+      <div className="max-w-xl mx-auto mt-16 p-6 bg-yellow-950/40 border border-yellow-800 rounded-xl text-center">
+        <p className="text-yellow-300 font-medium mb-2">Database not ready</p>
+        <p className="text-yellow-400/70 text-sm">
+          The Notebook tables are still being created. This happens automatically during the
+          first deploy — wait a minute and refresh the page.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col md:flex-row gap-0 -m-4 md:-m-8 min-h-[calc(100vh-5rem)]">
       {/* ── Sidebar ── */}
@@ -48,11 +74,7 @@ export default async function NotebookPage({
         folders={folders}
         activeFolderId={folderId}
         activeFilter={filter}
-        noteCounts={{
-          all: await prisma.note.count(),
-          published: await prisma.note.count({ where: { published: true } }),
-          drafts: await prisma.note.count({ where: { published: false } }),
-        }}
+        noteCounts={noteCounts}
       />
 
       {/* ── Notes list ── */}

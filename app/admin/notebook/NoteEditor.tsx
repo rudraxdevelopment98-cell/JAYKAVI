@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import { saveNote, deleteNote } from './actions';
 
@@ -156,11 +157,9 @@ export default function NoteEditor({
   const isDirty = useRef(false);
 
   const editor = useEditor({
-    // Required by Tiptap v3 under Next.js SSR to avoid hydration mismatches.
-    immediatelyRender: false,
     extensions: [
-      // StarterKit (v3) already bundles Underline, so it is not added again here.
       StarterKit,
+      Underline,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
     ],
     content: note.content || '<p></p>',
