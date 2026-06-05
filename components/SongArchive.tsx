@@ -1,6 +1,6 @@
 'use client';
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import type { Song } from '@/lib/types';
 import SongCard from './SongCard';
@@ -174,6 +174,7 @@ function FilterDropdown({ value, options, onChange, placeholder = 'All' }: Filte
 export default function SongArchive({ songs, facets }: { songs: Song[]; facets: Facets }) {
   const router = useRouter();
   const params = useSearchParams();
+  const pathname = usePathname();
 
   const [q, setQ] = useState(params.get('q') ?? '');
   const singer = params.get('singer') ?? '';
@@ -182,8 +183,11 @@ export default function SongArchive({ songs, facets }: { songs: Song[]; facets: 
   const sort = params.get('sort') ?? 'most-viewed';
   const view = params.get('view') ?? 'grid';
 
-  // debounce the search box into the URL
+  // debounce the search box into the URL — only when it actually changed,
+  // so we never fire a navigation on mount (which would loop via redirects).
   useEffect(() => {
+    const current = params.get('q') ?? '';
+    if (q === current) return;
     const t = setTimeout(() => setParam('q', q || null), 250);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -192,7 +196,8 @@ export default function SongArchive({ songs, facets }: { songs: Song[]; facets: 
   function setParam(key: string, value: string | null) {
     const next = new URLSearchParams(Array.from(params.entries()));
     if (value) next.set(key, value); else next.delete(key);
-    router.replace(`/songs?${next.toString()}`, { scroll: false });
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }
 
   const filtered = useMemo(() => {
