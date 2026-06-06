@@ -22,8 +22,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const desc = song.lyrics
     ? `${song.lyrics.slice(0, 155).replace(/\n/g, ' ')}…`
     : `${song.title} — Gujarati song written by ${song.lyricist}${singers}. Lyrics, credits and streaming links.`;
-  const images = song.artworkUrl ? [song.artworkUrl] : [];
   const canonicalUrl = absoluteUrl(`/songs/${song.slug}`);
+  // og:image / twitter:image come from the generated opengraph-image.tsx in
+  // this segment (a purpose-built 1200×630 share card), so we don't set images here.
   return {
     title: `${song.title} — Lyrics & Credits`,
     description: desc,
@@ -45,13 +46,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       description: desc,
       type: 'music.song',
       url: canonicalUrl,
-      images,
     },
     twitter: {
-      card: images.length ? 'summary_large_image' : 'summary',
+      card: 'summary_large_image',
       title: song.title,
       description: desc,
-      images,
     },
   };
 }
