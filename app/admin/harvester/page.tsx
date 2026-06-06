@@ -7,6 +7,7 @@ import AutoRunToggle from './AutoRunToggle';
 import ImportExcelButton from './ImportExcelButton';
 import PlaylistImportButton from './PlaylistImportButton';
 import SyncViewsButton from './SyncViewsButton';
+import BackfillTitlesButton from './BackfillTitlesButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,6 +96,17 @@ export default async function HarvesterPage() {
           or trigger it manually here.
         </p>
         <SyncViewsButton lastSynced={settings?.viewsSyncedAt ?? null} />
+      </div>
+
+      {/* Restore exact titles */}
+      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-4">
+        <div className="font-medium mb-1">Restore Exact YouTube Titles</div>
+        <p className="text-sm text-neutral-400 mb-3">
+          Songs imported earlier may have shortened titles. This restores each song&apos;s
+          full, exact YouTube title and keeps the cleaned line as its subtitle. Only songs with a
+          matching harvest candidate are touched.
+        </p>
+        <BackfillTitlesButton />
       </div>
 
       {/* Excel import */}

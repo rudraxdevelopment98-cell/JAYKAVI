@@ -2,6 +2,7 @@
 
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { logActivity } from '@/lib/activity';
 import { revalidatePath } from 'next/cache';
 
 function slugify(text: string): string {
@@ -167,6 +168,55 @@ export async function clearAllCandidates() {
   await prisma.harvestCandidate.deleteMany({});
 
   revalidatePath('/admin/harvester');
+}
+
+/**
+ * One-time backfill: restore the EXACT full YouTube title on songs that were
+ * imported before the exact-title change. For every song that has a YouTube ID,
+ * we look up its harvest candidate and set:
+ *   title    = candidate.rawTitle   (full, exact)
+ *   subtitle = existing subtitle, else candidate.cleanTitle
+ * Songs without a matching candidate, or already matching, are left untouched.
+ */
+export async function backfillExactTitles(): Promise<{ updated: number; checked: number }> {
+  const session = await auth();
+  assertAdmin(session);
+
+  const songs = await prisma.song.findMany({
+    where: { youtubeId: { not: null } },
+    select: { id: true, title: true, subtitle: true, youtubeId: true },
+  });
+
+  let updated = 0;
+  for (const s of songs) {
+    if (!s.youtubeId) continue;
+    const cand = await prisma.harvestCandidate.findFirst({
+      where: { youtubeId: s.youtubeId },
+      select: { rawTitle: true, cleanTitle: true },
+    });
+    if (!cand?.rawTitle) continue;
+
+    const newTitle = cand.rawTitle.trim();
+    const newSubtitle = s.subtitle?.trim() || cand.cleanTitle?.trim() || null;
+    if (newTitle === s.title && newSubtitle === s.subtitle) continue;
+
+    await prisma.song.update({
+      where: { id: s.id },
+      data: { title: newTitle, subtitle: newSubtitle },
+    });
+    updated++;
+  }
+
+  await logActivity({
+    actorEmail: session?.user?.email,
+    action: 'update',
+    entity: 'Song',
+    label: `Backfilled exact titles — ${updated} song${updated !== 1 ? 's' : ''}`,
+  });
+
+  revalidatePath('/admin/songs');
+  revalidatePath('/songs');
+  return { updated, checked: songs.length };
 }
 
 /**
