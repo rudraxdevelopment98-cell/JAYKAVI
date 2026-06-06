@@ -72,12 +72,18 @@ export default async function SongDetail({ params }: { params: { slug: string } 
     getCollectionById(song.collectionId),
     getAllSongs(),
   ]);
-  const related = all
-    .filter((s) => s.id !== song.id && (
-      (s.collectionId === song.collectionId && !!song.collectionId) ||
-      s.performingSingers.some((p) => song.performingSingers.includes(p))
-    ))
-    .slice(0, 6);
+  // Rank related songs: same singer first, then same collection.
+  const sameSinger = all.filter(
+    (s) => s.id !== song.id && s.performingSingers.some((p) => song.performingSingers.includes(p)),
+  );
+  const sameCollection = all.filter(
+    (s) =>
+      s.id !== song.id &&
+      !!song.collectionId &&
+      s.collectionId === song.collectionId &&
+      !sameSinger.some((x) => x.id === s.id),
+  );
+  const related = [...sameSinger, ...sameCollection].slice(0, 6);
 
   const songUrl = absoluteUrl(`/songs/${song.slug}`);
   const siteBase = absoluteUrl('/');
