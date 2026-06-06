@@ -8,6 +8,7 @@ import { bulkDeleteSongs, bulkEditSongs } from './actions';
 interface Song {
   id: string;
   title: string;
+  subtitle: string | null;
   slug: string;
   releaseYear: number | null;
   viewCount: number;
@@ -194,9 +195,12 @@ export default function SongsTable({
                       ? <img src={s.artworkUrl} alt="" className="w-10 h-10 rounded object-cover" />
                       : <div className="w-10 h-10 rounded bg-neutral-800" />}
                   </td>
-                  <td className="px-4 py-2.5">
-                    <Link href={`/admin/songs/${s.id}`} className="font-medium hover:underline">{s.title}</Link>
-                    <div className="text-xs text-neutral-500">{s.slug}</div>
+                  <td className="px-4 py-2.5 max-w-[320px]">
+                    <Link href={`/admin/songs/${s.id}`} className="font-medium hover:underline line-clamp-2">{s.title}</Link>
+                    {s.subtitle && s.subtitle !== s.title && (
+                      <div className="text-xs text-amber-600/80 dark:text-amber-400/70 truncate">{s.subtitle}</div>
+                    )}
+                    <div className="text-xs text-neutral-500 truncate">{s.slug}</div>
                   </td>
                   <td className="px-4 py-2.5 text-neutral-300 max-w-[160px] truncate hidden sm:table-cell">
                     {s.singers.map((sg) => sg.singer.name).join(', ') || '—'}

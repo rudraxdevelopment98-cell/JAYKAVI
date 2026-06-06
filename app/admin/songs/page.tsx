@@ -28,7 +28,7 @@ export default async function SongsAdminPage({
       : undefined,
     orderBy: [{ isTrending: 'desc' }, { releaseYear: 'desc' }, { title: 'asc' }],
     select: {
-      id: true, title: true, slug: true, releaseYear: true,
+      id: true, title: true, subtitle: true, slug: true, releaseYear: true,
       viewCount: true, isTrending: true, artworkUrl: true,
       language: true, genre: true, collectionId: true,
       singers: { select: { singer: { select: { name: true } } } },

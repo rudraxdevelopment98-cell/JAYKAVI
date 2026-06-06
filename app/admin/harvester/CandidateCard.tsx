@@ -27,7 +27,8 @@ export default function CandidateCard({ c, onDismiss }: { c: Candidate; onDismis
   const [dupWarning, setDupWarning] = useState<ApproveResult | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const [title, setTitle] = useState(c.cleanTitle);
+  const [title, setTitle] = useState(c.rawTitle);
+  const [subtitle, setSubtitle] = useState(c.cleanTitle);
   const [singers, setSingers] = useState(c.singerGuess ?? '');
   const [year, setYear] = useState(c.releaseYear?.toString() ?? '');
   const [ytId, setYtId] = useState(c.youtubeId);
@@ -39,7 +40,7 @@ export default function CandidateCard({ c, onDismiss }: { c: Candidate; onDismis
     setDupWarning(null);
     setActionError(null);
     try {
-      const result = await approveCandidate(c.id, { title, singerNames: singers, releaseYear: year, youtubeId: ytId }, force);
+      const result = await approveCandidate(c.id, { title, subtitle, singerNames: singers, releaseYear: year, youtubeId: ytId }, force);
       if (result.duplicate) {
         setDupWarning(result);
       } else {
@@ -93,7 +94,10 @@ export default function CandidateCard({ c, onDismiss }: { c: Candidate; onDismis
           />
         )}
         <div className="flex-1 min-w-0">
-          <div className="font-medium truncate">{c.cleanTitle}</div>
+          <div className="font-medium leading-snug line-clamp-2" title={c.rawTitle}>{c.rawTitle}</div>
+          {c.cleanTitle && c.cleanTitle !== c.rawTitle && (
+            <div className="text-xs text-amber-500/70 mt-0.5 truncate">{c.cleanTitle}</div>
+          )}
           <div className="text-xs text-neutral-400 mt-0.5 truncate">
             {c.channelTitle && <span className="mr-2">📺 {c.channelTitle}</span>}
             {c.singerGuess && <span className="mr-2">🎤 {c.singerGuess}</span>}
@@ -160,9 +164,24 @@ export default function CandidateCard({ c, onDismiss }: { c: Candidate; onDismis
       {open && (
         <div className="border-t border-neutral-800 bg-neutral-950/60 p-4 space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-neutral-400 mb-1">Song title</label>
+            <div className="sm:col-span-2">
+              <label className="block text-xs text-neutral-400 mb-1">
+                Song title <span className="text-neutral-600">— exact YouTube title</span>
+              </label>
               <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputCls} />
+              <button
+                type="button"
+                onClick={() => setTitle(c.rawTitle)}
+                className="text-[11px] text-amber-500/80 hover:text-amber-400 mt-1"
+              >
+                ↺ Reset to full YouTube title
+              </button>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs text-neutral-400 mb-1">
+                Subtitle <span className="text-neutral-600">— cleaned / display line (optional)</span>
+              </label>
+              <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className={inputCls} />
             </div>
             <div>
               <label className="block text-xs text-neutral-400 mb-1">Performing singers (comma separated)</label>

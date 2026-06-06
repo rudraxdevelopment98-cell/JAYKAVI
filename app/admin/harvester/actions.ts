@@ -41,6 +41,7 @@ export async function approveCandidate(
   candidateId: string,
   overrides: {
     title: string;
+    subtitle?: string;
     singerNames: string;
     releaseYear: string;
     youtubeId: string;
@@ -54,46 +55,41 @@ export async function approveCandidate(
     where: { id: candidateId },
   });
 
-  const title = overrides.title.trim() || candidate.cleanTitle;
+  // Title defaults to the EXACT, full YouTube title; subtitle is the cleaned line.
+  const title = overrides.title.trim() || candidate.rawTitle;
+  const subtitle = (overrides.subtitle ?? candidate.cleanTitle).trim() || null;
   const releaseYear = overrides.releaseYear ? parseInt(overrides.releaseYear, 10) : candidate.releaseYear;
   const youtubeId = overrides.youtubeId.trim() || candidate.youtubeId;
 
   // ── Duplicate detection ──────────────────────────────────────────────
-  // Look for an existing Song with the same YouTube ID or the same title.
-  // Unless the admin explicitly forces it, stop and report the duplicate.
-  if (!force) {
+  // A YouTube video ID uniquely identifies a song. We deliberately do NOT
+  // dedupe by title — distinct videos that happen to share a title are
+  // distinct songs and must all be importable.
+  if (!force && youtubeId) {
     const existing = await prisma.song.findFirst({
-      where: {
-        OR: [
-          youtubeId ? { youtubeId } : undefined,
-          { title: { equals: title, mode: 'insensitive' } },
-        ].filter(Boolean) as any,
-      },
+      where: { youtubeId },
       select: { title: true, slug: true, youtubeId: true },
     });
 
     if (existing) {
-      const reason =
-        existing.youtubeId && existing.youtubeId === youtubeId
-          ? 'A song with this exact YouTube video already exists.'
-          : 'A song with this title already exists.';
       return {
         ok: false,
         duplicate: true,
-        duplicateReason: reason,
+        duplicateReason: 'A song with this exact YouTube video already exists.',
         existingTitle: existing.title,
         existingSlug: existing.slug,
       };
     }
   }
 
-  const slug = await uniqueSlug(slugify(title));
+  const slug = await uniqueSlug(slugify(subtitle || title));
 
   // Create the Song
   const song = await prisma.song.create({
     data: {
       slug,
       title,
+      subtitle,
       lyricistCredit: 'Jayesh Prajapati "JAYKAVI"',
       language: 'Gujarati',
       artworkUrl: candidate.thumbnailUrl,
@@ -232,27 +228,26 @@ export async function bulkApproveSimple(ids: string[]): Promise<BulkApproveResul
   let skipped = 0;
 
   for (const c of candidates) {
-    const title = c.cleanTitle.trim();
+    // Exact full YouTube title; cleaned line becomes the subtitle.
+    const title = c.rawTitle.trim() || c.cleanTitle.trim();
+    const subtitle = c.cleanTitle.trim() || null;
     const youtubeId = c.youtubeId;
 
-    // Skip duplicates
-    const existing = await prisma.song.findFirst({
-      where: {
-        OR: [
-          youtubeId ? { youtubeId } : undefined,
-          { title: { equals: title, mode: 'insensitive' } },
-        ].filter(Boolean) as any,
-      },
-      select: { id: true },
-    });
-    if (existing) { skipped++; continue; }
+    // Skip ONLY a genuine duplicate of the same YouTube video — never by title.
+    if (youtubeId) {
+      const existing = await prisma.song.findFirst({
+        where: { youtubeId },
+        select: { id: true },
+      });
+      if (existing) { skipped++; continue; }
+    }
 
-    const slug = await uniqueSlug(slugify(title));
+    const slug = await uniqueSlug(slugify(subtitle || title));
     const releaseYear = c.releaseYear ?? null;
 
     const song = await prisma.song.create({
       data: {
-        slug, title,
+        slug, title, subtitle,
         lyricistCredit: 'Jayesh Prajapati "JAYKAVI"',
         language: 'Gujarati',
         artworkUrl: c.thumbnailUrl,

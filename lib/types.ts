@@ -28,6 +28,7 @@ export interface Song {
   id: string;
   slug: string;
   title: string;
+  subtitle?: string | null;
   altTitles: string[];
   lyricist: string;
   performingSingers: string[]; // singer names

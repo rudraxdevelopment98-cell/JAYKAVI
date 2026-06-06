@@ -29,6 +29,7 @@ interface Translation {
 
 interface Song {
   title: string;
+  subtitle: string | null;
   slug: string;
   altTitles: string[];
   lyricistCredit: string;
@@ -130,6 +131,19 @@ export default function SongForm({
             name="title"
             defaultValue={initial?.title ?? ''}
             required
+            className={inputCls}
+          />
+          <p className="text-xs text-neutral-500 mt-1">
+            For harvested songs this is the exact YouTube title. Keep it as-is; edit the subtitle instead.
+          </p>
+        </div>
+
+        <div>
+          <label className={labelCls}>Subtitle <span className="text-neutral-500">(optional display line)</span></label>
+          <input
+            name="subtitle"
+            defaultValue={initial?.subtitle ?? ''}
+            placeholder="Cleaned / readable title shown under the main title"
             className={inputCls}
           />
         </div>

@@ -85,6 +85,7 @@ model Song {
   legacyId           String?             @unique
   slug               String              @unique
   title              String
+  subtitle           String?             // editable secondary line (cleaned/readable title)
   altTitles          String[]            @default([])
   lyricistCredit     String
   composer           String?

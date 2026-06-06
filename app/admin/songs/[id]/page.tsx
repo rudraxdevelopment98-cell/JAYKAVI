@@ -42,6 +42,7 @@ export default async function EditSongPage({ params }: { params: { id: string } 
       <SongForm
         initial={{
           title: song.title,
+          subtitle: song.subtitle,
           slug: song.slug,
           altTitles: song.altTitles,
           lyricistCredit: song.lyricistCredit,

@@ -71,6 +71,7 @@ async function uniqueSlug(base: string, excludeId?: string): Promise<string> {
 
 interface SongPayload {
   title: string;
+  subtitle: string | null;
   slug: string;
   altTitles: string[];
   lyricistCredit: string;
@@ -94,9 +95,11 @@ function buildPayload(formData: FormData): SongPayload & {
   lyricsTranslations: TranslationInput[];
 } {
   const title = str(formData.get('title'));
+  const subtitle = strOrNull(formData.get('subtitle'));
   return {
     title,
-    slug: str(formData.get('slug')) || slugify(title),
+    subtitle,
+    slug: str(formData.get('slug')) || slugify(subtitle || title),
     altTitles: csv(formData.get('altTitles')),
     lyricistCredit: str(formData.get('lyricistCredit')) || 'Jayesh Prajapati "JAYKAVI"',
     composer: strOrNull(formData.get('composer')),
@@ -123,18 +126,16 @@ export async function createSong(formData: FormData): Promise<{ error: string } 
   const p = buildPayload(formData);
   if (!p.title) return { error: 'Title is required' };
 
-  const dupConditions: any[] = [{ title: { equals: p.title, mode: 'insensitive' } }];
-  if (p.youtubeId) dupConditions.push({ youtubeId: p.youtubeId });
-  const duplicate = await prisma.song.findFirst({
-    where: { OR: dupConditions },
-    select: { title: true, youtubeId: true, slug: true },
-  });
-  if (duplicate) {
-    const reason =
-      duplicate.youtubeId && duplicate.youtubeId === p.youtubeId
-        ? `A song with this YouTube ID already exists: "${duplicate.title}"`
-        : `Song "${duplicate.title}" already exists.`;
-    return { error: reason };
+  // Only a shared YouTube video ID counts as a true duplicate — two distinct
+  // videos may legitimately share a title.
+  if (p.youtubeId) {
+    const duplicate = await prisma.song.findFirst({
+      where: { youtubeId: p.youtubeId },
+      select: { title: true },
+    });
+    if (duplicate) {
+      return { error: `A song with this YouTube ID already exists: "${duplicate.title}"` };
+    }
   }
 
   const slug = await uniqueSlug(p.slug);
@@ -142,6 +143,7 @@ export async function createSong(formData: FormData): Promise<{ error: string } 
   const song = await prisma.song.create({
     data: {
       title: p.title,
+      subtitle: p.subtitle,
       slug,
       altTitles: p.altTitles,
       lyricistCredit: p.lyricistCredit,
@@ -189,6 +191,7 @@ export async function updateSong(id: string, formData: FormData) {
       where: { id },
       data: {
         title: p.title,
+        subtitle: p.subtitle,
         slug,
         altTitles: p.altTitles,
         lyricistCredit: p.lyricistCredit,

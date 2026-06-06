@@ -137,6 +137,7 @@ function dbSongToJson(s: any): Song {
     id: s.legacyId ?? s.id,
     slug: s.slug,
     title: s.title,
+    subtitle: s.subtitle ?? null,
     altTitles: s.altTitles ?? [],
     lyricist: s.lyricistCredit,
     performingSingers: (s.singers ?? []).map((sg: any) => sg.singer.name),

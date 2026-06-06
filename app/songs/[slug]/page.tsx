@@ -132,6 +132,11 @@ export default async function SongDetail({ params }: { params: { slug: string } 
           <h1 className="font-serif" style={{ fontSize: 'clamp(2rem,6vw,5rem)', fontWeight: 700, lineHeight: 1.05, margin: '10px 0 16px', letterSpacing: '-.01em' }}>
             {song.title}
           </h1>
+          {song.subtitle && song.subtitle !== song.title && (
+            <p className="text-muted" style={{ fontSize: '1.1rem', margin: '-6px 0 18px', fontStyle: 'italic' }}>
+              {song.subtitle}
+            </p>
+          )}
           {song.performingSingers.length > 0 && (
             <p style={{ fontSize: '1.05rem', margin: '0 0 22px' }}>
               Sung by <strong>{song.performingSingers.join(', ')}</strong>
