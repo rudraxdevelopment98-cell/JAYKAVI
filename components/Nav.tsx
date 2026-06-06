@@ -67,11 +67,35 @@ export default function Nav({ skin = 'default' }: { skin?: string }) {
           {traditional && (
             <li><Link href="/contact" className="nav-book">📩 Booking</Link></li>
           )}
+          <li>
+            <button
+              type="button"
+              className="nav-search"
+              onClick={() => window.dispatchEvent(new Event('open-search'))}
+              aria-label="Search (Ctrl+K)"
+              title="Search  ⌘K"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                <circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <span className="nav-search-k">⌘K</span>
+            </button>
+          </li>
           <li><ThemeToggle /></li>
         </ul>
 
         {/* Mobile right side */}
         <div className="nav-mobile-right">
+          <button
+            type="button"
+            className="nav-search nav-search--mobile"
+            onClick={() => window.dispatchEvent(new Event('open-search'))}
+            aria-label="Search"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+              <circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </button>
           <ThemeToggle />
           <button
             className="nav-burger"
@@ -161,6 +185,23 @@ export default function Nav({ skin = 'default' }: { skin?: string }) {
         .nav-link:hover::before { opacity: 1; transform: translateX(-50%) scale(1); }
         .nav-link.active { opacity: 1; }
         .nav-link.active::after { transform: scaleX(1); }
+
+        /* ── Search trigger ── */
+        .nav-search {
+          display: inline-flex; align-items: center; gap: 7px;
+          background: var(--panel); color: var(--text);
+          border: 1px solid var(--line); border-radius: 100px;
+          padding: 6px 12px; cursor: pointer; opacity: .82;
+          transition: opacity .25s ease, border-color .25s ease, transform .2s ease;
+        }
+        .nav-search:hover { opacity: 1; border-color: var(--accent); transform: translateY(-1px); }
+        .nav-search-k {
+          font-size: .66rem; letter-spacing: .04em; opacity: .6;
+          font-family: var(--font-hanken), system-ui, sans-serif;
+        }
+        .nav-search--mobile {
+          padding: 8px; border-radius: 10px;
+        }
 
         /* ── Mobile right ── */
         .nav-mobile-right {
