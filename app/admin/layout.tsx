@@ -45,6 +45,7 @@ const NAV_GROUPS = [
       { href: '/admin/theme', label: '🖌️ Site Theme' },
       { href: '/admin/backup', label: '💾 Backup' },
       { href: '/admin/logs', label: '📜 Activity Log' },
+      { href: '/admin/sitemap', label: '🗺️ Site Map' },
     ],
   },
 ];
