@@ -44,11 +44,7 @@ function Btn({
       type="button"
       onMouseDown={(e) => { e.preventDefault(); onClick(); }}
       title={title}
-      className={`inline-flex items-center justify-center w-8 h-8 rounded text-sm transition select-none
-        ${active
-          ? 'bg-amber-500/20 text-amber-300 border border-amber-600/40'
-          : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'
-        }`}
+      className={`note-toolbar-btn${active ? ' note-toolbar-btn--active' : ''} inline-flex items-center justify-center w-8 h-8 rounded text-sm transition select-none`}
     >
       {children}
     </button>
@@ -56,7 +52,7 @@ function Btn({
 }
 
 function Sep() {
-  return <span className="w-px h-5 bg-neutral-800 mx-0.5 flex-shrink-0" />;
+  return <span className="note-toolbar-sep w-px h-5 mx-0.5 flex-shrink-0" />;
 }
 
 // ─── Word download ─────────────────────────────────────────────────────────────
@@ -333,7 +329,7 @@ export default function NoteEditor({
     <div className={shell}>
 
       {/* ── Top action bar ── */}
-      <div className="flex items-center gap-2 px-5 py-2.5 border-b border-neutral-800 bg-neutral-950/90 backdrop-blur flex-shrink-0 flex-wrap">
+      <div className="note-topbar flex items-center gap-2 px-5 py-2.5 border-b border-neutral-800 bg-neutral-950/90 backdrop-blur flex-shrink-0 flex-wrap">
         {!focused && (
           <Link
             href="/admin/notebook"
@@ -475,7 +471,7 @@ export default function NoteEditor({
       </div>
 
       {/* ── Formatting toolbar ── */}
-      <div className="flex items-center gap-0.5 px-5 py-1.5 border-b border-neutral-800 bg-neutral-950/60 backdrop-blur flex-shrink-0 flex-wrap">
+      <div className="note-toolbar flex items-center gap-0.5 px-5 py-1.5 border-b border-neutral-800 bg-neutral-950/60 backdrop-blur flex-shrink-0 flex-wrap">
         {/* Headings */}
         <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
           active={editor.isActive('heading', { level: 1 })} title="Heading 1 (Song title)">
@@ -619,7 +615,7 @@ export default function NoteEditor({
       <div className="flex flex-1 overflow-hidden">
 
         {/* Main writing pane */}
-        <div className="flex-1 overflow-y-auto bg-neutral-950">
+        <div className="note-pane flex-1 overflow-y-auto bg-neutral-950">
           <div className={`mx-auto px-8 py-8 md:px-12 lg:px-16 ${focused ? 'max-w-2xl' : 'max-w-2xl'}`}>
             {/* Title */}
             <input
@@ -631,7 +627,7 @@ export default function NoteEditor({
                 isDirty.current = true;
                 setSaveStatus('unsaved');
               }}
-              className="w-full bg-transparent text-3xl md:text-4xl font-light
+              className="note-title-input w-full bg-transparent text-3xl md:text-4xl font-light
                 text-neutral-100 placeholder:text-neutral-700 focus:outline-none mb-6
                 border-b border-neutral-800 pb-4 tracking-tight"
               style={{ fontFamily: 'var(--font-fraunces), Georgia, serif' }}
@@ -644,7 +640,7 @@ export default function NoteEditor({
 
         {/* Right meta panel — hidden in focus mode */}
         {!focused && (
-          <div className="w-52 flex-shrink-0 border-l border-neutral-800 bg-neutral-900/20 p-4 overflow-y-auto hidden lg:block">
+          <div className="note-meta w-52 flex-shrink-0 border-l border-neutral-800 bg-neutral-900/20 p-4 overflow-y-auto hidden lg:block">
             <div className="space-y-6">
 
               <div>
@@ -824,6 +820,16 @@ export default function NoteEditor({
 
       {/* ── Editor prose styles ── */}
       <style>{`
+        /* ── Toolbar buttons (theme-aware via globals.css override) ── */
+        .note-toolbar-btn { color: #737373; }
+        .note-toolbar-btn:hover { color: #e5e5e5; background: #262626; }
+        .note-toolbar-btn--active {
+          background: rgba(245,158,11,.15);
+          color: #fbbf24;
+          border: 1px solid rgba(217,119,6,.38);
+        }
+        .note-toolbar-sep { background: #3a3a3a; display: inline-block; }
+
         .note-prose {
           min-height: 60vh;
           outline: none;

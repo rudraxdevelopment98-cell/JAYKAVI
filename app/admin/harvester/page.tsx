@@ -33,12 +33,13 @@ export default async function HarvesterPage() {
   const hasApiKey = !!process.env.YOUTUBE_API_KEY;
 
   return (
-    <div className="max-w-4xl">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
+    <>
+    {/* Sticky page header */}
+    <div className="admin-sticky-header">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold">Song Harvester</h1>
-          <p className="text-neutral-400 mt-1">
+          <p className="text-neutral-400 mt-1 text-sm">
             Searches YouTube for new JAYKAVI songs and queues them for your review.
           </p>
         </div>
@@ -49,6 +50,9 @@ export default async function HarvesterPage() {
           Configure
         </Link>
       </div>
+    </div>
+
+    <div className="max-w-4xl">
 
       {/* API key warning */}
       {!hasApiKey && (
@@ -130,7 +134,7 @@ export default async function HarvesterPage() {
 
       {/* Pending review queue */}
       <section className="mb-8">
-        <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+        <div className="sticky top-[56px] md:top-0 z-10 bg-neutral-950 -mx-4 px-4 md:-mx-0 md:px-0 py-2 mb-1 border-b border-neutral-800/50 flex items-center justify-between gap-3 flex-wrap">
           <h2 className="text-xl font-semibold">
             Pending Review{' '}
             <span className="text-neutral-400 font-normal text-base">
@@ -193,5 +197,6 @@ export default async function HarvesterPage() {
         )}
       </section>
     </div>
+    </>
   );
 }

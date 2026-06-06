@@ -591,6 +591,25 @@ a { color: inherit; }
   .h-scroll-item { flex: 0 0 min(220px, 76vw); }
 }
 
+/* ===== ADMIN STICKY PAGE HEADERS ===== */
+.admin-sticky-header {
+  position: sticky;
+  top: 56px; /* height of the mobile top bar */
+  z-index: 20;
+  background: #0a0a0b;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  /* extend to main's padding edges so it fills full viewport width */
+  margin: -1rem -1rem 1.5rem;
+  padding: .75rem 1rem 1rem;
+}
+@media (min-width: 768px) {
+  .admin-sticky-header { top: 0; margin: -2rem -2rem 1.5rem; padding: 1.25rem 2rem 1rem; }
+}
+[data-admin-theme='light'] .admin-sticky-header {
+  background: #f0f0f2;
+  border-color: rgba(0,0,0,.08);
+}
+
 /* ===== ADMIN LIGHT THEME ===== */
 [data-admin-theme='light'] .admin-shell {
   background-color: #F0F0F2 !important;
@@ -626,3 +645,59 @@ a { color: inherit; }
 [data-admin-theme='light'] .admin-shell .hover\:text-neutral-100:hover { color: #111 !important; }
 [data-admin-theme='light'] .admin-shell .hover\:text-neutral-200:hover { color: #222 !important; }
 [data-admin-theme='light'] .admin-shell .hover\:text-neutral-300:hover { color: #333 !important; }
+
+/* ── Notebook / NoteEditor light mode ── */
+/* Semi-transparent backgrounds not caught by class-name rules above */
+[data-admin-theme='light'] .note-topbar {
+  background: rgba(240,240,242,.96) !important;
+  border-color: #ddd !important;
+}
+[data-admin-theme='light'] .note-toolbar {
+  background: rgba(240,240,242,.92) !important;
+  border-color: #ddd !important;
+}
+[data-admin-theme='light'] .note-pane { background: #f7f6f2 !important; }
+[data-admin-theme='light'] .note-meta {
+  background: rgba(0,0,0,.03) !important;
+  border-color: #ddd !important;
+}
+[data-admin-theme='light'] .note-title-input {
+  color: #1a1a1a !important;
+  border-color: #ddd !important;
+}
+[data-admin-theme='light'] .note-title-input::placeholder { color: #b5b0a8 !important; }
+
+/* TipTap prose in light mode */
+[data-admin-theme='light'] .note-prose { color: #2b2b2b !important; caret-color: #c9a961 !important; }
+[data-admin-theme='light'] .note-prose h1 { color: #111 !important; border-color: #ddd !important; }
+[data-admin-theme='light'] .note-prose h2 { color: #1a1a1a !important; }
+[data-admin-theme='light'] .note-prose h3 { color: #4a4a4a !important; }
+[data-admin-theme='light'] .note-prose strong { color: #111 !important; }
+[data-admin-theme='light'] .note-prose em { color: #2b2b2b !important; }
+[data-admin-theme='light'] .note-prose mark { background: rgba(201,169,97,.28) !important; color: #7a4e0a !important; }
+[data-admin-theme='light'] .note-prose a { color: #a07020 !important; }
+[data-admin-theme='light'] .note-prose blockquote { border-color: #c9a961 !important; color: #6b6457 !important; }
+[data-admin-theme='light'] .note-prose hr { border-color: #ddd !important; }
+[data-admin-theme='light'] .note-prose ul[data-type="taskList"] li label input[type="checkbox"] { border-color: #aaa !important; }
+[data-admin-theme='light'] .note-prose p.is-editor-empty:first-child::before { color: #c0bbb2 !important; }
+[data-admin-theme='light'] .note-prose ::selection { background: rgba(201,169,97,.22) !important; }
+
+/* Toolbar buttons in light mode */
+[data-admin-theme='light'] .note-toolbar-btn { color: #555 !important; }
+[data-admin-theme='light'] .note-toolbar-btn:hover { color: #111 !important; background: rgba(0,0,0,.08) !important; }
+[data-admin-theme='light'] .note-toolbar-btn.note-toolbar-btn--active {
+  background: rgba(201,169,97,.2) !important;
+  color: #7a4e0a !important;
+  border-color: rgba(180,130,40,.4) !important;
+}
+[data-admin-theme='light'] .note-toolbar-sep { background: #d6d0c4 !important; }
+
+/* Right meta panel in light mode */
+[data-admin-theme='light'] .note-meta select,
+[data-admin-theme='light'] .note-meta input {
+  background: #f0eee8 !important;
+  border-color: #d0cbc2 !important;
+  color: #2b2b2b !important;
+}
+[data-admin-theme='light'] .note-meta .hover\:bg-neutral-800:hover { background: #e5e3de !important; }
+[data-admin-theme='light'] .note-meta .border-neutral-800 { border-color: #d6d0c4 !important; }
