@@ -1,12 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
 import Link from 'next/link';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import Underline from '@tiptap/extension-underline';
-import { saveNote, deleteNote } from './actions';
+import Highlight from '@tiptap/extension-highlight';
+import LinkExt from '@tiptap/extension-link';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
+import { saveNote, deleteNote, togglePinNote, duplicateNote, convertNoteToSong } from './actions';
 
 interface Folder { id: string; title: string; }
 
@@ -15,6 +19,8 @@ interface NoteData {
   title: string;
   content: string;
   published: boolean;
+  pinned: boolean;
+  tags: string[];
   folderId: string | null;
   folderTitle: string | null;
   createdAt: string;
@@ -149,10 +155,17 @@ export default function NoteEditor({
 }) {
   const [title, setTitle] = useState(note.title === 'Untitled' ? '' : note.title);
   const [published, setPublished] = useState(note.published);
+  const [pinned, setPinned] = useState(note.pinned);
   const [folderId, setFolderId] = useState<string | null>(note.folderId);
+  const [tags, setTags] = useState<string[]>(note.tags ?? []);
+  const [tagInput, setTagInput] = useState('');
+  const [focused, setFocused] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | 'error'>('saved');
   const [showDelete, setShowDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [converting, startConvert] = useTransition();
+  const [duplicating, startDuplicate] = useTransition();
+  const [pinning, startPin] = useTransition();
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isDirty = useRef(false);
 
@@ -161,6 +174,10 @@ export default function NoteEditor({
       StarterKit,
       Underline,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      Highlight.configure({ multicolor: false }),
+      LinkExt.configure({ openOnClick: false, autolink: true }),
+      TaskList,
+      TaskItem.configure({ nested: true }),
     ],
     content: note.content || '<p></p>',
     editorProps: {
@@ -176,7 +193,7 @@ export default function NoteEditor({
   });
 
   const doSave = useCallback(
-    async (opts?: { title?: string; published?: boolean; folderId?: string | null }) => {
+    async (opts?: { title?: string; published?: boolean; folderId?: string | null; tags?: string[] }) => {
       if (!editor) return;
       setSaveStatus('saving');
       try {
@@ -185,6 +202,7 @@ export default function NoteEditor({
           content: editor.getHTML(),
           published: opts?.published ?? published,
           folderId: opts?.folderId !== undefined ? opts.folderId : folderId,
+          tags: opts?.tags !== undefined ? opts.tags : tags,
         });
         setSaveStatus('saved');
         isDirty.current = false;
@@ -192,7 +210,7 @@ export default function NoteEditor({
         setSaveStatus('error');
       }
     },
-    [note.id, title, published, folderId, editor],
+    [note.id, title, published, folderId, tags, editor],
   );
 
   // Auto-save 2 s after stopping
@@ -201,7 +219,7 @@ export default function NoteEditor({
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     autoSaveTimer.current = setTimeout(() => doSave(), 2000);
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
-  }, [title, doSave]);
+  }, [title, tags, doSave]);
 
   // Also trigger auto-save on editor content change
   useEffect(() => {
@@ -214,6 +232,12 @@ export default function NoteEditor({
     editor.on('update', handler);
     return () => { editor.off('update', handler); };
   }, [editor, doSave]);
+
+  // Focus mode: hide scrollbar behind editor
+  useEffect(() => {
+    document.body.style.overflow = focused ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [focused]);
 
   async function handlePublishToggle() {
     const next = !published;
@@ -243,9 +267,55 @@ export default function NoteEditor({
     downloadAsWord(title || 'Untitled', editor.getHTML());
   }
 
-  const wordCount = editor
-    ? editor.getText().trim().split(/\s+/).filter(Boolean).length
-    : 0;
+  function handlePinToggle() {
+    const next = !pinned;
+    setPinned(next);
+    startPin(() => togglePinNote(note.id, next));
+  }
+
+  function handleDuplicate() {
+    startDuplicate(() => duplicateNote(note.id));
+  }
+
+  function handleConvertToSong() {
+    startConvert(() => convertNoteToSong(note.id));
+  }
+
+  function addTag(raw: string) {
+    const t = raw.trim().toLowerCase().replace(/[^a-z0-9઀-૿ऀ-ॿ\s-]/g, '').replace(/\s+/g, '-');
+    if (!t || tags.includes(t) || tags.length >= 12) return;
+    const next = [...tags, t];
+    setTags(next);
+    isDirty.current = true;
+    setSaveStatus('unsaved');
+    doSave({ tags: next });
+  }
+
+  function removeTag(t: string) {
+    const next = tags.filter((x) => x !== t);
+    setTags(next);
+    isDirty.current = true;
+    doSave({ tags: next });
+  }
+
+  // Stats
+  const text = editor ? editor.getText() : '';
+  const words = text.trim() ? text.trim().split(/\s+/).filter(Boolean).length : 0;
+  const chars = text.length;
+  const lines = text.split('\n').filter((l) => l.trim()).length;
+  const readingMins = Math.max(1, Math.round(words / 200));
+
+  const linkActive = editor?.isActive('link');
+
+  function handleLinkToggle() {
+    if (!editor) return;
+    if (editor.isActive('link')) {
+      editor.chain().focus().unsetLink().run();
+    } else {
+      const url = window.prompt('Enter URL');
+      if (url) editor.chain().focus().setLink({ href: url }).run();
+    }
+  }
 
   if (!editor) {
     return (
@@ -255,20 +325,26 @@ export default function NoteEditor({
     );
   }
 
+  const shell = focused
+    ? 'fixed inset-0 z-50 flex flex-col bg-neutral-950'
+    : 'flex flex-col h-[calc(100vh-5rem)] -m-8';
+
   return (
-<div className="flex flex-col h-[calc(100vh-5rem)] -m-8">
+    <div className={shell}>
 
       {/* ── Top action bar ── */}
       <div className="flex items-center gap-2 px-5 py-2.5 border-b border-neutral-800 bg-neutral-950/90 backdrop-blur flex-shrink-0 flex-wrap">
-        <Link
-          href="/admin/notebook"
-          className="text-sm text-neutral-500 hover:text-neutral-200 transition flex items-center gap-1 mr-2 flex-shrink-0"
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-          Notebook
-        </Link>
+        {!focused && (
+          <Link
+            href="/admin/notebook"
+            className="text-sm text-neutral-500 hover:text-neutral-200 transition flex items-center gap-1 mr-2 flex-shrink-0"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Notebook
+          </Link>
+        )}
 
         {/* Save status */}
         <span className={`text-xs flex-shrink-0 ${
@@ -284,6 +360,40 @@ export default function NoteEditor({
         </span>
 
         <div className="flex-1" />
+
+        {/* Pin */}
+        <button
+          onClick={handlePinToggle}
+          disabled={pinning}
+          title={pinned ? 'Unpin note' : 'Pin to top'}
+          className={`p-1.5 rounded-lg transition flex-shrink-0 text-base ${
+            pinned ? 'text-amber-400 bg-amber-500/10' : 'text-neutral-500 hover:text-amber-400 hover:bg-neutral-800'
+          }`}
+        >
+          📌
+        </button>
+
+        {/* Duplicate */}
+        <button
+          onClick={handleDuplicate}
+          disabled={duplicating}
+          title="Duplicate note"
+          className="p-1.5 text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 rounded-lg transition flex-shrink-0"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+            <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </button>
+
+        {/* Convert to Song */}
+        <button
+          onClick={handleConvertToSong}
+          disabled={converting}
+          title="Convert to Song draft"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-amber-700/50 text-amber-400 rounded-lg hover:bg-amber-500/10 transition flex-shrink-0"
+        >
+          {converting ? 'Converting…' : '🎵 → Song'}
+        </button>
 
         {/* Publish toggle */}
         <button
@@ -334,6 +444,23 @@ export default function NoteEditor({
           Word
         </button>
 
+        {/* Focus mode */}
+        <button
+          onClick={() => setFocused((v) => !v)}
+          title={focused ? 'Exit focus mode (Esc)' : 'Focus mode'}
+          className="p-1.5 text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 rounded-lg transition flex-shrink-0"
+        >
+          {focused ? (
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+            </svg>
+          ) : (
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+            </svg>
+          )}
+        </button>
+
         {/* Delete */}
         <button
           onClick={() => setShowDelete(true)}
@@ -381,6 +508,20 @@ export default function NoteEditor({
         <Btn onClick={() => editor.chain().focus().toggleStrike().run()}
           active={editor.isActive('strike')} title="Strikethrough">
           <span className="line-through text-[11px]">S</span>
+        </Btn>
+        <Btn onClick={() => editor.chain().focus().toggleHighlight().run()}
+          active={editor.isActive('highlight')} title="Highlight text">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+            <path d="M9 11l3 3L22 4"/><rect x="2" y="17" width="20" height="4" rx="1" fill="currentColor" stroke="none" opacity=".3"/>
+            <path d="M15 5l2 2"/>
+          </svg>
+        </Btn>
+        <Btn onClick={handleLinkToggle}
+          active={!!linkActive} title="Insert / remove link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
         </Btn>
 
         <Sep />
@@ -430,8 +571,27 @@ export default function NoteEditor({
             <text x="3" y="18.5" fontSize="7" fill="currentColor" stroke="none" fontFamily="sans-serif">3</text>
           </svg>
         </Btn>
+        <Btn onClick={() => editor.chain().focus().toggleTaskList().run()}
+          active={editor.isActive('taskList')} title="Checklist / Task list">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+            <rect x="3" y="5" width="5" height="5" rx="1"/>
+            <polyline points="4 7.5 5.5 9 8 6"/>
+            <line x1="11" y1="7" x2="20" y2="7"/>
+            <rect x="3" y="14" width="5" height="5" rx="1"/>
+            <line x1="11" y1="16" x2="20" y2="16"/>
+          </svg>
+        </Btn>
 
         <Sep />
+
+        {/* Blockquote */}
+        <Btn onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          active={editor.isActive('blockquote')} title="Blockquote">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+            <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+            <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+          </svg>
+        </Btn>
 
         {/* Divider */}
         <Btn onClick={() => editor.chain().focus().setHorizontalRule().run()}
@@ -452,7 +612,7 @@ export default function NoteEditor({
         <div className="flex-1" />
 
         {/* Word count */}
-        <span className="text-xs text-neutral-600 ml-2">{wordCount} words</span>
+        <span className="text-xs text-neutral-600 ml-2">{words} words</span>
       </div>
 
       {/* ── Writing area ── */}
@@ -460,7 +620,7 @@ export default function NoteEditor({
 
         {/* Main writing pane */}
         <div className="flex-1 overflow-y-auto bg-neutral-950">
-          <div className="max-w-2xl mx-auto px-8 py-8 md:px-12 lg:px-16">
+          <div className={`mx-auto px-8 py-8 md:px-12 lg:px-16 ${focused ? 'max-w-2xl' : 'max-w-2xl'}`}>
             {/* Title */}
             <input
               type="text"
@@ -482,87 +642,157 @@ export default function NoteEditor({
           </div>
         </div>
 
-        {/* Right meta panel */}
-        <div className="w-52 flex-shrink-0 border-l border-neutral-800 bg-neutral-900/20 p-4 overflow-y-auto hidden lg:block">
-          <div className="space-y-6">
+        {/* Right meta panel — hidden in focus mode */}
+        {!focused && (
+          <div className="w-52 flex-shrink-0 border-l border-neutral-800 bg-neutral-900/20 p-4 overflow-y-auto hidden lg:block">
+            <div className="space-y-6">
 
-            <div>
-              <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Folder</p>
-              <select
-                value={folderId ?? ''}
-                onChange={(e) => handleFolderChange(e.target.value || null)}
-                className="w-full px-2 py-1.5 text-xs bg-neutral-900 border border-neutral-700
-                  rounded-md focus:outline-none focus:border-amber-600 text-neutral-300"
-              >
-                <option value="">None</option>
-                {folders.map((f) => (
-                  <option key={f.id} value={f.id}>{f.title}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Visibility</p>
-              <button
-                onClick={handlePublishToggle}
-                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition ${
-                  published
-                    ? 'bg-green-900/30 border-green-700/50 text-green-300'
-                    : 'bg-neutral-800/60 border-neutral-700 text-neutral-400 hover:text-neutral-200'
-                }`}
-              >
-                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${published ? 'bg-green-400' : 'bg-neutral-500'}`} />
-                {published ? 'Public' : 'Private (Draft)'}
-              </button>
-            </div>
-
-            <div>
-              <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Stats</p>
-              <div className="space-y-1.5 text-xs text-neutral-500">
-                <div className="flex justify-between">
-                  <span>Words</span><span className="text-neutral-400">{wordCount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Chars</span>
-                  <span className="text-neutral-400">{editor.getText().length}</span>
-                </div>
+              <div>
+                <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Folder</p>
+                <select
+                  value={folderId ?? ''}
+                  onChange={(e) => handleFolderChange(e.target.value || null)}
+                  className="w-full px-2 py-1.5 text-xs bg-neutral-900 border border-neutral-700
+                    rounded-md focus:outline-none focus:border-amber-600 text-neutral-300"
+                >
+                  <option value="">None</option>
+                  {folders.map((f) => (
+                    <option key={f.id} value={f.id}>{f.title}</option>
+                  ))}
+                </select>
               </div>
-            </div>
 
-            <div>
-              <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Export</p>
-              <div className="space-y-1.5">
+              <div>
+                <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Visibility</p>
                 <button
-                  onClick={handlePDF}
-                  className="w-full text-left px-3 py-2 text-xs border border-neutral-800 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition"
+                  onClick={handlePublishToggle}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition ${
+                    published
+                      ? 'bg-green-900/30 border-green-700/50 text-green-300'
+                      : 'bg-neutral-800/60 border-neutral-700 text-neutral-400 hover:text-neutral-200'
+                  }`}
                 >
-                  ↓ Download PDF
-                </button>
-                <button
-                  onClick={handleWord}
-                  className="w-full text-left px-3 py-2 text-xs border border-neutral-800 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition"
-                >
-                  ↓ Download Word
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${published ? 'bg-green-400' : 'bg-neutral-500'}`} />
+                  {published ? 'Public' : 'Private (Draft)'}
                 </button>
               </div>
-            </div>
 
-            <div>
-              <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Dates</p>
-              <div className="space-y-2 text-xs text-neutral-600">
-                <div>
-                  <span className="block text-neutral-700">Created</span>
-                  {new Date(note.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+              {/* Tags */}
+              <div>
+                <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Tags</p>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {tags.map((t) => (
+                    <span key={t} className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-600/30 text-amber-400">
+                      #{t}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(t)}
+                        className="ml-0.5 opacity-60 hover:opacity-100 leading-none"
+                        title={`Remove #${t}`}
+                      >×</button>
+                    </span>
+                  ))}
                 </div>
-                <div>
-                  <span className="block text-neutral-700">Updated</span>
-                  {new Date(note.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    addTag(tagInput);
+                    setTagInput('');
+                  }}
+                  className="flex gap-1"
+                >
+                  <input
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    placeholder="add tag…"
+                    className="flex-1 min-w-0 px-2 py-1 text-[11px] bg-neutral-900 border border-neutral-700 rounded focus:outline-none focus:border-amber-600 text-neutral-300 placeholder:text-neutral-700"
+                  />
+                  <button
+                    type="submit"
+                    className="px-2 py-1 text-[11px] bg-neutral-800 text-neutral-300 rounded hover:bg-neutral-700 transition"
+                  >
+                    +
+                  </button>
+                </form>
+              </div>
+
+              {/* Stats */}
+              <div>
+                <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Stats</p>
+                <div className="space-y-1.5 text-xs text-neutral-500">
+                  <div className="flex justify-between">
+                    <span>Words</span><span className="text-neutral-400">{words}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Chars</span>
+                    <span className="text-neutral-400">{chars}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Lines</span>
+                    <span className="text-neutral-400">{lines}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Read time</span>
+                    <span className="text-neutral-400">~{readingMins} min</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
+              <div>
+                <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Export</p>
+                <div className="space-y-1.5">
+                  <button
+                    onClick={handlePDF}
+                    className="w-full text-left px-3 py-2 text-xs border border-neutral-800 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition"
+                  >
+                    ↓ Download PDF
+                  </button>
+                  <button
+                    onClick={handleWord}
+                    className="w-full text-left px-3 py-2 text-xs border border-neutral-800 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition"
+                  >
+                    ↓ Download Word
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Actions</p>
+                <div className="space-y-1.5">
+                  <button
+                    onClick={handleDuplicate}
+                    disabled={duplicating}
+                    className="w-full text-left px-3 py-2 text-xs border border-neutral-800 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition disabled:opacity-50"
+                  >
+                    ⧉ Duplicate note
+                  </button>
+                  <button
+                    onClick={handleConvertToSong}
+                    disabled={converting}
+                    className="w-full text-left px-3 py-2 text-xs border border-amber-700/30 rounded-lg text-amber-500/80 hover:text-amber-400 hover:bg-amber-500/5 transition disabled:opacity-50"
+                  >
+                    🎵 Convert to Song
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-neutral-500 font-medium mb-2 uppercase tracking-widest">Dates</p>
+                <div className="space-y-2 text-xs text-neutral-600">
+                  <div>
+                    <span className="block text-neutral-700">Created</span>
+                    {new Date(note.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </div>
+                  <div>
+                    <span className="block text-neutral-700">Updated</span>
+                    {new Date(note.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── Delete confirm modal ── */}
@@ -626,6 +856,26 @@ export default function NoteEditor({
         .note-prose em { font-style: italic; color: #e5e5e5; }
         .note-prose u { text-decoration: underline; text-underline-offset: 3px; }
         .note-prose s { opacity: 0.5; }
+        .note-prose mark {
+          background: rgba(245,158,11,.25);
+          color: #fde68a;
+          border-radius: 2px;
+          padding: 0 2px;
+        }
+        .note-prose a {
+          color: #f59e0b;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+          opacity: .85;
+        }
+        .note-prose a:hover { opacity: 1; }
+        .note-prose blockquote {
+          border-left: 3px solid #404040;
+          padding-left: 1em;
+          color: #a3a3a3;
+          font-style: italic;
+          margin: 1em 0;
+        }
         .note-prose ul {
           list-style-type: disc; padding-left: 1.5em; margin: 0 0 0.8em;
         }
@@ -633,6 +883,39 @@ export default function NoteEditor({
           list-style-type: decimal; padding-left: 1.5em; margin: 0 0 0.8em;
         }
         .note-prose li { margin: 0.2em 0; }
+        /* Task list */
+        .note-prose ul[data-type="taskList"] {
+          list-style: none;
+          padding-left: 0.25em;
+        }
+        .note-prose ul[data-type="taskList"] li {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.5em;
+        }
+        .note-prose ul[data-type="taskList"] li label {
+          display: flex;
+          align-items: center;
+          margin-top: 0.3em;
+          flex-shrink: 0;
+        }
+        .note-prose ul[data-type="taskList"] li label input[type="checkbox"] {
+          appearance: none;
+          width: 14px; height: 14px;
+          border: 1.5px solid #555;
+          border-radius: 3px;
+          background: transparent;
+          cursor: pointer;
+          transition: background .15s, border-color .15s;
+        }
+        .note-prose ul[data-type="taskList"] li label input[type="checkbox"]:checked {
+          background: #f59e0b;
+          border-color: #f59e0b;
+        }
+        .note-prose ul[data-type="taskList"] li[data-checked="true"] > div {
+          text-decoration: line-through;
+          opacity: 0.45;
+        }
         .note-prose hr {
           border: none; border-top: 1px solid #333;
           margin: 1.6em 0;

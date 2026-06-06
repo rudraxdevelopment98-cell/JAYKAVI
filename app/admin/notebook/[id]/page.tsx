@@ -22,6 +22,8 @@ export default async function NoteEditorPage({ params }: { params: { id: string 
         title: note.title,
         content: note.content,
         published: note.published,
+        pinned: note.pinned,
+        tags: note.tags,
         folderId: note.folderId,
         folderTitle: note.folder?.title ?? null,
         createdAt: note.createdAt.toISOString(),

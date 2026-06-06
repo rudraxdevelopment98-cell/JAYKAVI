@@ -343,6 +343,8 @@ model Note {
   content     String      @default("")
   published   Boolean     @default(false)
   publishedAt DateTime?
+  pinned      Boolean     @default(false)
+  tags        String[]    @default([])
   folderId    String?
   folder      NoteFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
   createdAt   DateTime    @default(now())
@@ -350,6 +352,7 @@ model Note {
 
   @@index([published])
   @@index([folderId])
+  @@index([pinned])
 }
 
 // ----------------------------- CONTACT MESSAGES -------------------------
