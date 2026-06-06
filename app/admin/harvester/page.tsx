@@ -26,11 +26,26 @@ async function getData() {
     }),
     prisma.siteSettings.findFirst({ where: { id: 1 }, select: { viewsSyncedAt: true } }),
   ]);
-  return { config, pending, recent, settings };
+
+  // Which pending candidates already match a Song in the listing (by YouTube id)?
+  // We surface these in the queue so they aren't re-added by mistake.
+  const ytIds = pending.map((p) => p.youtubeId).filter(Boolean) as string[];
+  const existingSongs = ytIds.length
+    ? await prisma.song.findMany({
+        where: { youtubeId: { in: ytIds } },
+        select: { youtubeId: true, title: true, slug: true },
+      })
+    : [];
+  const existing: Record<string, { title: string; slug: string }> = {};
+  for (const s of existingSongs) {
+    if (s.youtubeId) existing[s.youtubeId] = { title: s.title, slug: s.slug };
+  }
+
+  return { config, pending, recent, settings, existing };
 }
 
 export default async function HarvesterPage() {
-  const { config, pending, recent, settings } = await getData();
+  const { config, pending, recent, settings, existing } = await getData();
   const hasApiKey = !!process.env.YOUTUBE_API_KEY;
 
   return (
@@ -155,7 +170,7 @@ export default async function HarvesterPage() {
           <ClearAllButton count={pending.length} />
         </div>
 
-        <HarvesterQueue candidates={pending} />
+        <HarvesterQueue candidates={pending} existing={existing} />
       </section>
 
       {/* Recent runs */}

@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 function extractPlaylistId(input: string): string | null {
   const s = input.trim();
@@ -12,6 +13,7 @@ function extractPlaylistId(input: string): string | null {
 }
 
 export default function PlaylistImportButton() {
+  const router = useRouter();
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -44,7 +46,11 @@ export default function PlaylistImportButton() {
         if (data.alreadySong > 0) parts.push(`${data.alreadySong} already in Songs`);
         if (data.alreadyCandidate > 0) parts.push(`${data.alreadyCandidate} already in queue`);
         setMessage(data.message ?? (parts.length ? parts.join(' · ') : 'Nothing new to add.'));
-        if (data.created > 0) setInput('');
+        if (data.created > 0) {
+          setInput('');
+          // Refresh the server component so the new candidates appear in the queue
+          router.refresh();
+        }
       }
     } catch {
       setStatus('error');

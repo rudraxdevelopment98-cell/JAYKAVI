@@ -20,7 +20,15 @@ interface Candidate {
 
 type SortKey = 'newest' | 'oldest' | 'views_high' | 'views_low';
 
-export default function HarvesterQueue({ candidates }: { candidates: Candidate[] }) {
+interface ExistingSong { title: string; slug: string; }
+
+export default function HarvesterQueue({
+  candidates,
+  existing = {},
+}: {
+  candidates: Candidate[];
+  existing?: Record<string, ExistingSong>;
+}) {
   const router = useRouter();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -161,6 +169,7 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
   const withSinger = active_candidates.filter((c) => c.singerGuess).length;
   const withViews = active_candidates.filter((c) => (c.viewCount ?? 0) > 0);
   const topViews = withViews.length > 0 ? Math.max(...withViews.map((c) => c.viewCount!)) : 0;
+  const alreadyListed = active_candidates.filter((c) => existing[c.youtubeId]).length;
 
   const hasFilter = !!(search.trim() || filterSinger || filterYear);
 
@@ -181,7 +190,11 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         <StatChip label="Total" value={active_candidates.length} color="text-neutral-300" />
         <StatChip label="Singer detected" value={withSinger} color="text-violet-400" />
-        <StatChip label="No singer" value={active_candidates.length - withSinger} color="text-amber-400" />
+        {alreadyListed > 0 ? (
+          <StatChip label="Already in Songs" value={alreadyListed} color="text-yellow-400" />
+        ) : (
+          <StatChip label="No singer" value={active_candidates.length - withSinger} color="text-amber-400" />
+        )}
         <StatChip
           label="Top views"
           value={topViews >= 1_000_000
@@ -310,7 +323,7 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
                   isSelected ? 'ring-1 ring-amber-600/50 shadow-lg shadow-amber-950/20' : ''
                 }`}
               >
-                <CandidateCard c={c} onDismiss={() => dismissOne(c.id)} />
+                <CandidateCard c={c} existing={existing[c.youtubeId]} onDismiss={() => dismissOne(c.id)} />
               </div>
             </div>
           );

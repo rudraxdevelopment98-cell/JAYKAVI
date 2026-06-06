@@ -18,7 +18,17 @@ interface Candidate {
   description: string | null;
 }
 
-export default function CandidateCard({ c, onDismiss }: { c: Candidate; onDismiss?: () => void }) {
+interface ExistingSong { title: string; slug: string; }
+
+export default function CandidateCard({
+  c,
+  existing,
+  onDismiss,
+}: {
+  c: Candidate;
+  existing?: ExistingSong;
+  onDismiss?: () => void;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [showDesc, setShowDesc] = useState(false);
@@ -102,7 +112,30 @@ export default function CandidateCard({ c, onDismiss }: { c: Candidate; onDismis
   const isBusy = busy !== null;
 
   return (
-    <div className="border border-neutral-800 rounded-xl overflow-hidden bg-neutral-900">
+    <div className={`border rounded-xl overflow-hidden bg-neutral-900 ${
+      existing ? 'border-yellow-700/60' : 'border-neutral-800'
+    }`}>
+      {/* ── Already-in-listing banner ── */}
+      {existing && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-yellow-950/40 border-b border-yellow-800/40 text-xs text-yellow-300">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+            <path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/>
+          </svg>
+          <span>
+            Already in your Songs as{' '}
+            <a
+              href={`/songs/${existing.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold underline underline-offset-2 hover:text-yellow-200"
+            >
+              {existing.title}
+            </a>
+            {' '}— no need to add again.
+          </span>
+        </div>
+      )}
+
       {/* ── Main row ── */}
       <div className="flex items-start gap-3 p-4 flex-wrap sm:flex-nowrap">
         {/* Thumbnail */}
