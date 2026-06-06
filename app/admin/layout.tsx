@@ -4,24 +4,49 @@ import { permissionForPath, hasPermission } from '@/lib/permissions';
 import AdminThemeToggle from './_components/AdminThemeToggle';
 import AdminShell from './_components/AdminShell';
 
-const NAV = [
-  { href: '/admin', label: 'Dashboard' },
-  { href: '/admin/account', label: '👤 My Profile' },
-  { href: '/admin/profile', label: 'Artist Profile' },
-  { href: '/admin/contact', label: 'Contact & Social' },
-  { href: '/admin/messages', label: '✉️ Contact Messages' },
-  { href: '/admin/singers', label: 'Singers' },
-  { href: '/admin/collections', label: 'Collections' },
-  { href: '/admin/songs', label: 'Songs' },
-  { href: '/admin/journey', label: 'Journey' },
-  { href: '/admin/blog', label: '📝 Blog' },
-  { href: '/admin/notebook', label: '📓 Notebook' },
-  { href: '/admin/harvester', label: '🎬 Song Harvester' },
-  { href: '/admin/analytics', label: '📊 Analytics' },
-  { href: '/admin/admins', label: '👤 Admins' },
-  { href: '/admin/logs', label: '📜 Activity Log' },
-  { href: '/admin/backup', label: '💾 Backup' },
-  { href: '/admin/theme', label: '🎨 Site Theme' },
+const NAV_GROUPS = [
+  {
+    group: null,
+    items: [
+      { href: '/admin', label: '🏠 Dashboard' },
+    ],
+  },
+  {
+    group: 'Content',
+    items: [
+      { href: '/admin/songs', label: '🎵 Songs' },
+      { href: '/admin/collections', label: '📀 Collections' },
+      { href: '/admin/singers', label: '🎤 Singers' },
+      { href: '/admin/journey', label: '🛤️ Journey' },
+      { href: '/admin/blog', label: '📝 Blog' },
+      { href: '/admin/notebook', label: '📓 Notebook' },
+    ],
+  },
+  {
+    group: 'Discover',
+    items: [
+      { href: '/admin/harvester', label: '🎬 Song Harvester' },
+      { href: '/admin/analytics', label: '📊 Analytics' },
+    ],
+  },
+  {
+    group: 'People',
+    items: [
+      { href: '/admin/account', label: '👤 My Profile' },
+      { href: '/admin/profile', label: '🎨 Artist Profile' },
+      { href: '/admin/admins', label: '🔑 Admins' },
+      { href: '/admin/contact', label: '📡 Contact & Social' },
+      { href: '/admin/messages', label: '✉️ Messages' },
+    ],
+  },
+  {
+    group: 'System',
+    items: [
+      { href: '/admin/theme', label: '🖌️ Site Theme' },
+      { href: '/admin/backup', label: '💾 Backup' },
+      { href: '/admin/logs', label: '📜 Activity Log' },
+    ],
+  },
 ];
 
 export default async function AdminLayout({
@@ -38,14 +63,17 @@ export default async function AdminLayout({
   // Empty permissions = legacy full-access admin — show everything.
   const perms: string[] = session.permissions ?? [];
   const restricted = perms.length > 0;
-  const navItems = NAV.filter((item) => {
-    const required = permissionForPath(item.href);
-    return required === null || !restricted || hasPermission(perms, required);
-  });
+  const navGroups = NAV_GROUPS.map((g) => ({
+    ...g,
+    items: g.items.filter((item) => {
+      const required = permissionForPath(item.href);
+      return required === null || !restricted || hasPermission(perms, required);
+    }),
+  })).filter((g) => g.items.length > 0);
 
   return (
     <AdminShell
-      navItems={navItems}
+      navGroups={navGroups}
       email={session.user?.email ?? ''}
       sidebarFooter={
         <>
