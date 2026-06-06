@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import CandidateCard from './CandidateCard';
 import { bulkRejectCandidates, bulkApproveSimple } from './actions';
@@ -18,6 +18,8 @@ interface Candidate {
   description: string | null;
 }
 
+type SortKey = 'newest' | 'oldest' | 'views_high' | 'views_low';
+
 export default function HarvesterQueue({ candidates }: { candidates: Candidate[] }) {
   const router = useRouter();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
@@ -27,7 +29,49 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
   const [error, setError] = useState<string | null>(null);
   const selectAllRef = useRef<HTMLInputElement>(null);
 
-  const visible = candidates.filter((c) => !dismissed.has(c.id));
+  // Filters
+  const [search, setSearch] = useState('');
+  const [filterSinger, setFilterSinger] = useState('');
+  const [filterYear, setFilterYear] = useState('');
+  const [sort, setSort] = useState<SortKey>('newest');
+
+  const active_candidates = candidates.filter((c) => !dismissed.has(c.id));
+
+  // Distinct years and singers for filter dropdowns
+  const years = useMemo(() => {
+    const s = new Set(active_candidates.map((c) => c.releaseYear).filter(Boolean) as number[]);
+    return Array.from(s).sort((a, b) => b - a);
+  }, [active_candidates]);
+
+  const singerOptions = useMemo(() => {
+    const s = new Set(active_candidates.map((c) => c.singerGuess).filter(Boolean) as string[]);
+    return Array.from(s).sort();
+  }, [active_candidates]);
+
+  // Filtered + sorted
+  const visible = useMemo(() => {
+    let list = active_candidates;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(
+        (c) =>
+          c.rawTitle.toLowerCase().includes(q) ||
+          c.cleanTitle.toLowerCase().includes(q) ||
+          (c.singerGuess ?? '').toLowerCase().includes(q) ||
+          (c.channelTitle ?? '').toLowerCase().includes(q),
+      );
+    }
+    if (filterSinger) list = list.filter((c) => c.singerGuess === filterSinger);
+    if (filterYear) list = list.filter((c) => String(c.releaseYear) === filterYear);
+
+    list = [...list];
+    if (sort === 'newest') list.sort((a, b) => (b.releaseYear ?? 0) - (a.releaseYear ?? 0));
+    else if (sort === 'oldest') list.sort((a, b) => (a.releaseYear ?? 0) - (b.releaseYear ?? 0));
+    else if (sort === 'views_high') list.sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0));
+    else if (sort === 'views_low') list.sort((a, b) => (a.viewCount ?? 0) - (b.viewCount ?? 0));
+    return list;
+  }, [active_candidates, search, filterSinger, filterYear, sort]);
+
   const allSelected = visible.length > 0 && selected.size === visible.length;
   const someSelected = selected.size > 0 && !allSelected;
 
@@ -35,7 +79,6 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
     if (selectAllRef.current) selectAllRef.current.indeterminate = someSelected;
   }, [someSelected]);
 
-  // Auto-clear result/error banners after 5 s
   useEffect(() => {
     if (!result) return;
     const t = setTimeout(() => setResult(null), 5000);
@@ -71,18 +114,22 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
 
   async function handleBulkApprove() {
     const n = selected.size;
-    if (!confirm(`Quick-approve ${n} candidate${n !== 1 ? 's' : ''} using their existing titles and singer guesses? Duplicates will be skipped.`)) return;
+    if (
+      !confirm(
+        `Quick-approve ${n} candidate${n !== 1 ? 's' : ''} using their existing titles and singer guesses? Duplicates will be skipped.`,
+      )
+    )
+      return;
     setBusy('approve');
     setError(null);
     try {
       const r = await bulkApproveSimple(Array.from(selected));
-      selected.forEach((id) => {
-        setDismissed((prev) => new Set([...prev, id]));
-      });
+      selected.forEach((id) => setDismissed((prev) => new Set([...prev, id])));
       setSelected(new Set());
-      const msg = r.approved === 0 && r.skipped > 0
-        ? `All ${r.skipped} were duplicates — nothing added.`
-        : `✓ ${r.approved} approved${r.skipped > 0 ? ` · ${r.skipped} skipped (duplicates)` : ''}`;
+      const msg =
+        r.approved === 0 && r.skipped > 0
+          ? `All ${r.skipped} were duplicates — nothing added.`
+          : `✓ ${r.approved} approved${r.skipped > 0 ? ` · ${r.skipped} skipped (duplicates)` : ''}`;
       setResult(msg);
       router.refresh();
     } catch (e: any) {
@@ -99,9 +146,7 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
     setError(null);
     try {
       const r = await bulkRejectCandidates(Array.from(selected));
-      selected.forEach((id) => {
-        setDismissed((prev) => new Set([...prev, id]));
-      });
+      selected.forEach((id) => setDismissed((prev) => new Set([...prev, id])));
       setSelected(new Set());
       setResult(`✕ ${r.rejected} rejected`);
       router.refresh();
@@ -112,7 +157,14 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
     }
   }
 
-  if (visible.length === 0) {
+  // Stats
+  const withSinger = active_candidates.filter((c) => c.singerGuess).length;
+  const withViews = active_candidates.filter((c) => (c.viewCount ?? 0) > 0);
+  const topViews = withViews.length > 0 ? Math.max(...withViews.map((c) => c.viewCount!)) : 0;
+
+  const hasFilter = !!(search.trim() || filterSinger || filterYear);
+
+  if (active_candidates.length === 0) {
     return (
       <div className="px-5 py-8 bg-neutral-900/60 border border-neutral-800 rounded-xl text-center text-neutral-400">
         No songs waiting for review. Run the harvester to find new songs.
@@ -120,9 +172,95 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
     );
   }
 
+  const selectCls =
+    'text-sm bg-neutral-900 border border-neutral-800 rounded-lg px-2.5 py-1.5 text-neutral-300 focus:outline-none focus:border-amber-500 cursor-pointer';
+
   return (
     <div>
-      {/* Select-all row */}
+      {/* ── Stats bar ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+        <StatChip label="Total" value={active_candidates.length} color="text-neutral-300" />
+        <StatChip label="Singer detected" value={withSinger} color="text-violet-400" />
+        <StatChip label="No singer" value={active_candidates.length - withSinger} color="text-amber-400" />
+        <StatChip
+          label="Top views"
+          value={topViews >= 1_000_000
+            ? `${(topViews / 1_000_000).toFixed(1)}M`
+            : topViews >= 1_000
+            ? `${(topViews / 1_000).toFixed(0)}K`
+            : String(topViews)}
+          color="text-sky-400"
+        />
+      </div>
+
+      {/* ── Filter / sort bar ── */}
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        {/* Search */}
+        <div className="relative flex-1 min-w-[160px]">
+          <svg
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none"
+            width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden
+          >
+            <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Filter by title, singer…"
+            className="w-full pl-8 pr-3 py-1.5 text-sm bg-neutral-900 border border-neutral-800
+              rounded-lg text-neutral-300 placeholder-neutral-600 focus:outline-none focus:border-amber-500"
+          />
+        </div>
+
+        {/* Singer filter */}
+        {singerOptions.length > 0 && (
+          <select value={filterSinger} onChange={(e) => setFilterSinger(e.target.value)} className={selectCls}>
+            <option value="">All singers</option>
+            {singerOptions.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        )}
+
+        {/* Year filter */}
+        {years.length > 0 && (
+          <select value={filterYear} onChange={(e) => setFilterYear(e.target.value)} className={selectCls}>
+            <option value="">All years</option>
+            {years.map((y) => (
+              <option key={y} value={String(y)}>{y}</option>
+            ))}
+          </select>
+        )}
+
+        {/* Sort */}
+        <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className={selectCls}>
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="views_high">Most viewed</option>
+          <option value="views_low">Least viewed</option>
+        </select>
+
+        {/* Clear filters */}
+        {hasFilter && (
+          <button
+            onClick={() => { setSearch(''); setFilterSinger(''); setFilterYear(''); }}
+            className="text-xs text-amber-500 hover:text-amber-400 transition whitespace-nowrap"
+          >
+            ✕ Clear filters
+          </button>
+        )}
+      </div>
+
+      {/* ── Filter result count ── */}
+      {hasFilter && (
+        <p className="text-xs text-neutral-500 mb-3">
+          Showing {visible.length} of {active_candidates.length} candidates
+        </p>
+      )}
+
+      {/* ── Select-all row ── */}
       <div className="flex items-center gap-3 mb-3 px-1">
         <input
           ref={selectAllRef}
@@ -143,7 +281,14 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
         )}
       </div>
 
-      {/* Candidate cards */}
+      {/* ── No filter results ── */}
+      {visible.length === 0 && (
+        <div className="px-5 py-8 bg-neutral-900/60 border border-neutral-800 rounded-xl text-center text-neutral-400 text-sm">
+          No candidates match your filters.
+        </div>
+      )}
+
+      {/* ── Candidate cards ── */}
       <div className="space-y-3">
         {visible.map((c) => {
           const isSelected = selected.has(c.id);
@@ -160,9 +305,11 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
                 />
               </div>
               {/* Card */}
-              <div className={`flex-1 min-w-0 rounded-xl transition-shadow ${
-                isSelected ? 'ring-1 ring-amber-600/50 shadow-lg shadow-amber-950/20' : ''
-              }`}>
+              <div
+                className={`flex-1 min-w-0 rounded-xl transition-shadow ${
+                  isSelected ? 'ring-1 ring-amber-600/50 shadow-lg shadow-amber-950/20' : ''
+                }`}
+              >
                 <CandidateCard c={c} onDismiss={() => dismissOne(c.id)} />
               </div>
             </div>
@@ -190,45 +337,54 @@ export default function HarvesterQueue({ candidates }: { candidates: Candidate[]
           Deselect all
         </button>
         <div className="w-px h-5 bg-neutral-700 shrink-0" />
-        {/* Approve */}
         <button
           onClick={handleBulkApprove}
           disabled={busy !== null}
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-green-400
             border border-green-900/60 rounded-lg hover:bg-green-950/50 transition disabled:opacity-50 whitespace-nowrap"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="20 6 9 17 4 12"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
           {busy === 'approve' ? 'Approving…' : `Approve ${selected.size}`}
         </button>
-        {/* Reject */}
         <button
           onClick={handleBulkReject}
           disabled={busy !== null}
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-400
             border border-red-900/60 rounded-lg hover:bg-red-950/50 transition disabled:opacity-50 whitespace-nowrap"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
           {busy === 'reject' ? 'Rejecting…' : `Reject ${selected.size}`}
         </button>
       </div>
 
-      {/* Result toast */}
+      {/* ── Toasts ── */}
       {result && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50
           px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl
-          text-sm text-neutral-200 shadow-xl animate-fade-in whitespace-nowrap">
+          text-sm text-neutral-200 shadow-xl whitespace-nowrap animate-fade-in">
           {result}
         </div>
       )}
-
-      {/* Error toast */}
       {error && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50
           px-4 py-2 bg-red-950 border border-red-700 rounded-xl
-          text-sm text-red-300 shadow-xl animate-fade-in whitespace-nowrap">
+          text-sm text-red-300 shadow-xl whitespace-nowrap animate-fade-in">
           {error}
         </div>
       )}
+    </div>
+  );
+}
+
+function StatChip({ label, value, color }: { label: string; value: string | number; color: string }) {
+  return (
+    <div className="px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-xl">
+      <div className={`text-xl font-bold tabular-nums leading-tight ${color}`}>{value}</div>
+      <div className="text-xs text-neutral-500 mt-0.5">{label}</div>
     </div>
   );
 }
