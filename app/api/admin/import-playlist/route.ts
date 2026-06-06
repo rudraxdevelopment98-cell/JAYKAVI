@@ -1,20 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
-import { videoIdsFromPlaylist, hydrateVideos } from '@/lib/youtube';
+import { videoIdsFromPlaylist, hydrateVideos, guessSinger, cleanTitle } from '@/lib/youtube';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
-
-const PLAYLIST_CAP = 200;
-
-function cleanTitle(raw: string): string {
-  return raw
-    .replace(/#\S+/g, '')
-    .split('|')[0]
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
 function extractYear(publishedAt: string): number | null {
   const m = String(publishedAt ?? '').match(/^(\d{4})/);
@@ -42,7 +32,7 @@ export async function POST(req: NextRequest) {
   // Fetch video IDs from playlist
   let videoIds: string[];
   try {
-    videoIds = await videoIdsFromPlaylist(playlistId, PLAYLIST_CAP);
+    videoIds = await videoIdsFromPlaylist(playlistId, 200);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: `Failed to fetch playlist: ${msg}` }, { status: 502 });
@@ -61,6 +51,49 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Failed to hydrate videos: ${msg}` }, { status: 502 });
   }
 
+  const allIds = [...videoMap.keys()];
+
+  // Fetch what already exists so we can skip correctly
+  let existingSongIds: Set<string>;
+  let existingCandidateIds: Set<string>;
+  let singerNames: string[];
+  try {
+    const [songs, candidates, singers] = await Promise.all([
+      prisma.song.findMany({
+        where: { youtubeId: { in: allIds } },
+        select: { youtubeId: true },
+      }),
+      prisma.harvestCandidate.findMany({
+        where: { youtubeId: { in: allIds } },
+        select: { youtubeId: true },
+      }),
+      prisma.singer.findMany({ select: { name: true } }),
+    ]);
+    existingSongIds      = new Set(songs.map((s) => s.youtubeId).filter(Boolean) as string[]);
+    existingCandidateIds = new Set(candidates.map((c) => c.youtubeId));
+    singerNames          = singers.map((s) => s.name);
+  } catch {
+    return NextResponse.json({ error: 'Database not connected. Set up DATABASE_URL first.' }, { status: 503 });
+  }
+
+  // Only videos that are genuinely new (not already a song AND not already a candidate)
+  const newEntries = [...videoMap.entries()].filter(
+    ([id]) => !existingSongIds.has(id) && !existingCandidateIds.has(id),
+  );
+
+  const alreadySong      = existingSongIds.size;
+  const alreadyCandidate = existingCandidateIds.size;
+
+  if (newEntries.length === 0) {
+    return NextResponse.json({
+      created: 0,
+      skipped: videoMap.size,
+      alreadySong,
+      alreadyCandidate,
+      message: `All ${videoMap.size} videos already exist — ${alreadySong} in Songs, ${alreadyCandidate} in queue.`,
+    });
+  }
+
   // Create a HarvestRun record
   let run;
   try {
@@ -68,42 +101,45 @@ export async function POST(req: NextRequest) {
       data: {
         status: 'done',
         scanned: videoIds.length,
-        newFound: videoMap.size,
+        newFound: newEntries.length,
       },
     });
   } catch {
-    return NextResponse.json({ error: 'Database not connected. Set up DATABASE_URL first.' }, { status: 503 });
+    return NextResponse.json({ error: 'Database error creating run.' }, { status: 503 });
   }
 
+  // Bulk-insert new candidates
   let created = 0;
-  let skipped = 0;
-
-  for (const [youtubeId, video] of videoMap.entries()) {
-    const title = cleanTitle(video.title);
-    const year = extractYear(video.publishedAt);
-
-    try {
-      await prisma.harvestCandidate.upsert({
-        where: { youtubeId },
-        create: {
-          runId: run.id,
-          youtubeId,
-          cleanTitle: title,
-          rawTitle: video.title,
-          channelTitle: video.channelTitle || null,
-          description: video.description,
-          thumbnailUrl: video.thumbnailUrl || null,
-          viewCount: video.viewCount ?? null,
-          releaseYear: year,
-          status: 'pending',
-        },
-        update: {},
-      });
-      created++;
-    } catch {
-      skipped++;
-    }
+  try {
+    const result = await prisma.harvestCandidate.createMany({
+      data: newEntries.map(([youtubeId, video]) => ({
+        runId:        run.id,
+        youtubeId,
+        rawTitle:     video.title,
+        cleanTitle:   cleanTitle(video.title),
+        channelTitle: video.channelTitle || null,
+        description:  video.description  ?? '',
+        thumbnailUrl: video.thumbnailUrl  || null,
+        viewCount:    video.viewCount     ?? null,
+        releaseYear:  extractYear(video.publishedAt),
+        singerGuess:  guessSinger(video.title, singerNames) || null,
+        status:       'pending',
+      })),
+      skipDuplicates: true,
+    });
+    created = result.count;
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Failed to save candidates: ${msg}` }, { status: 500 });
   }
 
-  return NextResponse.json({ created, skipped, runId: run.id });
+  const skipped = videoMap.size - created;
+
+  return NextResponse.json({
+    created,
+    skipped,
+    alreadySong,
+    alreadyCandidate,
+    runId: run.id,
+  });
 }

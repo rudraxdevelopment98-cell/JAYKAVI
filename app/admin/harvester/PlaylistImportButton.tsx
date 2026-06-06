@@ -39,8 +39,12 @@ export default function PlaylistImportButton() {
         setMessage(data.error ?? 'Import failed.');
       } else {
         setStatus('done');
-        setMessage(`${data.created} song${data.created !== 1 ? 's' : ''} added to queue, ${data.skipped} skipped.`);
-        setInput('');
+        const parts: string[] = [];
+        if (data.created > 0) parts.push(`${data.created} added to queue`);
+        if (data.alreadySong > 0) parts.push(`${data.alreadySong} already in Songs`);
+        if (data.alreadyCandidate > 0) parts.push(`${data.alreadyCandidate} already in queue`);
+        setMessage(data.message ?? (parts.length ? parts.join(' · ') : 'Nothing new to add.'));
+        if (data.created > 0) setInput('');
       }
     } catch {
       setStatus('error');
