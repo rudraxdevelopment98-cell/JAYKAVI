@@ -340,6 +340,54 @@ export async function bulkApproveSimple(ids: string[]): Promise<BulkApproveResul
   return { approved, skipped };
 }
 
+/**
+ * Reset approved candidates whose linked Song no longer exists back to
+ * pending so they show up in the review queue again.
+ */
+export async function reQueueDeletedSongs(): Promise<{ requeued: number }> {
+  const session = await auth();
+  assertAdmin(session);
+
+  const approved = await prisma.harvestCandidate.findMany({
+    where: { status: 'approved' },
+    select: { id: true, songId: true },
+  });
+
+  if (approved.length === 0) return { requeued: 0 };
+
+  // Candidates with a songId that no longer exists in Song table
+  const withSongId = approved.filter((c) => c.songId).map((c) => c.songId as string);
+  const orphanIds: string[] = approved.filter((c) => !c.songId).map((c) => c.id);
+
+  if (withSongId.length > 0) {
+    const existingSongs = await prisma.song.findMany({
+      where: { id: { in: withSongId } },
+      select: { id: true },
+    });
+    const existingSet = new Set(existingSongs.map((s) => s.id));
+    approved
+      .filter((c) => c.songId && !existingSet.has(c.songId))
+      .forEach((c) => orphanIds.push(c.id));
+  }
+
+  if (orphanIds.length === 0) return { requeued: 0 };
+
+  const { count } = await prisma.harvestCandidate.updateMany({
+    where: { id: { in: orphanIds } },
+    data: { status: 'pending', songId: null },
+  });
+
+  await logActivity({
+    actorEmail: (session as any)?.user?.email,
+    action: 'update',
+    entity: 'HarvestCandidate',
+    label: `Re-queued ${count} candidates for deleted songs`,
+  });
+
+  revalidatePath('/admin/harvester');
+  return { requeued: count };
+}
+
 export async function saveHarvestConfig(formData: FormData) {
   const session = await auth();
   assertAdmin(session);

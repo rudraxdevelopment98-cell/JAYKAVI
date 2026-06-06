@@ -8,6 +8,7 @@ import ImportExcelButton from './ImportExcelButton';
 import PlaylistImportButton from './PlaylistImportButton';
 import SyncViewsButton from './SyncViewsButton';
 import BackfillTitlesButton from './BackfillTitlesButton';
+import ReQueueButton from './ReQueueButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -81,6 +82,16 @@ export default async function HarvesterPage() {
       {/* Auto-run toggle */}
       <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-4">
         <AutoRunToggle initial={!!(config as any)?.autoRun} />
+      </div>
+
+      {/* Re-queue deleted songs */}
+      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-4">
+        <div className="font-medium mb-1">Re-queue deleted songs</div>
+        <p className="text-sm text-neutral-400 mb-3">
+          If you deleted songs from the database and want to re-approve them, use this to restore
+          their candidates back to the pending queue.
+        </p>
+        <ReQueueButton />
       </div>
 
       {/* Playlist import */}
