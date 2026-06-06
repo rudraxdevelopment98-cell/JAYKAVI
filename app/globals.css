@@ -646,21 +646,67 @@ a { color: inherit; }
 [data-admin-theme='light'] .admin-shell .hover\:text-neutral-200:hover { color: #222 !important; }
 [data-admin-theme='light'] .admin-shell .hover\:text-neutral-300:hover { color: #333 !important; }
 
+/* bg-neutral-800 (static & opacity variants) — buttons, badges, tags */
+[data-admin-theme='light'] .admin-shell .bg-neutral-800 { background-color: #E8E8EA !important; }
+[data-admin-theme='light'] .admin-shell .bg-neutral-800\/90 { background-color: rgba(232,232,234,.95) !important; }
+[data-admin-theme='light'] .admin-shell .bg-neutral-800\/70 { background-color: rgba(232,232,234,.8) !important; }
+[data-admin-theme='light'] .admin-shell .bg-neutral-800\/60 { background-color: rgba(232,232,234,.75) !important; }
+[data-admin-theme='light'] .admin-shell .bg-neutral-800\/40 { background-color: rgba(232,232,234,.55) !important; }
+
+/* bg-neutral-900 opacity variants that weren't covered */
+[data-admin-theme='light'] .admin-shell .bg-neutral-900\/30 { background-color: rgba(255,255,255,.9) !important; }
+[data-admin-theme='light'] .admin-shell .bg-neutral-900\/20 { background-color: rgba(255,255,255,.7) !important; }
+[data-admin-theme='light'] .admin-shell .bg-neutral-900\/10 { background-color: rgba(255,255,255,.5) !important; }
+
+/* bg-neutral-950 opacity variants (used on topbar/toolbar) */
+[data-admin-theme='light'] .admin-shell .bg-neutral-950\/90 { background-color: rgba(240,240,242,.96) !important; }
+[data-admin-theme='light'] .admin-shell .bg-neutral-950\/80 { background-color: rgba(240,240,242,.92) !important; }
+[data-admin-theme='light'] .admin-shell .bg-neutral-950\/60 { background-color: rgba(240,240,242,.85) !important; }
+
+/* Additional hover overrides */
+[data-admin-theme='light'] .admin-shell .hover\:bg-neutral-700:hover { background-color: #DEDEDE !important; }
+[data-admin-theme='light'] .admin-shell .hover\:bg-neutral-800\/50:hover { background-color: rgba(232,232,234,.6) !important; }
+[data-admin-theme='light'] .admin-shell .hover\:bg-neutral-800\/70:hover { background-color: rgba(232,232,234,.8) !important; }
+
+/* Additional text colors (used in dates, folder labels, separator text) */
+[data-admin-theme='light'] .admin-shell .text-neutral-600 { color: #888 !important; }
+[data-admin-theme='light'] .admin-shell .text-neutral-700 { color: #aaa !important; }
+
+/* Additional border colors */
+[data-admin-theme='light'] .admin-shell .border-neutral-600 { border-color: #BBBBBB !important; }
+
+/* placeholder text in inputs */
+[data-admin-theme='light'] .admin-shell input::placeholder,
+[data-admin-theme='light'] .admin-shell textarea::placeholder { color: #AAAAAA !important; }
+
 /* ── Notebook / NoteEditor light mode ── */
-/* Semi-transparent backgrounds not caught by class-name rules above */
 [data-admin-theme='light'] .note-topbar {
-  background: rgba(240,240,242,.96) !important;
+  background: rgba(240,240,242,.97) !important;
   border-color: #ddd !important;
+  color: #1a1a1a !important;
 }
+[data-admin-theme='light'] .note-topbar button,
+[data-admin-theme='light'] .note-topbar a { color: #555 !important; }
+[data-admin-theme='light'] .note-topbar .bg-neutral-800 { background-color: #E2E2E5 !important; }
+[data-admin-theme='light'] .note-topbar .text-neutral-200 { color: #1a1a1a !important; }
+[data-admin-theme='light'] .note-topbar .text-neutral-300 { color: #333 !important; }
+[data-admin-theme='light'] .note-topbar .border-neutral-700 { border-color: #ccc !important; }
+[data-admin-theme='light'] .note-topbar .hover\:bg-neutral-700:hover { background-color: #D8D8DA !important; }
+[data-admin-theme='light'] .note-topbar .hover\:bg-neutral-800:hover { background-color: #E2E2E5 !important; }
+[data-admin-theme='light'] .note-topbar .hover\:text-neutral-200:hover { color: #111 !important; }
+
 [data-admin-theme='light'] .note-toolbar {
-  background: rgba(240,240,242,.92) !important;
+  background: rgba(240,240,242,.95) !important;
   border-color: #ddd !important;
 }
 [data-admin-theme='light'] .note-pane { background: #f7f6f2 !important; }
 [data-admin-theme='light'] .note-meta {
-  background: rgba(0,0,0,.03) !important;
+  background: #f0eee8 !important;
   border-color: #ddd !important;
+  color: #2b2b2b !important;
 }
+[data-admin-theme='light'] .note-meta p { color: #888 !important; }
+[data-admin-theme='light'] .note-meta .border-neutral-800 { border-color: #d6d0c4 !important; }
 [data-admin-theme='light'] .note-title-input {
   color: #1a1a1a !important;
   border-color: #ddd !important;
@@ -701,3 +747,28 @@ a { color: inherit; }
 }
 [data-admin-theme='light'] .note-meta .hover\:bg-neutral-800:hover { background: #e5e3de !important; }
 [data-admin-theme='light'] .note-meta .border-neutral-800 { border-color: #d6d0c4 !important; }
+
+/* ── Notebook sidebar light mode ── */
+[data-admin-theme='light'] .notebook-sidebar {
+  background: #F8F7F4 !important;
+  border-color: #E0E0E0 !important;
+  color: #1a1a1a !important;
+}
+[data-admin-theme='light'] .notebook-sidebar .text-neutral-400 { color: #555 !important; }
+[data-admin-theme='light'] .notebook-sidebar .text-neutral-500 { color: #777 !important; }
+[data-admin-theme='light'] .notebook-sidebar .text-neutral-600 { color: #888 !important; }
+[data-admin-theme='light'] .notebook-sidebar .hover\:bg-neutral-800:hover { background: #EAEAEA !important; }
+[data-admin-theme='light'] .notebook-sidebar .hover\:text-neutral-200:hover { color: #111 !important; }
+[data-admin-theme='light'] .notebook-sidebar .hover\:text-neutral-300:hover { color: #333 !important; }
+[data-admin-theme='light'] .notebook-sidebar input {
+  background: #FFFFFF !important;
+  border-color: #CCCCCC !important;
+  color: #111 !important;
+}
+[data-admin-theme='light'] .notebook-sidebar input::placeholder { color: #AAAAAA !important; }
+/* bg-neutral-950 in folder rename inputs */
+[data-admin-theme='light'] .notebook-sidebar .bg-neutral-950 { background: #FFFFFF !important; }
+
+/* ── Notebook list page card/tag light mode ── */
+[data-admin-theme='light'] .admin-shell .bg-neutral-800.text-neutral-400 { color: #555 !important; }
+[data-admin-theme='light'] .admin-shell .text-neutral-600 { color: #888 !important; }
