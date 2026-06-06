@@ -13,40 +13,62 @@ import ReQueueButton from './ReQueueButton';
 export const dynamic = 'force-dynamic';
 
 async function getData() {
-  const [config, pending, recent, settings] = await Promise.all([
-    prisma.harvestConfig.findFirst({ where: { id: 1 } }),
-    prisma.harvestCandidate.findMany({
-      where: { status: 'pending' },
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.harvestRun.findMany({
-      orderBy: { startedAt: 'desc' },
-      take: 5,
-      include: { _count: { select: { candidates: true } } },
-    }),
-    prisma.siteSettings.findFirst({ where: { id: 1 }, select: { viewsSyncedAt: true } }),
-  ]);
+  try {
+    const [config, pending, recent, settings] = await Promise.all([
+      prisma.harvestConfig.findFirst({ where: { id: 1 } }),
+      prisma.harvestCandidate.findMany({
+        where: { status: 'pending' },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.harvestRun.findMany({
+        orderBy: { startedAt: 'desc' },
+        take: 5,
+        include: { _count: { select: { candidates: true } } },
+      }),
+      prisma.siteSettings.findFirst({ where: { id: 1 }, select: { viewsSyncedAt: true } }),
+    ]);
 
-  // Which pending candidates already match a Song in the listing (by YouTube id)?
-  // We surface these in the queue so they aren't re-added by mistake.
-  const ytIds = pending.map((p) => p.youtubeId).filter(Boolean) as string[];
-  const existingSongs = ytIds.length
-    ? await prisma.song.findMany({
-        where: { youtubeId: { in: ytIds } },
-        select: { youtubeId: true, title: true, slug: true },
-      })
-    : [];
-  const existing: Record<string, { title: string; slug: string }> = {};
-  for (const s of existingSongs) {
-    if (s.youtubeId) existing[s.youtubeId] = { title: s.title, slug: s.slug };
+    // Which pending candidates already match a Song in the listing (by YouTube id)?
+    const ytIds = pending.map((p) => p.youtubeId).filter(Boolean) as string[];
+    const existingSongs = ytIds.length
+      ? await prisma.song.findMany({
+          where: { youtubeId: { in: ytIds } },
+          select: { youtubeId: true, title: true, slug: true },
+        })
+      : [];
+    const existing: Record<string, { title: string; slug: string }> = {};
+    for (const s of existingSongs) {
+      if (s.youtubeId) existing[s.youtubeId] = { title: s.title, slug: s.slug };
+    }
+
+    return { config, pending, recent, settings, existing, dbError: false };
+  } catch {
+    return {
+      config: null,
+      pending: [],
+      recent: [],
+      settings: null,
+      existing: {} as Record<string, { title: string; slug: string }>,
+      dbError: true,
+    };
   }
-
-  return { config, pending, recent, settings, existing };
 }
 
 export default async function HarvesterPage() {
-  const { config, pending, recent, settings, existing } = await getData();
+  const { config, pending, recent, settings, existing, dbError } = await getData();
   const hasApiKey = !!process.env.YOUTUBE_API_KEY;
+
+  if (dbError) {
+    return (
+      <div className="max-w-xl mx-auto mt-16 p-6 bg-yellow-950/40 border border-yellow-800 rounded-xl text-center">
+        <p className="text-yellow-300 font-medium mb-2">Database not connected</p>
+        <p className="text-yellow-400/70 text-sm">
+          Could not reach the database. Check that <code className="font-mono bg-yellow-900/30 px-1 rounded">DATABASE_URL</code> is set
+          correctly in your environment variables, then refresh the page.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
