@@ -57,7 +57,7 @@ export default async function Home() {
   ]);
   const trending = trendingAll;
   const top = topAll.filter((s) => s.viewCount > 0);
-  const topVideos = topAll.filter((s) => s.viewCount > 0 && s.embed?.youtubeId).slice(0, 5);
+  const topVideos = topAll.filter((s) => s.embed?.youtubeId).slice(0, 5);
   const journey = journeyAll.slice(0, 4);
 
   const name = l.displayName ?? l.name;
@@ -113,7 +113,7 @@ export default async function Home() {
       )}
 
       {/* Top 5 most-viewed videos — auto-scrolling carousel */}
-      {topVideos.length >= 2 && (
+      {topVideos.length >= 1 && (
         <section className="section-pad" style={{ position: 'relative', zIndex: 2 }}>
           <SectionHead tag="Top Videos" title="Most watched on YouTube" />
           <TopVideosCarousel songs={topVideos} />

@@ -13,7 +13,7 @@ const DURATION = 5000;
 
 export default function TopVideosCarousel({ songs }: { songs: Song[] }) {
   const items = songs
-    .filter((s) => s.embed?.youtubeId && s.viewCount > 0)
+    .filter((s) => s.embed?.youtubeId)
     .slice(0, 5);
 
   const n = items.length;
@@ -42,7 +42,7 @@ export default function TopVideosCarousel({ songs }: { songs: Song[] }) {
     setProgress(0);
   }
 
-  if (n < 2) return null;
+  if (n < 1) return null;
 
   const song = items[cur];
   const ytId = song.embed!.youtubeId!;
