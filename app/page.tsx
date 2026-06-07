@@ -10,6 +10,7 @@ import JsonLd from '@/components/JsonLd';
 import TraditionalHome from '@/components/traditional/TraditionalHome';
 import HeritageHome from '@/components/heritage/HeritageHome';
 import HeroLuma from '@/components/HeroLuma';
+import TopVideosCarousel from '@/components/TopVideosCarousel';
 import { siteUrl, absoluteUrl } from '@/lib/seo';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -56,6 +57,7 @@ export default async function Home() {
   ]);
   const trending = trendingAll;
   const top = topAll.filter((s) => s.viewCount > 0);
+  const topVideos = topAll.filter((s) => s.viewCount > 0 && s.embed?.youtubeId).slice(0, 5);
   const journey = journeyAll.slice(0, 4);
 
   const name = l.displayName ?? l.name;
@@ -107,6 +109,14 @@ export default async function Home() {
         <section className="section-pad" style={{ position: 'relative', zIndex: 2 }}>
           <SectionHead tag="Now Trending" title="Songs being loved right now" href="/songs" hrefLabel="View all songs →" />
           <HorizontalScrollRow songs={trending} />
+        </section>
+      )}
+
+      {/* Top 5 most-viewed videos — auto-scrolling carousel */}
+      {topVideos.length >= 2 && (
+        <section className="section-pad" style={{ position: 'relative', zIndex: 2 }}>
+          <SectionHead tag="Top Videos" title="Most watched on YouTube" />
+          <TopVideosCarousel songs={topVideos} />
         </section>
       )}
 
