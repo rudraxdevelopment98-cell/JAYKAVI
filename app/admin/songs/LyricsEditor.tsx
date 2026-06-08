@@ -1,5 +1,6 @@
 'use client';
 import { useRef } from 'react';
+import FetchLyricsButton from './FetchLyricsButton';
 
 const TOOLS = [
   { label: 'B', title: 'Bold', wrap: ['**','**'] },
@@ -44,18 +45,21 @@ export default function LyricsEditor({ defaultValue = '' }: { defaultValue?: str
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-1 p-1 bg-neutral-950 border border-neutral-800 rounded-md w-fit">
-        {TOOLS.map((t) => (
-          <button
-            key={t.label}
-            type="button"
-            title={t.title}
-            onClick={() => applyTool(t)}
-            className="w-8 h-8 flex items-center justify-center text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white rounded transition"
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1 p-1 bg-neutral-950 border border-neutral-800 rounded-md w-fit">
+          {TOOLS.map((t) => (
+            <button
+              key={t.label}
+              type="button"
+              title={t.title}
+              onClick={() => applyTool(t)}
+              className="w-8 h-8 flex items-center justify-center text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white rounded transition"
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <FetchLyricsButton getTextarea={() => ref.current} />
       </div>
       <textarea
         ref={ref}

@@ -236,6 +236,45 @@ export async function updateSong(id: string, formData: FormData) {
   redirect('/admin/songs');
 }
 
+export interface FetchLyricsResult {
+  suggestion: {
+    source: 'youtube' | 'google';
+    label: string;
+    url?: string;
+    text: string;
+    confidence: 'high' | 'medium' | 'low';
+  } | null;
+  searchHits: { title: string; link: string; snippet: string }[];
+  searchConfigured: boolean;
+}
+
+export async function fetchLyricsAction(input: {
+  youtubeId?: string | null;
+  title: string;
+  singers?: string;
+}): Promise<FetchLyricsResult> {
+  const session = await auth();
+  assertAdmin(session);
+  const { fetchFromYouTube, searchGoogle } = await import('@/lib/lyricsFetch');
+
+  let suggestion: FetchLyricsResult['suggestion'] = null;
+  if (input.youtubeId) {
+    const s = await fetchFromYouTube(input.youtubeId);
+    if (s) suggestion = s;
+  }
+
+  const searchConfigured = Boolean(
+    process.env.GOOGLE_CSE_ID &&
+      (process.env.GOOGLE_SEARCH_API_KEY || process.env.YOUTUBE_API_KEY)
+  );
+  let searchHits: FetchLyricsResult['searchHits'] = [];
+  if (searchConfigured && input.title) {
+    searchHits = await searchGoogle(input.title, input.singers ?? '');
+  }
+
+  return { suggestion, searchHits, searchConfigured };
+}
+
 export async function deleteSong(id: string) {
   const session = await auth();
   assertAdmin(session);

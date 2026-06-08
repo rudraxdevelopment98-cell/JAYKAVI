@@ -226,6 +226,7 @@ export default function SongForm({
                     key={s.id}
                     type="button"
                     onClick={() => toggleSinger(s.id)}
+                    data-selected-singer={checked ? s.name : undefined}
                     className={`px-3 py-1.5 text-xs rounded-full border transition ${
                       checked
                         ? 'bg-amber-500 text-neutral-950 border-amber-500 font-medium'
