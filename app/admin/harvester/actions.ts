@@ -4,21 +4,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { logActivity } from '@/lib/activity';
 import { revalidatePath } from 'next/cache';
-
-// Find an existing singer by name (case-insensitive) or create a new one.
-// This prevents duplicates when the same singer exists without a legacyId.
-async function findOrCreateSinger(name: string) {
-  const existing = await prisma.singer.findFirst({
-    where: { name: { equals: name, mode: 'insensitive' } },
-  });
-  if (existing) return existing;
-  return prisma.singer.create({
-    data: {
-      legacyId: `auto-${name.toLowerCase().replace(/\s+/g, '-')}`,
-      name,
-    },
-  });
-}
+import { parseSingerNames, findOrCreateSinger } from '@/lib/singers';
 
 function slugify(text: string): string {
   return text
@@ -124,13 +110,10 @@ export async function approveCandidate(
     },
   });
 
-  // Attach singers by name — find existing (by name, case-insensitive) before creating
-  const singerNames = overrides.singerNames
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
+  // Attach singers — parse handles ",", "|", "/", "&", "feat.", "ft.", "and" etc.
+  const singerNames = parseSingerNames(overrides.singerNames);
   for (const name of singerNames) {
-    const singer = await findOrCreateSinger(name);
+    const singer = await findOrCreateSinger(prisma, name);
     await prisma.songSinger.create({
       data: { songId: song.id, singerId: singer.id },
     });
@@ -336,11 +319,10 @@ export async function bulkApproveSimple(ids: string[]): Promise<BulkApproveResul
       },
     });
 
-    // Attach singer guess — find existing by name before creating
-    const singerNames = (c.singerGuess ?? '')
-      .split(',').map((s) => s.trim()).filter(Boolean);
+    // Attach singers — robust parser handles all separator variants
+    const singerNames = parseSingerNames(c.singerGuess);
     for (const name of singerNames) {
-      const singer = await findOrCreateSinger(name);
+      const singer = await findOrCreateSinger(prisma, name);
       await prisma.songSinger.create({ data: { songId: song.id, singerId: singer.id } });
     }
 

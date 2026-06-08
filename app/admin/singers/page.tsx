@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import MergeDuplicatesButton from './MergeDuplicatesButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,12 +17,15 @@ export default async function SingersAdminPage() {
           <h1 className="text-3xl font-semibold">Singers</h1>
           <p className="text-neutral-400 mt-1 text-sm">{singers.length} performers</p>
         </div>
-        <Link
-          href="/admin/singers/new"
-          className="shrink-0 px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition text-sm"
-        >
-          + New Singer
-        </Link>
+        <div className="flex items-center gap-3 flex-wrap">
+          <MergeDuplicatesButton />
+          <Link
+            href="/admin/singers/new"
+            className="shrink-0 px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition text-sm"
+          >
+            + New Singer
+          </Link>
+        </div>
       </div>
 
       {singers.length === 0 ? (

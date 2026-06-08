@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { logActivity } from '@/lib/activity';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { normalizeSingerKey } from '@/lib/singers';
 
 function assertAdmin(s: any) {
   if (!s || !s.isAdmin) throw new Error('Unauthorized');
@@ -24,10 +25,10 @@ export async function createSinger(formData: FormData): Promise<{ error: string 
   const name = str(formData.get('name'));
   if (!name) return { error: 'Name is required' };
 
-  const duplicate = await prisma.singer.findFirst({
-    where: { name: { equals: name, mode: 'insensitive' } },
-    select: { id: true, name: true },
-  });
+  // Normalized dedup check — catches case, whitespace, and honorific variants
+  const key = normalizeSingerKey(name);
+  const all = await prisma.singer.findMany({ select: { id: true, name: true } });
+  const duplicate = all.find((s) => normalizeSingerKey(s.name) === key);
   if (duplicate) {
     return { error: `Singer "${duplicate.name}" already exists.` };
   }
@@ -87,6 +88,84 @@ export async function deleteSinger(id: string) {
   });
   revalidatePath('/admin/singers');
   redirect('/admin/singers');
+}
+
+/**
+ * Merge singer rows that normalize to the same key into a single canonical
+ * record. Re-points all SongSinger joins to the kept singer (dedup'd per
+ * song) and deletes the duplicates. Returns a summary for the UI.
+ *
+ * Canonical = the row with the most existing song links; ties broken by
+ * older createdAt so existing URLs/IDs survive when possible.
+ */
+export async function mergeDuplicateSingers(): Promise<{
+  groups: number;
+  merged: number;
+  joinsRemoved: number;
+}> {
+  const session = await auth();
+  assertAdmin(session);
+
+  const all = await prisma.singer.findMany({
+    select: { id: true, name: true, createdAt: true, _count: { select: { songs: true } } },
+  });
+
+  // Group by normalized key
+  const byKey = new Map<string, typeof all>();
+  for (const s of all) {
+    const k = normalizeSingerKey(s.name);
+    if (!k) continue;
+    const arr = byKey.get(k) ?? [];
+    arr.push(s);
+    byKey.set(k, arr);
+  }
+
+  let groups = 0;
+  let merged = 0;
+  let joinsRemoved = 0;
+
+  for (const [, rows] of byKey) {
+    if (rows.length < 2) continue;
+    groups++;
+    // Pick canonical: most songs, then oldest
+    rows.sort((a, b) => b._count.songs - a._count.songs || +a.createdAt - +b.createdAt);
+    const keep = rows[0];
+    const dupIds = rows.slice(1).map((r) => r.id);
+
+    // Move joins from dupes to canonical, skipping pairs that already exist
+    const dupJoins = await prisma.songSinger.findMany({
+      where: { singerId: { in: dupIds } },
+      select: { songId: true, singerId: true },
+    });
+    const keepJoins = await prisma.songSinger.findMany({
+      where: { singerId: keep.id },
+      select: { songId: true },
+    });
+    const alreadyOnKeep = new Set(keepJoins.map((j) => j.songId));
+    const toCreate = dupJoins
+      .filter((j) => !alreadyOnKeep.has(j.songId))
+      // Dedup within the dupes themselves
+      .filter((j, i, arr) => arr.findIndex((x) => x.songId === j.songId) === i)
+      .map((j) => ({ songId: j.songId, singerId: keep.id }));
+
+    if (toCreate.length > 0) {
+      await prisma.songSinger.createMany({ data: toCreate, skipDuplicates: true });
+    }
+    const del = await prisma.songSinger.deleteMany({ where: { singerId: { in: dupIds } } });
+    joinsRemoved += del.count;
+    await prisma.singer.deleteMany({ where: { id: { in: dupIds } } });
+    merged += dupIds.length;
+  }
+
+  await logActivity({
+    actorEmail: session?.user?.email,
+    action: 'update',
+    entity: 'Singer',
+    label: `Merged ${merged} duplicate singer${merged !== 1 ? 's' : ''} across ${groups} group${groups !== 1 ? 's' : ''}`,
+  });
+  revalidatePath('/admin/singers');
+  revalidatePath('/songs');
+  return { groups, merged, joinsRemoved };
 }
 
 // Sync which songs this singer performs on (SongSinger join table).

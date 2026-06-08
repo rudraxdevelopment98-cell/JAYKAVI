@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { fetchFromYouTube, searchGoogle } from '@/lib/lyricsFetch';
 import { hydrateVideos, extractSingersFromDescription } from '@/lib/youtube';
+import { parseSingerNames, normalizeSingerKey } from '@/lib/singers';
 
 function assertAdmin(s: any) {
   if (!s || !s.isAdmin) throw new Error('Unauthorized');
@@ -356,21 +357,21 @@ export async function fetchSingersAction(youtubeId: string): Promise<{
   const v = map.get(youtubeId);
   if (!v) return { found: [], matched: [] };
 
-  // Extract from description credit lines
-  const fromDesc = extractSingersFromDescription(v.description);
+  // Description credit lines, parsed through the same robust splitter
+  const fromDescRaw = extractSingersFromDescription(v.description).join(', ');
+  const fromDesc = parseSingerNames(fromDescRaw);
+
   // Also check the title for known singers in DB
   const allSingers = await prisma.singer.findMany({ select: { id: true, name: true } });
   const fromTitle = allSingers.filter((s) =>
     v.title.toLowerCase().includes(s.name.toLowerCase())
   );
 
-  const found = fromDesc.length > 0
-    ? fromDesc
-    : fromTitle.map((s) => s.name);
+  const found = fromDesc.length > 0 ? fromDesc : fromTitle.map((s) => s.name);
 
-  // Return existing Singer records that match any found name (case-insensitive)
-  const foundLower = new Set(found.map((n) => n.toLowerCase()));
-  const matched = allSingers.filter((s) => foundLower.has(s.name.toLowerCase()));
+  // Normalized match against DB so case/whitespace variants resolve correctly
+  const foundKeys = new Set(found.map(normalizeSingerKey));
+  const matched = allSingers.filter((s) => foundKeys.has(normalizeSingerKey(s.name)));
 
   return { found, matched };
 }
