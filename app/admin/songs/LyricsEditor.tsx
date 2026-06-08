@@ -11,12 +11,23 @@ const TOOLS = [
 
 export default function LyricsEditor({ defaultValue = '' }: { defaultValue?: string }) {
   const ref = useRef<HTMLTextAreaElement>(null);
+  // Save selection before focus leaves (clicking toolbar button loses it)
+  const sel = useRef<{ start: number; end: number }>({ start: 0, end: 0 });
+
+  function saveSelection() {
+    const ta = ref.current;
+    if (!ta) return;
+    sel.current = { start: ta.selectionStart, end: ta.selectionEnd };
+  }
 
   function applyTool(tool: typeof TOOLS[0]) {
     const ta = ref.current;
     if (!ta) return;
-    const start = ta.selectionStart;
-    const end = ta.selectionEnd;
+    // Restore the saved selection (clicking a button moved focus away)
+    ta.focus();
+    ta.setSelectionRange(sel.current.start, sel.current.end);
+    const start = sel.current.start;
+    const end = sel.current.end;
     const val = ta.value;
 
     let newVal: string;
@@ -34,13 +45,12 @@ export default function LyricsEditor({ defaultValue = '' }: { defaultValue?: str
       return;
     }
 
-    ta.value = newVal;
-    ta.setSelectionRange(newCursor, newCursor);
-    ta.focus();
-    // trigger React onChange
-    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
-    nativeInputValueSetter?.call(ta, newVal);
+    // Write via native setter so React tracks the change
+    const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+    nativeSet?.call(ta, newVal);
     ta.dispatchEvent(new Event('input', { bubbles: true }));
+    ta.setSelectionRange(newCursor, newCursor);
+    sel.current = { start: newCursor, end: newCursor };
   }
 
   return (
@@ -52,7 +62,11 @@ export default function LyricsEditor({ defaultValue = '' }: { defaultValue?: str
               key={t.label}
               type="button"
               title={t.title}
-              onClick={() => applyTool(t)}
+              onMouseDown={(e) => {
+                // Prevent the button from stealing focus/selection
+                e.preventDefault();
+                applyTool(t);
+              }}
               className="w-8 h-8 flex items-center justify-center text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white rounded transition"
             >
               {t.label}
@@ -66,6 +80,9 @@ export default function LyricsEditor({ defaultValue = '' }: { defaultValue?: str
         name="lyrics"
         defaultValue={defaultValue}
         rows={14}
+        onSelect={saveSelection}
+        onKeyUp={saveSelection}
+        onMouseUp={saveSelection}
         placeholder="Paste or type lyrics here… Use the toolbar above for bold, italic, and stanza breaks."
         className="w-full px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-md text-sm font-mono focus:outline-none focus:border-neutral-600 leading-relaxed"
       />

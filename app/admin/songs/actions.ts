@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { logActivity } from '@/lib/activity';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { fetchFromYouTube, searchGoogle } from '@/lib/lyricsFetch';
 
 function assertAdmin(s: any) {
   if (!s || !s.isAdmin) throw new Error('Unauthorized');
@@ -255,8 +256,6 @@ export async function fetchLyricsAction(input: {
 }): Promise<FetchLyricsResult> {
   const session = await auth();
   assertAdmin(session);
-  const { fetchFromYouTube, searchGoogle } = await import('@/lib/lyricsFetch');
-
   let suggestion: FetchLyricsResult['suggestion'] = null;
   if (input.youtubeId) {
     const s = await fetchFromYouTube(input.youtubeId);

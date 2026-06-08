@@ -25,17 +25,17 @@ export default async function EditSongPage({ params }: { params: { id: string } 
 
   return (
     <div className="max-w-3xl">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="sticky top-0 z-10 flex items-center gap-3 mb-6 py-3 -mx-4 px-4 bg-neutral-950/95 backdrop-blur border-b border-neutral-800/60">
         <Link href="/admin/songs" className="text-sm text-neutral-400 hover:text-white flex-shrink-0">
           ← Songs
         </Link>
-        <h1 className="text-3xl font-semibold truncate min-w-0 flex-1">{song.title}</h1>
+        <h1 className="text-xl font-semibold truncate min-w-0 flex-1">{song.title}</h1>
         <Link
           href={`/songs/${song.slug}`}
           target="_blank"
           className="text-xs text-neutral-500 hover:text-amber-400 flex-shrink-0"
         >
-          View on site ↗
+          View ↗
         </Link>
       </div>
 
