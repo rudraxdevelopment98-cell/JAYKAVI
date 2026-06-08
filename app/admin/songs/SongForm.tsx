@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef } from 'react';
 import ImageUpload from '../_components/ImageUpload';
 import LyricsEditor from './LyricsEditor';
+import { fetchSingersAction } from './actions';
 
 const PLATFORMS = [
   'youtube',
@@ -72,6 +73,9 @@ export default function SongForm({
     initial?.lyricsTranslations ?? []
   );
   const [error, setError] = useState('');
+  const [singerFetchMsg, setSingerFetchMsg] = useState('');
+  const [isFetchingSingers, startFetchSingers] = useTransition();
+  const youtubeIdRef = useRef<HTMLInputElement>(null);
   const [isPending, startTransition] = useTransition();
 
   const inputCls =
@@ -212,7 +216,40 @@ export default function SongForm({
         </div>
 
         <div>
-          <label className={labelCls}>Performing singers</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className={labelCls} style={{ marginBottom: 0 }}>Performing singers</label>
+            <button
+              type="button"
+              disabled={isFetchingSingers}
+              onClick={() => {
+                setSingerFetchMsg('');
+                const ytId = youtubeIdRef.current?.value?.trim();
+                if (!ytId) { setSingerFetchMsg('Add a YouTube ID first.'); return; }
+                startFetchSingers(async () => {
+                  const r = await fetchSingersAction(ytId);
+                  if (r.found.length === 0) {
+                    setSingerFetchMsg('No singers found in video.');
+                    return;
+                  }
+                  // Auto-select any matched existing singers
+                  const newIds = r.matched.map((s) => s.id).filter((id) => !selectedSingers.includes(id));
+                  if (newIds.length > 0) setSelectedSingers((prev) => [...prev, ...newIds]);
+                  const unmatched = r.found.filter((n) => !r.matched.some((m) => m.name.toLowerCase() === n.toLowerCase()));
+                  const msg = [
+                    r.matched.length > 0 && `Selected: ${r.matched.map((m) => m.name).join(', ')}`,
+                    unmatched.length > 0 && `Not in DB yet: ${unmatched.join(', ')}`,
+                  ].filter(Boolean).join(' · ');
+                  setSingerFetchMsg(msg);
+                });
+              }}
+              className="text-xs px-2.5 py-1 border border-violet-700/50 bg-violet-950/30 text-violet-300 rounded hover:bg-violet-900/40 disabled:opacity-50 transition"
+            >
+              {isFetchingSingers ? 'Fetching…' : '🎤 Fetch from YouTube'}
+            </button>
+          </div>
+          {singerFetchMsg && (
+            <p className="text-xs text-violet-300 mb-2">{singerFetchMsg}</p>
+          )}
           {singers.length === 0 ? (
             <p className="text-sm text-neutral-500">
               No singers in database. Add some first.
@@ -322,6 +359,7 @@ export default function SongForm({
           <div>
             <label className={labelCls}>YouTube video ID</label>
             <input
+              ref={youtubeIdRef}
               name="youtubeId"
               defaultValue={initial?.youtubeId ?? ''}
               placeholder="dQw4w9WgXcQ"

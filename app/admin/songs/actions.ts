@@ -6,6 +6,7 @@ import { logActivity } from '@/lib/activity';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { fetchFromYouTube, searchGoogle } from '@/lib/lyricsFetch';
+import { hydrateVideos, extractSingersFromDescription } from '@/lib/youtube';
 
 function assertAdmin(s: any) {
   if (!s || !s.isAdmin) throw new Error('Unauthorized');
@@ -341,4 +342,35 @@ export async function bulkDeleteSongs(ids: string[]): Promise<{ deleted: number 
   revalidatePath('/admin/songs');
   revalidatePath('/songs');
   return { deleted: count };
+}
+
+export async function fetchSingersAction(youtubeId: string): Promise<{
+  found: string[];
+  matched: { id: string; name: string }[];
+}> {
+  const session = await auth();
+  assertAdmin(session);
+  if (!youtubeId) return { found: [], matched: [] };
+
+  const map = await hydrateVideos([youtubeId]);
+  const v = map.get(youtubeId);
+  if (!v) return { found: [], matched: [] };
+
+  // Extract from description credit lines
+  const fromDesc = extractSingersFromDescription(v.description);
+  // Also check the title for known singers in DB
+  const allSingers = await prisma.singer.findMany({ select: { id: true, name: true } });
+  const fromTitle = allSingers.filter((s) =>
+    v.title.toLowerCase().includes(s.name.toLowerCase())
+  );
+
+  const found = fromDesc.length > 0
+    ? fromDesc
+    : fromTitle.map((s) => s.name);
+
+  // Return existing Singer records that match any found name (case-insensitive)
+  const foundLower = new Set(found.map((n) => n.toLowerCase()));
+  const matched = allSingers.filter((s) => foundLower.has(s.name.toLowerCase()));
+
+  return { found, matched };
 }

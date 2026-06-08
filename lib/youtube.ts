@@ -231,3 +231,22 @@ export function cleanTitle(title: string): string {
     .replace(/^[-|\s]+|[-|\s]+$/g, '')
     .trim();
 }
+
+// ─── Extract performing singer names from a YouTube description ───────────────
+// Looks for lines like "Singer : Kinjal Dave", "Vocals - Geeta Rabari", etc.
+const SINGER_CREDIT_RE = /^(?:singer|singers|vocal(?:ist|s)?|voice|performed?\s*by|sung\s*by|gayak|swara|સ્વર|ગાયક)\s*[:\-–|]\s*(.+)$/i;
+
+export function extractSingersFromDescription(description: string): string[] {
+  if (!description) return [];
+  const names = new Set<string>();
+  for (const rawLine of description.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    const m = line.match(SINGER_CREDIT_RE);
+    if (m) {
+      // Value after colon may be comma/slash/&-separated
+      const parts = m[1].split(/[,\/&|]+/).map((s) => s.trim()).filter((s) => s.length > 1 && s.length < 60);
+      for (const p of parts) names.add(p);
+    }
+  }
+  return [...names];
+}

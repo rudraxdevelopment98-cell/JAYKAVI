@@ -5,6 +5,21 @@ import { prisma } from '@/lib/prisma';
 import { logActivity } from '@/lib/activity';
 import { revalidatePath } from 'next/cache';
 
+// Find an existing singer by name (case-insensitive) or create a new one.
+// This prevents duplicates when the same singer exists without a legacyId.
+async function findOrCreateSinger(name: string) {
+  const existing = await prisma.singer.findFirst({
+    where: { name: { equals: name, mode: 'insensitive' } },
+  });
+  if (existing) return existing;
+  return prisma.singer.create({
+    data: {
+      legacyId: `auto-${name.toLowerCase().replace(/\s+/g, '-')}`,
+      name,
+    },
+  });
+}
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -109,23 +124,30 @@ export async function approveCandidate(
     },
   });
 
-  // Attach singers by name — create if they don't exist
+  // Attach singers by name — find existing (by name, case-insensitive) before creating
   const singerNames = overrides.singerNames
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
   for (const name of singerNames) {
-    const singer = await prisma.singer.upsert({
-      where: { legacyId: `auto-${name.toLowerCase().replace(/\s+/g, '-')}` },
-      update: {},
-      create: {
-        legacyId: `auto-${name.toLowerCase().replace(/\s+/g, '-')}`,
-        name,
-      },
-    });
+    const singer = await findOrCreateSinger(name);
     await prisma.songSinger.create({
       data: { songId: song.id, singerId: singer.id },
     });
+  }
+
+  // Auto-assign to a singer's collection if one exists with a matching name
+  if (singerNames.length > 0) {
+    const matchedCollection = await prisma.collection.findFirst({
+      where: { title: { in: singerNames, mode: 'insensitive' } },
+      select: { id: true },
+    });
+    if (matchedCollection) {
+      await prisma.song.update({
+        where: { id: song.id },
+        data: { collectionId: matchedCollection.id },
+      });
+    }
   }
 
   // ── Keep the harvester's known-singers list up to date ───────────────
@@ -314,16 +336,26 @@ export async function bulkApproveSimple(ids: string[]): Promise<BulkApproveResul
       },
     });
 
-    // Attach singer guess if present
+    // Attach singer guess — find existing by name before creating
     const singerNames = (c.singerGuess ?? '')
       .split(',').map((s) => s.trim()).filter(Boolean);
     for (const name of singerNames) {
-      const singer = await prisma.singer.upsert({
-        where: { legacyId: `auto-${name.toLowerCase().replace(/\s+/g, '-')}` },
-        update: {},
-        create: { legacyId: `auto-${name.toLowerCase().replace(/\s+/g, '-')}`, name },
-      });
+      const singer = await findOrCreateSinger(name);
       await prisma.songSinger.create({ data: { songId: song.id, singerId: singer.id } });
+    }
+
+    // Auto-assign to singer's collection if one exists
+    if (singerNames.length > 0) {
+      const matchedCollection = await prisma.collection.findFirst({
+        where: { title: { in: singerNames, mode: 'insensitive' } },
+        select: { id: true },
+      });
+      if (matchedCollection) {
+        await prisma.song.update({
+          where: { id: song.id },
+          data: { collectionId: matchedCollection.id },
+        });
+      }
     }
 
     await prisma.harvestCandidate.update({
