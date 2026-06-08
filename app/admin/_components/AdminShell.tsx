@@ -4,10 +4,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-interface NavItem  { href: string; label: string; }
+interface NavItem  { href: string; label: string; badge?: number | string }
 interface NavGroup { group: string | null; items: NavItem[]; }
 
-const DEFAULT_W = 220;
+const DEFAULT_W = 230;
 const MIN_W      = 180;
 const MAX_W      = 320;
 
@@ -25,7 +25,20 @@ export default function AdminShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [width, setWidth]           = useState(DEFAULT_W);
   const [collapsed, setCollapsed]   = useState<Set<string>>(new Set());
+  const [query, setQuery]           = useState('');
   const pathname = usePathname();
+
+  // Filter nav by search query (matches label, case-insensitive)
+  const filteredGroups: NavGroup[] = query.trim()
+    ? navGroups
+        .map((g) => ({
+          ...g,
+          items: g.items.filter((it) =>
+            it.label.toLowerCase().includes(query.trim().toLowerCase())
+          ),
+        }))
+        .filter((g) => g.items.length > 0)
+    : navGroups;
 
   const [isDesktop, setIsDesktop] = useState(false);
 
@@ -99,7 +112,7 @@ export default function AdminShell({
       <div className="flex-shrink-0 sticky top-0 z-10
         bg-neutral-950 md:bg-neutral-900
         border-b border-neutral-800
-        px-4 pt-5 pb-4">
+        px-4 pt-4 pb-3">
         {/* Close button — mobile drawer only */}
         <button
           onClick={() => setMobileOpen(false)}
@@ -111,25 +124,62 @@ export default function AdminShell({
             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
         </button>
+
+        {/* Brand row with avatar */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-neutral-900 font-semibold text-sm flex-shrink-0 shadow-sm">
+            {(email?.[0] ?? 'A').toUpperCase()}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold tracking-tight text-neutral-100 leading-tight">
+              JAYKAVI Admin
+            </p>
+            <p className="text-[11px] text-neutral-500 truncate" title={email}>{email}</p>
+          </div>
+        </div>
+
         <Link
           href="/"
-          className="inline-flex items-center gap-1 text-[11px] text-neutral-500
-            hover:text-neutral-300 transition mb-2"
+          target="_blank"
+          className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-neutral-400
+            hover:text-amber-300 transition py-1.5 rounded border border-neutral-800 hover:border-neutral-700"
         >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
-            <polyline points="15 18 9 12 15 6"/>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
           </svg>
           View site
         </Link>
-        <p className="text-base font-semibold tracking-tight text-neutral-100 leading-tight">
-          JAYKAVI Admin
-        </p>
-        <p className="text-[11px] text-neutral-500 mt-0.5 truncate">{email}</p>
+      </div>
+
+      {/* Search */}
+      <div className="flex-shrink-0 px-3 pt-3 pb-1">
+        <div className="relative">
+          <svg
+            width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            strokeWidth="2" strokeLinecap="round" aria-hidden
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none"
+          >
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search menu…"
+            aria-label="Search menu"
+            className="w-full pl-8 pr-2 py-1.5 text-xs bg-neutral-950 border border-neutral-800 rounded-md text-neutral-200 placeholder-neutral-600 focus:outline-none focus:border-neutral-600 transition"
+          />
+        </div>
       </div>
 
       {/* Scrollable nav */}
-      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-1 min-h-0">
-        {navGroups.map((g, gi) => {
+      <nav className="flex-1 overflow-y-auto px-2 py-2 space-y-1 min-h-0">
+        {filteredGroups.length === 0 && (
+          <p className="px-3 py-4 text-xs text-neutral-500 text-center">No matches</p>
+        )}
+        {filteredGroups.map((g, gi) => {
           if (!g.group) {
             /* ungrouped items rendered directly */
             return g.items.map((item) => (
@@ -268,17 +318,31 @@ export default function AdminShell({
 }
 
 // ── Shared nav link ─────────────────────────────────────────────────────────
-function NavLink({ item, active }: { item: { href: string; label: string }; active: boolean }) {
+function NavLink({ item, active }: { item: { href: string; label: string; badge?: number | string }; active: boolean }) {
   return (
     <Link
       href={item.href}
-      className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-[13px] transition-all ${
+      className={`relative flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-md text-[13px] transition-all ${
         active
-          ? 'bg-amber-500/15 text-amber-300 font-medium'
-          : 'text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800/70'
+          ? 'bg-amber-500/12 text-amber-200 font-medium'
+          : 'text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800/60'
       }`}
     >
-      {item.label}
+      {active && (
+        <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-amber-400" aria-hidden />
+      )}
+      <span className="flex-1 truncate">{item.label}</span>
+      {item.badge != null && Number(item.badge) > 0 && (
+        <span
+          className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full ${
+            active
+              ? 'bg-amber-400 text-neutral-900'
+              : 'bg-amber-500/20 text-amber-300 group-hover:bg-amber-500/30'
+          }`}
+        >
+          {typeof item.badge === 'number' && item.badge > 99 ? '99+' : item.badge}
+        </span>
+      )}
     </Link>
   );
 }

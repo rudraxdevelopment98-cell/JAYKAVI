@@ -1,8 +1,24 @@
 import { auth, signOut } from '@/auth';
 import { redirect } from 'next/navigation';
 import { permissionForPath, hasPermission } from '@/lib/permissions';
+import { prisma } from '@/lib/prisma';
 import AdminThemeToggle from './_components/AdminThemeToggle';
 import AdminShell from './_components/AdminShell';
+
+async function getSidebarBadges(): Promise<Record<string, number>> {
+  try {
+    const [pending, unread] = await Promise.all([
+      prisma.harvestCandidate.count({ where: { status: 'pending' } }),
+      prisma.contactMessage.count({ where: { read: false } }),
+    ]);
+    return {
+      '/admin/harvester': pending,
+      '/admin/messages': unread,
+    };
+  } catch {
+    return {};
+  }
+}
 
 const NAV_GROUPS = [
   {
@@ -64,12 +80,15 @@ export default async function AdminLayout({
   // Empty permissions = legacy full-access admin — show everything.
   const perms: string[] = session.permissions ?? [];
   const restricted = perms.length > 0;
+  const badges = await getSidebarBadges();
   const navGroups = NAV_GROUPS.map((g) => ({
     ...g,
-    items: g.items.filter((item) => {
-      const required = permissionForPath(item.href);
-      return required === null || !restricted || hasPermission(perms, required);
-    }),
+    items: g.items
+      .filter((item) => {
+        const required = permissionForPath(item.href);
+        return required === null || !restricted || hasPermission(perms, required);
+      })
+      .map((item) => ({ ...item, badge: badges[item.href] })),
   })).filter((g) => g.items.length > 0);
 
   return (
