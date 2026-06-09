@@ -213,10 +213,96 @@ a { color: inherit; }
   color: transparent;
 }
 
-/* ════════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════════
+   GARBA NIGHT THEME — Festival Neon / Navratri
+   Deep midnight indigo with electric saffron, hot-pink & turquoise.
+   Inspired by the electric energy of Gujarati Navratri nights.
+   ════════════════════════════════════════════════════════════════ */
+[data-theme-skin='garba'][data-theme='dark'],
+[data-theme-skin='garba']:not([data-theme='light']) {
+  --bg:          #05041A;
+  --panel:       rgba(15, 10, 45, 0.75);
+  --panel-solid: #0E0B2C;
+  --text:        #F5EEFF;
+  --muted:       #8B7AB0;
+  --line:        rgba(255, 95, 31, 0.14);
+  --accent:      #FF5F1F;
+  --glow:        0 0 80px rgba(233, 30, 140, 0.28);
+  --hero-grad:
+    radial-gradient(ellipse 70% 60% at 80% 20%, rgba(255,95,31,.22) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 55% at 20% 80%, rgba(233,30,140,.18) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(123,47,190,.12) 0%, transparent 65%),
+    linear-gradient(160deg, #08062A 0%, #05041A 55%, #080422 100%);
+  /* Festival-specific palette */
+  --neon-orange: #FF5F1F;
+  --neon-pink:   #E91E8C;
+  --neon-teal:   #00D4AA;
+  --neon-gold:   #FFD700;
+  --neon-purple: #A259FF;
+}
+
+[data-theme-skin='garba'][data-theme='light'] {
+  --bg:          #FFF8F0;
+  --panel:       rgba(255, 240, 220, 0.85);
+  --panel-solid: #FFF2E0;
+  --text:        #1A0A2E;
+  --muted:       #7B5EA7;
+  --line:        rgba(232, 64, 0, 0.14);
+  --accent:      #E84000;
+  --glow:        0 20px 60px rgba(232, 64, 0, 0.2);
+  --hero-grad:
+    radial-gradient(ellipse 70% 60% at 80% 20%, rgba(232,64,0,.14) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 55% at 20% 80%, rgba(194,0,96,.1) 0%, transparent 60%),
+    linear-gradient(160deg, #1A0A2E 0%, #08062A 50%, #0E0B2C 100%);
+  --neon-orange: #E84000;
+  --neon-pink:   #C20060;
+  --neon-teal:   #007A65;
+  --neon-gold:   #FF9900;
+  --neon-purple: #6B1FA8;
+}
+
+/* Gradient text for garba theme */
+[data-theme-skin='garba'] .gradient-text {
+  background: linear-gradient(120deg, #FF5F1F, #E91E8C, #A259FF);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Gold top frame overridden by GarbaHome's animated frame — hide body::after */
+[data-theme-skin='garba'] body::after { display: none; }
+
+/* Nav: garba skin — scrolled state */
+[data-theme-skin='garba'] .site-nav.scrolled {
+  background: linear-gradient(180deg,
+    rgba(5,4,26,.95) 0%, rgba(5,4,26,.85) 100%);
+  border-color: rgba(255,95,31,.18);
+}
+[data-theme-skin='garba'][data-theme='light'] .site-nav.scrolled {
+  background: linear-gradient(180deg,
+    rgba(255,248,240,.97) 0%, rgba(255,248,240,.9) 100%);
+  border-color: rgba(232,64,0,.18);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+[data-theme-skin='garba'] .nav-logo { letter-spacing: -.01em; }
+[data-theme-skin='garba'] .nav-logo .accent { color: var(--accent); }
+[data-theme-skin='garba'] .nav-link.active { border-bottom-color: var(--accent); }
+[data-theme-skin='garba'] .nav-link.active::after,
+[data-theme-skin='garba'] .nav-link:hover::after {
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+/* Song cards get a neon-left-border in garba skin */
+[data-theme-skin='garba'] .glass {
+  border-color: rgba(255,95,31,.18) !important;
+}
+[data-theme-skin='garba'] .sc-art-fallback {
+  background: linear-gradient(160deg, rgba(255,95,31,.25) 0%, rgba(5,4,26,.95) 100%) !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
    HERITAGE LIBRARY THEME — Gujarati literary archive
    Deep gold on near-black (dark) / warm parchment (light).
-   ════════════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════════════ */
 [data-theme-skin='heritage'][data-theme='dark'],
 [data-theme-skin='heritage']:not([data-theme='light']) {
   --bg: #0F0B08;
@@ -318,7 +404,7 @@ a { color: inherit; }
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
-/* ── Traditional Nav skin ─────────────────────────────────────────── */
+/* ── Traditional Nav skin ───────────────────────────────── */
 
 /*
  * The Traditional hero is ALWAYS a dark background (dark gradient + optional
@@ -723,10 +809,10 @@ a { color: inherit; }
   .songs-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
 }
 
-/* ═══════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    MOBILE (≤ 639px): YouTube-style compact list — 1 row per song.
    Thumbnail on left (90×90), title + meta on right.
-   ═══════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════ */
 @media (max-width: 639px) {
   .songs-grid { grid-template-columns: 1fr; gap: 8px; }
 
