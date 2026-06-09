@@ -12,6 +12,7 @@ import { FadeUp } from '@/components/Reveal';
 import JsonLd from '@/components/JsonLd';
 import TraditionalHome from '@/components/traditional/TraditionalHome';
 import HeritageHome from '@/components/heritage/HeritageHome';
+import GarbaHome from '@/components/garba/GarbaHome';
 import HeroLuma from '@/components/HeroLuma';
 import TopVideosCarousel from '@/components/TopVideosCarousel';
 import { siteUrl, absoluteUrl } from '@/lib/seo';
@@ -47,6 +48,14 @@ export default async function Home() {
       <>
         <HeroLuma mode="image" image={heritageSettings.heroPhoto} />
         <HeritageHome settings={heritageSettings} />
+      </>
+    );
+  }
+  if (activeTheme === 'garba') {
+    return (
+      <>
+        <HeroLuma mode="dark" />
+        <GarbaHome />
       </>
     );
   }
