@@ -31,4 +31,11 @@ export const SITE_THEMES: ThemeDefinition[] = [
     darkPreview: 'linear-gradient(135deg, #0F0800 45%, #D4AF37 100%)',
     lightPreview: 'linear-gradient(135deg, #FAF3E7 45%, #B8860B 100%)',
   },
+  {
+    key: 'garba',
+    label: 'Garba Night',
+    description: 'Electric festival energy — inspired by Navratri nights. Deep midnight indigo sky with neon saffron, hot-pink & turquoise accents.',
+    darkPreview: 'linear-gradient(135deg, #05041A 30%, #FF5F1F 60%, #E91E8C 80%, #A259FF 100%)',
+    lightPreview: 'linear-gradient(135deg, #1A0A2E 30%, #FF5F1F 60%, #E91E8C 80%, #A259FF 100%)',
+  },
 ];
