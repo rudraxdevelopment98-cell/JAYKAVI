@@ -85,6 +85,25 @@ export default function ThemeSelector({ current }: { current: string }) {
       </form>
 
       {/* Per-theme config links */}
+      {current === 'default' && (
+        <div className="mt-8 p-4 rounded-xl border border-neutral-700/50 bg-neutral-900/40">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="text-sm font-semibold text-neutral-200">Default Theme is active</p>
+              <p className="text-xs text-neutral-400 mt-1">
+                Choose from 4 hero layout styles: Cinematic, Portrait, Fullscreen, or Minimal.
+              </p>
+            </div>
+            <Link
+              href="/admin/theme/hero"
+              className="flex-shrink-0 px-4 py-2 rounded-lg border border-neutral-600 text-neutral-300 text-sm font-medium hover:bg-neutral-800 transition"
+            >
+              Configure Hero →
+            </Link>
+          </div>
+        </div>
+      )}
+
       {current === 'traditional' && (
         <div className="mt-8 p-4 rounded-xl border border-amber-900/50 bg-amber-950/20">
           <div className="flex items-center justify-between gap-4 flex-wrap">

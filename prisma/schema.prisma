@@ -323,6 +323,12 @@ model SiteSettings {
   herShowLegacy     Boolean  @default(true)
 
   viewsSyncedAt     DateTime? // last time YouTube view counts were refreshed
+
+  // Default theme — hero variant selector
+  heroVariant     String  @default("cinematic") // cinematic | portrait | fullscreen | minimal
+  heroPortraitUrl String? // artist photo for Portrait + Fullscreen variants
+  heroBgImageUrl  String? // background image for Fullscreen variant
+  heroBgVideoUrl  String? // background video for Fullscreen variant
 }
 
 // ----------------------------- NOTEBOOK --------------------------------

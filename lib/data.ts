@@ -563,3 +563,54 @@ export async function setHeritageSettings(s: HeritageSettings): Promise<void> {
     create: { id: 1, ...data },
   });
 }
+
+// ── Default theme — Hero variant settings ─────────────────────────────────
+
+export interface HeroSettings {
+  variant: string; // 'cinematic' | 'portrait' | 'fullscreen' | 'minimal'
+  portraitUrl: string | null;
+  bgImageUrl: string | null;
+  bgVideoUrl: string | null;
+}
+
+const HERO_DEFAULTS: HeroSettings = {
+  variant: 'cinematic',
+  portraitUrl: null,
+  bgImageUrl: null,
+  bgVideoUrl: null,
+};
+
+export async function getHeroSettings(): Promise<HeroSettings> {
+  try {
+    const row = await prisma.siteSettings.findFirst({ where: { id: 1 } });
+    if (!row) return HERO_DEFAULTS;
+    return {
+      variant: row.heroVariant ?? 'cinematic',
+      portraitUrl: row.heroPortraitUrl ?? null,
+      bgImageUrl: row.heroBgImageUrl ?? null,
+      bgVideoUrl: row.heroBgVideoUrl ?? null,
+    };
+  } catch {
+    return HERO_DEFAULTS;
+  }
+}
+
+export async function setHeroSettings(s: HeroSettings): Promise<void> {
+  await prisma.siteSettings.upsert({
+    where: { id: 1 },
+    update: {
+      heroVariant: s.variant,
+      heroPortraitUrl: s.portraitUrl,
+      heroBgImageUrl: s.bgImageUrl,
+      heroBgVideoUrl: s.bgVideoUrl,
+    },
+    create: {
+      id: 1,
+      activeTheme: 'default',
+      heroVariant: s.variant,
+      heroPortraitUrl: s.portraitUrl,
+      heroBgImageUrl: s.bgImageUrl,
+      heroBgVideoUrl: s.bgVideoUrl,
+    },
+  });
+}

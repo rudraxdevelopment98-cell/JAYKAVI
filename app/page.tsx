@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
-import { getLyricist, getTrendingSongs, getTopSongs, getJourney, getActiveTheme, getTraditionalSettings, getHeritageSettings, getSocial } from '@/lib/data';
+import { getLyricist, getTrendingSongs, getTopSongs, getJourney, getActiveTheme, getTraditionalSettings, getHeritageSettings, getSocial, getHeroSettings } from '@/lib/data';
 import CinematicHero from '@/components/CinematicHero';
+import HeroPortrait from '@/components/heroes/HeroPortrait';
+import HeroFullscreen from '@/components/heroes/HeroFullscreen';
+import HeroMinimal from '@/components/heroes/HeroMinimal';
 import HorizontalScrollRow from '@/components/HorizontalScrollRow';
 import SectionHead from '@/components/SectionHead';
 import { FadeUp } from '@/components/Reveal';
@@ -48,12 +51,13 @@ export default async function Home() {
     );
   }
 
-  const [l, trendingAll, topAll, journeyAll, social] = await Promise.all([
+  const [l, trendingAll, topAll, journeyAll, social, heroSettings] = await Promise.all([
     getLyricist(),
     getTrendingSongs(),
     getTopSongs(10),
     getJourney(),
     getSocial(),
+    getHeroSettings(),
   ]);
   const trending = trendingAll;
   const top = topAll.filter((s) => s.viewCount > 0);
@@ -102,8 +106,11 @@ export default async function Home() {
     <>
       <JsonLd data={personLd} />
       <JsonLd data={websiteLd} />
-      <HeroLuma mode="dark" />
-      <CinematicHero l={l} />
+      <HeroLuma mode={heroSettings.variant === 'minimal' ? 'theme' : 'dark'} />
+      {heroSettings.variant === 'portrait'   && <HeroPortrait   l={l} portraitUrl={heroSettings.portraitUrl} />}
+      {heroSettings.variant === 'fullscreen' && <HeroFullscreen l={l} bgImageUrl={heroSettings.bgImageUrl} bgVideoUrl={heroSettings.bgVideoUrl} />}
+      {heroSettings.variant === 'minimal'    && <HeroMinimal    l={l} />}
+      {(heroSettings.variant === 'cinematic' || !heroSettings.variant) && <CinematicHero l={l} />}
 
       {trending.length > 0 && (
         <section className="section-pad" style={{ position: 'relative', zIndex: 2 }}>
