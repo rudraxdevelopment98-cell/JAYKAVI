@@ -68,6 +68,14 @@ export default function Nav({ skin = 'default' }: { skin?: string }) {
             <li><Link href="/contact" className="nav-book">📩 Booking</Link></li>
           )}
           <li>
+            <Link
+              href="/request"
+              className={`nav-request${pathname === '/request' ? ' active' : ''}`}
+            >
+              Request a song
+            </Link>
+          </li>
+          <li>
             <button
               type="button"
               className="nav-search"
@@ -124,6 +132,14 @@ export default function Nav({ skin = 'default' }: { skin?: string }) {
               {link.label}
             </Link>
           ))}
+          <Link
+            href="/request"
+            className={`mobile-link font-serif${pathname === '/request' ? ' active' : ''}`}
+            style={{ transitionDelay: open ? `${links.length * 0.05}s` : '0s' }}
+            onClick={() => setOpen(false)}
+          >
+            Request a song
+          </Link>
         </nav>
       </div>
 
@@ -201,6 +217,19 @@ export default function Nav({ skin = 'default' }: { skin?: string }) {
         }
         .nav-search--mobile {
           padding: 8px; border-radius: 10px;
+        }
+        .nav-request {
+          display: inline-flex; align-items: center; gap: 5px;
+          padding: 7px 14px; border-radius: 100px;
+          font-size: .82rem; font-weight: 600; letter-spacing: .01em;
+          border: 1px solid var(--accent);
+          color: var(--accent);
+          text-decoration: none;
+          transition: background .2s ease, color .2s ease;
+          white-space: nowrap;
+        }
+        .nav-request:hover, .nav-request.active {
+          background: var(--accent); color: #fff;
         }
 
         /* ── Mobile right ── */

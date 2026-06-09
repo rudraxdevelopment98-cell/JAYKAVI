@@ -367,3 +367,18 @@ model ContactMessage {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+// ----------------------------- SONG REQUESTS ----------------------------
+
+model SongRequest {
+  id         String   @id @default(cuid())
+  name       String?
+  songName   String
+  singerName String?
+  youtubeUrl String?
+  notes      String?
+  status     String   @default("pending") // pending | noted | added | rejected
+  adminNote  String?
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}

@@ -7,13 +7,15 @@ import AdminShell from './_components/AdminShell';
 
 async function getSidebarBadges(): Promise<Record<string, number>> {
   try {
-    const [pending, unread] = await Promise.all([
+    const [pending, unread, songReqs] = await Promise.all([
       prisma.harvestCandidate.count({ where: { status: 'pending' } }),
       prisma.contactMessage.count({ where: { read: false } }),
+      prisma.songRequest.count({ where: { read: false } }),
     ]);
     return {
       '/admin/harvester': pending,
       '/admin/messages': unread,
+      '/admin/song-requests': songReqs,
     };
   } catch {
     return {};
@@ -52,7 +54,8 @@ const NAV_GROUPS = [
       { href: '/admin/profile', label: '🎨 Artist Profile' },
       { href: '/admin/admins', label: '🔑 Admins' },
       { href: '/admin/contact', label: '📡 Contact & Social' },
-      { href: '/admin/messages', label: '✉️ Messages' },
+        { href: '/admin/messages', label: '✉️ Messages' },
+      { href: '/admin/song-requests', label: '🎶 Song Requests' },
     ],
   },
   {
