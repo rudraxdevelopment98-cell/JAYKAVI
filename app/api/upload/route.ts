@@ -56,6 +56,14 @@ export async function POST(req: Request) {
     );
   }
 
-  const { url, publicId } = await uploadBuffer(buffer, folder);
-  return NextResponse.json({ url, publicId });
+  try {
+    const { url, publicId } = await uploadBuffer(buffer, folder);
+    return NextResponse.json({ url, publicId });
+  } catch (err: any) {
+    console.error('[upload] Cloudinary error:', err);
+    return NextResponse.json(
+      { error: err?.message ?? 'Cloudinary upload failed. Check CLOUDINARY_* env vars in Vercel.' },
+      { status: 500 },
+    );
+  }
 }

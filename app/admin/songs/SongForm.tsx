@@ -226,20 +226,24 @@ export default function SongForm({
                 const ytId = youtubeIdRef.current?.value?.trim();
                 if (!ytId) { setSingerFetchMsg('Add a YouTube ID first.'); return; }
                 startFetchSingers(async () => {
-                  const r = await fetchSingersAction(ytId);
-                  if (r.found.length === 0) {
-                    setSingerFetchMsg('No singers found in video.');
-                    return;
+                  try {
+                    const r = await fetchSingersAction(ytId);
+                    if (r.error) { setSingerFetchMsg(`Error: ${r.error}`); return; }
+                    if (r.found.length === 0) {
+                      setSingerFetchMsg('No singers found in video description.');
+                      return;
+                    }
+                    const newIds = r.matched.map((s) => s.id).filter((id) => !selectedSingers.includes(id));
+                    if (newIds.length > 0) setSelectedSingers((prev) => [...prev, ...newIds]);
+                    const unmatched = r.found.filter((n) => !r.matched.some((m) => m.name.toLowerCase() === n.toLowerCase()));
+                    const msg = [
+                      r.matched.length > 0 && `Selected: ${r.matched.map((m) => m.name).join(', ')}`,
+                      unmatched.length > 0 && `Not in DB yet: ${unmatched.join(', ')}`,
+                    ].filter(Boolean).join(' · ');
+                    setSingerFetchMsg(msg);
+                  } catch (e: any) {
+                    setSingerFetchMsg(`Error: ${e?.message ?? 'fetch failed'}`);
                   }
-                  // Auto-select any matched existing singers
-                  const newIds = r.matched.map((s) => s.id).filter((id) => !selectedSingers.includes(id));
-                  if (newIds.length > 0) setSelectedSingers((prev) => [...prev, ...newIds]);
-                  const unmatched = r.found.filter((n) => !r.matched.some((m) => m.name.toLowerCase() === n.toLowerCase()));
-                  const msg = [
-                    r.matched.length > 0 && `Selected: ${r.matched.map((m) => m.name).join(', ')}`,
-                    unmatched.length > 0 && `Not in DB yet: ${unmatched.join(', ')}`,
-                  ].filter(Boolean).join(' · ');
-                  setSingerFetchMsg(msg);
                 });
               }}
               className="text-xs px-2.5 py-1 border border-violet-700/50 bg-violet-950/30 text-violet-300 rounded hover:bg-violet-900/40 disabled:opacity-50 transition"

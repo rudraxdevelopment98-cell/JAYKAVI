@@ -260,8 +260,12 @@ export async function fetchLyricsAction(input: {
   assertAdmin(session);
   let suggestion: FetchLyricsResult['suggestion'] = null;
   if (input.youtubeId) {
-    const s = await fetchFromYouTube(input.youtubeId);
-    if (s) suggestion = s;
+    try {
+      const s = await fetchFromYouTube(input.youtubeId);
+      if (s) suggestion = s;
+    } catch {
+      // YouTube API unavailable or quota exceeded — continue with search-only
+    }
   }
 
   const searchConfigured = Boolean(
@@ -348,12 +352,21 @@ export async function bulkDeleteSongs(ids: string[]): Promise<{ deleted: number 
 export async function fetchSingersAction(youtubeId: string): Promise<{
   found: string[];
   matched: { id: string; name: string }[];
+  error?: string;
 }> {
   const session = await auth();
   assertAdmin(session);
   if (!youtubeId) return { found: [], matched: [] };
+  if (!process.env.YOUTUBE_API_KEY) {
+    return { found: [], matched: [], error: 'YOUTUBE_API_KEY not configured' };
+  }
 
-  const map = await hydrateVideos([youtubeId]);
+  let map: Map<string, any>;
+  try {
+    map = await hydrateVideos([youtubeId]);
+  } catch (e: any) {
+    return { found: [], matched: [], error: e?.message ?? 'YouTube API error' };
+  }
   const v = map.get(youtubeId);
   if (!v) return { found: [], matched: [] };
 
