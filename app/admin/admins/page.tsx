@@ -97,9 +97,15 @@ async function removeAdmin(formData: FormData) {
 }
 
 export default async function AdminAdminsPage() {
-  const [admins, session] = await Promise.all([getAdmins(), auth()]);
+  const [allAdmins, session] = await Promise.all([getAdmins(), auth()]);
   const envAdmins = getEnvAdmins();
   const currentEmail = (session?.user?.email ?? '').toLowerCase();
+
+  // Env-owners are shown in the "Owners" section above. A DB AdminUser row can
+  // also exist for an owner (e.g. created when they edit their profile) — don't
+  // list those again here, otherwise editing your profile looks like it created
+  // a new admin.
+  const admins = allAdmins.filter((a) => !envAdmins.includes(a.email.toLowerCase()));
 
   const inputCls =
     'w-full px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-md text-sm focus:outline-none focus:border-amber-500';
