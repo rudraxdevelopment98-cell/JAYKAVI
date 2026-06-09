@@ -28,7 +28,6 @@ async function getData() {
       prisma.siteSettings.findFirst({ where: { id: 1 }, select: { viewsSyncedAt: true } }),
     ]);
 
-    // Which pending candidates already match a Song in the listing (by YouTube id)?
     const ytIds = pending.map((p) => p.youtubeId).filter(Boolean) as string[];
     const existingSongs = ytIds.length
       ? await prisma.song.findMany({
@@ -63,188 +62,254 @@ export default async function HarvesterPage() {
       <div className="max-w-xl mx-auto mt-16 p-6 bg-yellow-950/40 border border-yellow-800 rounded-xl text-center">
         <p className="text-yellow-300 font-medium mb-2">Database not connected</p>
         <p className="text-yellow-400/70 text-sm">
-          Could not reach the database. Check that <code className="font-mono bg-yellow-900/30 px-1 rounded">DATABASE_URL</code> is set
+          Could not reach the database. Check that{' '}
+          <code className="font-mono bg-yellow-900/30 px-1 rounded">DATABASE_URL</code> is set
           correctly in your environment variables, then refresh the page.
         </p>
       </div>
     );
   }
 
+  const lastRun = recent[0];
+
   return (
     <>
-    {/* Sticky page header */}
-    <div className="admin-sticky-header">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-semibold">Song Harvester</h1>
-          <p className="text-neutral-400 mt-1 text-sm">
-            Searches YouTube for new JAYKAVI songs and queues them for your review.
-          </p>
-        </div>
-        <Link
-          href="/admin/harvester/config"
-          className="shrink-0 text-sm px-3 py-1.5 border border-neutral-700 rounded-md hover:bg-neutral-800 transition"
-        >
-          Configure
-        </Link>
-      </div>
-    </div>
-
-    <div className="max-w-4xl">
-
-      {/* API key warning */}
-      {!hasApiKey && (
-        <div className="mb-6 px-4 py-3 bg-yellow-950/60 border border-yellow-800 rounded-xl text-sm text-yellow-300">
-          <strong>YOUTUBE_API_KEY not set.</strong> Add it to your{' '}
-          <code className="font-mono bg-yellow-900/40 px-1 rounded">.env</code> file to enable
-          harvesting. Free quota: 10,000 units/day.
-        </div>
-      )}
-
-      {/* Run button + config summary */}
-      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-4">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
+      {/* Sticky page header */}
+      <div className="admin-sticky-header">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <div className="font-medium mb-1">Start a new harvest</div>
-            <div className="text-sm text-neutral-400">
-              Searches {config?.searchTerms.length ?? 4} terms ·{' '}
-              {config?.ownChannels.length ?? 0} own channels ·{' '}
-              up to {config?.maxResultsPerTerm ?? 100} results per term
-            </div>
+            <h1 className="text-2xl font-semibold">Song Harvester</h1>
+            <p className="text-neutral-400 mt-0.5 text-sm">
+              Find new JAYKAVI songs on YouTube and approve them for the site.
+            </p>
           </div>
-          <RunButton hasApiKey={hasApiKey} />
-        </div>
-      </div>
-
-      {/* Auto-run toggle */}
-      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-4">
-        <AutoRunToggle initial={!!(config as any)?.autoRun} />
-      </div>
-
-      {/* Re-queue deleted songs */}
-      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-4">
-        <div className="font-medium mb-1">Re-queue deleted songs</div>
-        <p className="text-sm text-neutral-400 mb-3">
-          If you deleted songs from the database and want to re-approve them, use this to restore
-          their candidates back to the pending queue.
-        </p>
-        <ReQueueButton />
-      </div>
-
-      {/* Playlist import */}
-      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-4">
-        <div className="font-medium mb-1">Import from Playlist</div>
-        <p className="text-sm text-neutral-400 mb-3">
-          Paste a YouTube playlist URL or ID to import up to 200 videos as pending candidates.
-        </p>
-        <PlaylistImportButton />
-      </div>
-
-      {/* View count sync */}
-      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-4">
-        <div className="font-medium mb-1">Sync YouTube View Counts</div>
-        <p className="text-sm text-neutral-400 mb-3">
-          Refreshes the view count for every song that has a YouTube ID. Runs automatically every 2 days,
-          or trigger it manually here.
-        </p>
-        <SyncViewsButton lastSynced={settings?.viewsSyncedAt ?? null} />
-      </div>
-
-      {/* Restore exact titles */}
-      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-4">
-        <div className="font-medium mb-1">Restore Exact YouTube Titles</div>
-        <p className="text-sm text-neutral-400 mb-3">
-          Songs imported earlier may have shortened titles. This restores each song&apos;s
-          full, exact YouTube title and keeps the cleaned line as its subtitle. Only songs with a
-          matching harvest candidate are touched.
-        </p>
-        <BackfillTitlesButton />
-      </div>
-
-      {/* Excel import */}
-      <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl mb-6">
-        <div className="font-medium mb-1">Import from Excel</div>
-        <p className="text-sm text-neutral-400 mb-3">
-          Upload a spreadsheet with columns: <code className="text-neutral-300">Title · Channel · Published · Views · Link · Source</code>.
-          All rows are added as pending candidates for you to review.
-        </p>
-        <div className="flex items-center gap-3 flex-wrap">
-          <ImportExcelButton />
-          <a
-            href="/api/admin/excel-template"
-            download
-            className="text-sm text-neutral-400 hover:text-neutral-200 underline underline-offset-2 transition"
+          <Link
+            href="/admin/harvester/config"
+            className="shrink-0 flex items-center gap-1.5 text-sm px-3 py-1.5 border border-neutral-700 rounded-lg hover:bg-neutral-800 transition text-neutral-300"
           >
-            Download template
-          </a>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/>
+              <path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>
+            </svg>
+            Configure
+          </Link>
         </div>
       </div>
 
-      {/* Pending review queue */}
-      <section className="mb-8">
-        <div className="sticky top-[56px] md:top-0 z-10 bg-neutral-950 -mx-4 px-4 md:-mx-0 md:px-0 py-2 mb-1 border-b border-neutral-800/50 flex items-center justify-between gap-3 flex-wrap">
-          <h2 className="text-xl font-semibold">
-            Pending Review{' '}
-            <span className="text-neutral-400 font-normal text-base">
-              ({pending.length})
+      <div className="max-w-4xl space-y-6">
+
+        {/* API key warning */}
+        {!hasApiKey && (
+          <div className="px-4 py-3 bg-yellow-950/60 border border-yellow-800 rounded-xl text-sm text-yellow-300 flex items-start gap-3">
+            <svg className="shrink-0 mt-0.5" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span>
+              <strong>YOUTUBE_API_KEY not set.</strong>{' '}
+              Add it to your <code className="font-mono bg-yellow-900/40 px-1 rounded">.env</code> file
+              to enable harvesting. Free quota: 10,000 units/day.
             </span>
-          </h2>
-          <ClearAllButton count={pending.length} />
-        </div>
-
-        <HarvesterQueue candidates={pending} existing={existing} />
-      </section>
-
-      {/* Recent runs */}
-      <section>
-        <h2 className="text-xl font-semibold mb-3">Recent Runs</h2>
-        {recent.length === 0 ? (
-          <p className="text-neutral-400 text-sm">No runs yet.</p>
-        ) : (
-          <div className="overflow-x-auto rounded-xl border border-neutral-800">
-            <table className="w-full text-sm min-w-[500px]">
-              <thead className="bg-neutral-900 text-neutral-400 text-left">
-                <tr>
-                  <th className="px-4 py-2 font-medium">Date</th>
-                  <th className="px-4 py-2 font-medium">Status</th>
-                  <th className="px-4 py-2 font-medium">Scanned</th>
-                  <th className="px-4 py-2 font-medium">New found</th>
-                  <th className="px-4 py-2 font-medium">Candidates</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-800">
-                {recent.map((r) => (
-                  <tr key={r.id} className="hover:bg-neutral-900/60">
-                    <td className="px-4 py-2 text-neutral-300">
-                      {new Date(r.startedAt).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-2">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          r.status === 'done'
-                            ? 'bg-green-900/60 text-green-300'
-                            : r.status === 'error'
-                            ? 'bg-red-900/60 text-red-300'
-                            : 'bg-yellow-900/60 text-yellow-300'
-                        }`}
-                      >
-                        {r.status}
-                      </span>
-                      {r.errorMsg && (
-                        <span className="ml-2 text-xs text-red-400">{r.errorMsg}</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 text-neutral-300">{r.scanned}</td>
-                    <td className="px-4 py-2 text-neutral-300">{r.newFound}</td>
-                    <td className="px-4 py-2 text-neutral-300">{r._count.candidates}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         )}
-      </section>
-    </div>
+
+        {/* ── Primary action: Run harvest ── */}
+        <div className="p-5 bg-neutral-900 border border-neutral-800 rounded-xl">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-base mb-1">Run Harvest</div>
+              <div className="text-sm text-neutral-400">
+                Searches{' '}
+                <span className="text-neutral-200">{config?.searchTerms.length ?? 4} terms</span>
+                {' · '}
+                <span className="text-neutral-200">{config?.ownChannels.length ?? 0} channels</span>
+                {' · up to '}
+                <span className="text-neutral-200">{config?.maxResultsPerTerm ?? 100}</span>
+                {' results each'}
+              </div>
+              {lastRun && (
+                <div className="flex items-center gap-2 mt-2 text-xs text-neutral-500">
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full inline-block ${
+                      lastRun.status === 'done'
+                        ? 'bg-green-500'
+                        : lastRun.status === 'error'
+                        ? 'bg-red-500'
+                        : 'bg-yellow-500'
+                    }`}
+                  />
+                  Last run {new Date(lastRun.startedAt).toLocaleString()} · {lastRun.newFound} new found
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <AutoRunToggle initial={!!(config as any)?.autoRun} compact />
+              <RunButton hasApiKey={hasApiKey} />
+            </div>
+          </div>
+        </div>
+
+        {/* ── Tools grid ── */}
+        <div>
+          <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">
+            Import & Utilities
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Playlist import */}
+            <ToolCard
+              title="Import from Playlist"
+              description="Paste a YouTube playlist URL or ID to import up to 200 videos as pending candidates."
+            >
+              <PlaylistImportButton />
+            </ToolCard>
+
+            {/* View count sync */}
+            <ToolCard
+              title="Sync View Counts"
+              description="Refreshes view counts for every song with a YouTube ID. Auto-runs every 2 days."
+            >
+              <SyncViewsButton lastSynced={settings?.viewsSyncedAt ?? null} />
+            </ToolCard>
+
+            {/* Excel import */}
+            <ToolCard
+              title="Import from Excel"
+              description={
+                <>
+                  Upload a spreadsheet with columns:{' '}
+                  <code className="text-neutral-300 font-mono text-[11px]">
+                    Title · Channel · Published · Views · Link · Source
+                  </code>
+                </>
+              }
+            >
+              <div className="flex items-center gap-3 flex-wrap">
+                <ImportExcelButton />
+                <a
+                  href="/api/admin/excel-template"
+                  download
+                  className="text-sm text-neutral-400 hover:text-neutral-200 underline underline-offset-2 transition"
+                >
+                  Download template
+                </a>
+              </div>
+            </ToolCard>
+
+            {/* Restore titles */}
+            <ToolCard
+              title="Restore YouTube Titles"
+              description="Restores full YouTube titles for songs imported with shortened titles. Only touches songs with a matching harvest candidate."
+            >
+              <BackfillTitlesButton />
+            </ToolCard>
+
+            {/* Re-queue */}
+            <ToolCard
+              title="Re-queue Deleted Songs"
+              description="Restore harvest candidates for songs you deleted, so you can re-approve them."
+            >
+              <ReQueueButton />
+            </ToolCard>
+          </div>
+        </div>
+
+        {/* ── Pending review queue ── */}
+        <section>
+          <div
+            className="sticky top-[56px] md:top-0 z-10 bg-neutral-950 -mx-4 px-4 md:-mx-0 md:px-0
+              py-2 mb-4 border-b border-neutral-800/50 flex items-center justify-between gap-3 flex-wrap"
+          >
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              Pending Review
+              {pending.length > 0 && (
+                <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-sm font-medium rounded-full tabular-nums">
+                  {pending.length}
+                </span>
+              )}
+            </h2>
+            <ClearAllButton count={pending.length} />
+          </div>
+
+          <HarvesterQueue candidates={pending} existing={existing} />
+        </section>
+
+        {/* ── Recent runs ── */}
+        {recent.length > 0 && (
+          <section>
+            <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">
+              Recent Runs
+            </h2>
+            <div className="overflow-x-auto rounded-xl border border-neutral-800">
+              <table className="w-full text-sm min-w-[480px]">
+                <thead className="bg-neutral-900/80 text-neutral-500 text-left">
+                  <tr>
+                    <th className="px-4 py-2.5 font-medium">Date</th>
+                    <th className="px-4 py-2.5 font-medium">Status</th>
+                    <th className="px-4 py-2.5 font-medium">Scanned</th>
+                    <th className="px-4 py-2.5 font-medium">New found</th>
+                    <th className="px-4 py-2.5 font-medium">Candidates</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-800/60">
+                  {recent.map((r) => (
+                    <tr key={r.id} className="hover:bg-neutral-900/40 transition-colors">
+                      <td className="px-4 py-2.5 text-neutral-300 text-xs">
+                        {new Date(r.startedAt).toLocaleString()}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                            r.status === 'done'
+                              ? 'bg-green-900/40 text-green-300'
+                              : r.status === 'error'
+                              ? 'bg-red-900/40 text-red-300'
+                              : 'bg-yellow-900/40 text-yellow-300'
+                          }`}
+                        >
+                          <span className={`w-1 h-1 rounded-full ${
+                            r.status === 'done' ? 'bg-green-400' : r.status === 'error' ? 'bg-red-400' : 'bg-yellow-400'
+                          }`} />
+                          {r.status}
+                        </span>
+                        {r.errorMsg && (
+                          <span className="ml-2 text-xs text-red-400">{r.errorMsg}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5 text-neutral-300 tabular-nums">{r.scanned}</td>
+                      <td className="px-4 py-2.5 tabular-nums">
+                        <span className={r.newFound > 0 ? 'text-green-400 font-medium' : 'text-neutral-400'}>
+                          {r.newFound > 0 ? `+${r.newFound}` : r.newFound}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 text-neutral-300 tabular-nums">{r._count.candidates}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+      </div>
     </>
+  );
+}
+
+function ToolCard({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="p-4 bg-neutral-900 border border-neutral-800 rounded-xl flex flex-col gap-3">
+      <div>
+        <div className="font-medium text-sm mb-1">{title}</div>
+        <p className="text-xs text-neutral-500 leading-relaxed">{description}</p>
+      </div>
+      {children}
+    </div>
   );
 }
