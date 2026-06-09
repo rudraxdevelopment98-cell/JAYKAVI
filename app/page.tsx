@@ -12,6 +12,7 @@ import { FadeUp } from '@/components/Reveal';
 import JsonLd from '@/components/JsonLd';
 import TraditionalHome from '@/components/traditional/TraditionalHome';
 import HeritageHome from '@/components/heritage/HeritageHome';
+import GarbaHome from '@/components/garba/GarbaHome';
 import HeroLuma from '@/components/HeroLuma';
 import TopVideosCarousel from '@/components/TopVideosCarousel';
 import { siteUrl, absoluteUrl } from '@/lib/seo';
@@ -30,7 +31,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  // The Traditional theme renders a completely different devotional layout.
   const activeTheme = await getActiveTheme();
   if (activeTheme === 'traditional') {
     const tradSettings = await getTraditionalSettings();
@@ -47,6 +47,14 @@ export default async function Home() {
       <>
         <HeroLuma mode="image" image={heritageSettings.heroPhoto} />
         <HeritageHome settings={heritageSettings} />
+      </>
+    );
+  }
+  if (activeTheme === 'garba') {
+    return (
+      <>
+        <HeroLuma mode="dark" />
+        <GarbaHome />
       </>
     );
   }
@@ -67,7 +75,6 @@ export default async function Home() {
   const name = l.displayName ?? l.name;
   const base = siteUrl();
 
-  // Build sameAs links from stored social profiles
   const sameAs: string[] = [base];
   if (social.youtube) sameAs.push(social.youtube);
   if (social.instagram) sameAs.push(`https://www.instagram.com/${social.instagram.replace(/^@/, '')}`);
@@ -119,7 +126,6 @@ export default async function Home() {
         </section>
       )}
 
-      {/* Top 5 most-viewed videos — auto-scrolling carousel */}
       {topVideos.length >= 1 && (
         <section className="section-pad" style={{ position: 'relative', zIndex: 2 }}>
           <SectionHead tag="Top Videos" title="Most watched on YouTube" />
@@ -127,7 +133,6 @@ export default async function Home() {
         </section>
       )}
 
-      {/* Journey teaser */}
       <section className="section-pad" style={{ position: 'relative', zIndex: 2, background: 'linear-gradient(180deg,transparent,var(--panel),transparent)' }}>
         <SectionHead center tag="The Journey" title={`From ${l.bornPlace?.split(',')[0] ?? 'a village'} to the whole of Gujarat`} />
         <div style={{ maxWidth: 700, margin: '0 auto' }}>
@@ -158,17 +163,10 @@ export default async function Home() {
       )}
 
       <style>{`
-        .home-journey-row {
-          display: flex; gap: 24px; padding: 18px 0;
-          border-bottom: 1px solid var(--line);
-          align-items: flex-start;
-        }
+        .home-journey-row { display: flex; gap: 24px; padding: 18px 0; border-bottom: 1px solid var(--line); align-items: flex-start; }
         .home-journey-row:last-of-type { border-bottom: none; }
         .home-journey-year { flex: 0 0 64px; font-size: 1.05rem; font-weight: 600; padding-top: 2px; }
-        @media (max-width: 480px) {
-          .home-journey-year { flex: 0 0 50px; font-size: .95rem; }
-          .home-journey-row  { gap: 14px; }
-        }
+        @media (max-width: 480px) { .home-journey-year { flex: 0 0 50px; font-size: .95rem; } .home-journey-row { gap: 14px; } }
       `}</style>
     </>
   );
