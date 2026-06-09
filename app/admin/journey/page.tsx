@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,22 +10,20 @@ export default async function JourneyAdminPage() {
   });
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-semibold">Journey</h1>
-          <p className="text-neutral-400 mt-1 text-sm">
-            {events.length} milestones on the timeline
-          </p>
-        </div>
-        <Link
-          href="/admin/journey/new"
-          className="shrink-0 px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition text-sm"
-        >
-          + New Milestone
-        </Link>
-      </div>
-
+    <>
+      <AdminPageHeader
+        title={<>Journey</>}
+        subtitle={<>{events.length} milestones on the timeline</>}
+        actions={
+          <Link
+            href="/admin/journey/new"
+            className="shrink-0 px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition text-sm"
+          >
+            + New Milestone
+          </Link>
+        }
+      />
+      <div>
       {events.length === 0 ? (
         <div className="px-5 py-8 bg-neutral-900/60 border border-neutral-800 rounded-xl text-center text-neutral-400">
           No journey milestones yet.
@@ -57,6 +56,7 @@ export default async function JourneyAdminPage() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

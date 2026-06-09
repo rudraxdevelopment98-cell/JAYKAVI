@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -180,15 +181,12 @@ function GroupCard({
 
 export default function SiteMapPage() {
   return (
-    <div className="max-w-7xl space-y-10">
-
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold">Site Map</h1>
-        <p className="text-sm text-neutral-400 mt-1">
-          Full architecture overview — every public route, admin section, API endpoint, and data model in one place.
-        </p>
-      </div>
+    <>
+      <AdminPageHeader
+        title="Site Map"
+        subtitle="Full architecture overview — every public route, admin section, API endpoint, and data model in one place."
+      />
+      <div className="max-w-7xl space-y-10">
 
       {/* ── Public + Admin columns ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -361,6 +359,7 @@ export default function SiteMapPage() {
       <p className="text-xs text-neutral-700 pb-6">
         Auto-generated from source — update <code className="text-neutral-600">app/admin/sitemap/page.tsx</code> as routes change.
       </p>
-    </div>
+      </div>
+    </>
   );
 }

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,15 +37,19 @@ export default async function ActivityLogPage() {
   const logs = await getRecentLogs();
 
   return (
-    <div className="max-w-4xl">
-      <h1 className="text-3xl font-semibold">Activity Log</h1>
-      <p className="text-neutral-400 mt-1 mb-6 text-sm">
-        Sign-ins and content changes from the last 7 days
-        {logs.length > 0 && <> · {logs.length} event{logs.length !== 1 ? 's' : ''}</>}.
-        Older entries are removed automatically to save storage.
-      </p>
-
-      {logs.length === 0 ? (
+    <>
+      <AdminPageHeader
+        title={<>Activity Log</>}
+        subtitle={
+          <>
+            Sign-ins and content changes from the last 7 days
+            {logs.length > 0 && <> · {logs.length} event{logs.length !== 1 ? 's' : ''}</>}.
+            Older entries are removed automatically to save storage.
+          </>
+        }
+      />
+      <div className="max-w-4xl">
+        {logs.length === 0 ? (
         <div className="px-5 py-10 bg-neutral-900/60 border border-neutral-800 rounded-xl text-center text-neutral-400">
           No activity in the last 7 days.
         </div>
@@ -90,6 +95,7 @@ export default async function ActivityLogPage() {
       <p className="text-xs text-neutral-600 mt-6">
         Older events are not shown here. Each line records who did what and when.
       </p>
-    </div>
+      </div>
+    </>
   );
 }

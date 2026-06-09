@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import MergeDuplicatesButton from './MergeDuplicatesButton';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,23 +12,23 @@ export default async function SingersAdminPage() {
   });
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-semibold">Singers</h1>
-          <p className="text-neutral-400 mt-1 text-sm">{singers.length} performers</p>
-        </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <MergeDuplicatesButton />
-          <Link
-            href="/admin/singers/new"
-            className="shrink-0 px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition text-sm"
-          >
-            + New Singer
-          </Link>
-        </div>
-      </div>
-
+    <>
+      <AdminPageHeader
+        title={<>Singers</>}
+        subtitle={<>{singers.length} performers</>}
+        actions={
+          <>
+            <MergeDuplicatesButton />
+            <Link
+              href="/admin/singers/new"
+              className="shrink-0 px-4 py-2 bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition text-sm"
+            >
+              + New Singer
+            </Link>
+          </>
+        }
+      />
+      <div>
       {singers.length === 0 ? (
         <div className="px-5 py-8 bg-neutral-900/60 border border-neutral-800 rounded-xl text-center text-neutral-400">
           No singers yet.
@@ -59,6 +60,7 @@ export default async function SingersAdminPage() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

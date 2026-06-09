@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { isEnvAdmin } from '@/auth';
 import { saveMyAccount } from './actions';
 import AccountForm from './AccountForm';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,13 +34,18 @@ export default async function MyAccountPage() {
   const permissions: string[] = (session as any).permissions ?? [];
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-3xl font-semibold mb-1">My Profile</h1>
-      <p className="text-sm text-neutral-400 mb-8">
-        Your personal admin details. Your sign-in email and access level are managed by the owner and can’t be changed here.
-      </p>
-
-      <AccountForm profile={profile} permissions={permissions} action={saveMyAccount} />
-    </div>
+    <>
+      <AdminPageHeader
+        title={<>My Profile</>}
+        subtitle={
+          <>
+            Your personal admin details. Your sign-in email and access level are managed by the owner and can’t be changed here.
+          </>
+        }
+      />
+      <div className="max-w-2xl">
+        <AccountForm profile={profile} permissions={permissions} action={saveMyAccount} />
+      </div>
+    </>
   );
 }

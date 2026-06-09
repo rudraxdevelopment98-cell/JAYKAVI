@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,14 +46,18 @@ export default async function AnalyticsPage() {
   const last30 = series.reduce((a, s) => a + s.count, 0);
 
   return (
-    <div className="max-w-4xl">
-      <h1 className="text-3xl font-semibold mb-1">Analytics</h1>
-      <p className="text-neutral-400 mb-6 text-sm">
-        Privacy-friendly on-site reads. No cookies or personal data are collected —
-        just how many times each song page has been opened.
-      </p>
-
-      {!ok && (
+    <>
+      <AdminPageHeader
+        title={<>Analytics</>}
+        subtitle={
+          <>
+            Privacy-friendly on-site reads. No cookies or personal data are collected —
+            just how many times each song page has been opened.
+          </>
+        }
+      />
+      <div className="max-w-4xl">
+        {!ok && (
         <div className="mb-6 px-4 py-3 bg-yellow-950/60 border border-yellow-800 rounded-xl text-sm text-yellow-300">
           Analytics tables aren&apos;t ready yet. They&apos;ll appear after the next deploy
           finishes setting up the database.
@@ -132,7 +137,8 @@ export default async function AnalyticsPage() {
           </div>
         )}
       </section>
-    </div>
+      </div>
+    </>
   );
 }
 

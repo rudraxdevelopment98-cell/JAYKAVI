@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { saveProfile } from './actions';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,12 +39,16 @@ export default async function ProfilePage() {
     'w-full px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-md text-sm focus:outline-none focus:border-neutral-600';
 
   return (
-    <div className="max-w-3xl">
-      <h1 className="text-3xl font-semibold mb-2">Artist Profile</h1>
-      <p className="text-neutral-400 mb-8">
-        Core information shown across the site — hero, about page, footer credits.
-      </p>
-
+    <>
+      <AdminPageHeader
+        title={<>Artist Profile</>}
+        subtitle={
+          <>
+            Core information shown across the site — hero, about page, footer credits.
+          </>
+        }
+      />
+      <div className="max-w-3xl">
       <form action={saveProfile} className="space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -218,5 +223,6 @@ export default async function ProfilePage() {
         </div>
       </form>
     </div>
+    </>
   );
 }

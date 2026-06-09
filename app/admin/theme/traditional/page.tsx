@@ -1,10 +1,10 @@
-import Link from 'next/link';
 import { getTraditionalSettings } from '@/lib/data';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { saveTraditionalSettings } from './actions';
 import ImageField from './ImageField';
 import VideoField from './VideoField';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,19 +25,14 @@ export default async function TraditionalSettingsPage() {
   ] as const;
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex items-center gap-3 mb-1">
-        <Link href="/admin/theme" className="text-sm text-neutral-400 hover:text-neutral-200 transition">
-          ← Site Theme
-        </Link>
-        <span className="text-neutral-700">/</span>
-        <span className="text-sm text-neutral-300">Traditional Settings</span>
-      </div>
-      <h1 className="text-3xl font-semibold mb-1">🎨 Traditional Theme Settings</h1>
-      <p className="text-sm text-neutral-400 mb-8">
-        Customize text and images shown on the Traditional theme. Changes take effect immediately for all visitors.
-      </p>
-
+    <>
+      <AdminPageHeader
+        title="🎨 Traditional Theme Settings"
+        backHref="/admin/theme"
+        backLabel="Site Theme"
+        subtitle="Customize text and images shown on the Traditional theme. Changes take effect immediately for all visitors."
+      />
+      <div className="max-w-2xl">
       <form action={saveTraditionalSettings} className="space-y-8">
 
         {/* ── Hero section ── */}
@@ -122,6 +117,7 @@ export default async function TraditionalSettingsPage() {
           Save Traditional Settings
         </button>
       </form>
-    </div>
+      </div>
+    </>
   );
 }

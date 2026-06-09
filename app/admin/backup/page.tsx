@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { isSheetsConfigured } from '@/lib/sheetsSync';
 import RestoreButton from './RestoreButton';
 import SyncSheetsButton from './SyncSheetsButton';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,15 +39,19 @@ export default async function BackupPage() {
   const sheetsReady = isSheetsConfigured();
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-3xl font-semibold">Backup</h1>
-      <p className="text-neutral-400 mt-1 mb-6 text-sm">
-        A full snapshot of all site content (songs, singers, collections, journey, profile,
-        contact, harvester config and admins). It runs automatically once a week and overwrites
-        the previous one, so it never uses extra storage. You can also run it now and download a
-        copy to keep safe.
-      </p>
-
+    <>
+      <AdminPageHeader
+        title={<>Backup</>}
+        subtitle={
+          <>
+            A full snapshot of all site content (songs, singers, collections, journey, profile,
+            contact, harvester config and admins). It runs automatically once a week and overwrites
+            the previous one, so it never uses extra storage. You can also run it now and download a
+            copy to keep safe.
+          </>
+        }
+      />
+      <div className="max-w-2xl">
       <div className="p-5 rounded-xl border border-neutral-800 bg-neutral-900/60 mb-6">
         {backup ? (
           <>
@@ -136,6 +141,7 @@ GOOGLE_SHEETS_BACKUP_ID="your-sheet-id-here"`}</pre>
         Activity-log entries older than {LOG_RETENTION_DAYS} days are cleared during each backup to
         keep storage low. The backup is stored as a single record that is overwritten every time.
       </p>
-    </div>
+      </div>
+    </>
   );
 }

@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
-import Link from 'next/link';
 import { saveHarvestConfig } from '../actions';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,13 +18,9 @@ export default async function HarvestConfigPage() {
   const labelCls = 'block text-sm font-medium text-neutral-300 mb-1';
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/harvester" className="text-sm text-neutral-400 hover:text-white">
-          ← Harvester
-        </Link>
-        <h1 className="text-3xl font-semibold">Harvest Config</h1>
-      </div>
+    <>
+      <AdminPageHeader title="Harvest Config" backHref="/admin/harvester" backLabel="Harvester" />
+      <div className="max-w-2xl">
 
       {/* How the filter works */}
       <div className="mb-8 p-4 border border-amber-800/40 bg-amber-950/20 rounded-xl text-sm text-neutral-300 space-y-2">
@@ -133,6 +129,7 @@ export default async function HarvestConfigPage() {
           </button>
         </div>
       </form>
-    </div>
+      </div>
+    </>
   );
 }

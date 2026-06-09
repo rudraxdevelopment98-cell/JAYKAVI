@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import PostForm from '../PostForm';
 import DeleteButton from '../../_components/DeleteButton';
 import { updatePost, deletePost } from '../actions';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,23 +13,22 @@ export default async function EditPostPage({ params }: { params: { id: string } 
   if (!post) notFound();
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/blog" className="text-sm text-neutral-400 hover:text-white flex-shrink-0">
-          ← Blog
-        </Link>
-        <h1 className="text-3xl font-semibold truncate min-w-0 flex-1">{post.title}</h1>
-        {post.published && (
+    <>
+      <AdminPageHeader
+        title={post.title}
+        backHref="/admin/blog"
+        backLabel="Blog"
+        actions={post.published ? (
           <Link
             href={`/blog/${post.slug}`}
             target="_blank"
-            className="text-sm text-neutral-400 hover:text-white flex-shrink-0"
+            className="text-sm text-neutral-400 hover:text-white"
           >
             View on site ↗
           </Link>
-        )}
-      </div>
-
+        ) : undefined}
+      />
+      <div className="max-w-2xl">
       <PostForm
         initial={{
           title: post.title,
@@ -52,6 +52,7 @@ export default async function EditPostPage({ params }: { params: { id: string } 
           confirmText={`Delete "${post.title}"?`}
         />
       </div>
-    </div>
+      </div>
+    </>
   );
 }

@@ -95,7 +95,7 @@ export default async function NotebookPage({
 
       {/* ── Notes list ── */}
       <div className="flex-1 p-4 md:p-8">
-        <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
+        <div className="flex items-center justify-between mb-4 gap-4 flex-wrap sticky top-[56px] md:top-0 z-20 -mx-4 px-4 md:-mx-8 md:px-8 -mt-4 md:-mt-8 pt-4 md:pt-8 pb-4 bg-neutral-950/90 backdrop-blur-md border-b border-neutral-800/60">
           <div>
             <h1 className="text-2xl font-semibold">{activeLabel}</h1>
             <p className="text-sm text-neutral-400 mt-0.5">{notes.length} note{notes.length !== 1 ? 's' : ''}</p>

@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { ADMIN_SECTIONS } from '@/lib/permissions';
 import { logActivity } from '@/lib/activity';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,12 +113,12 @@ export default async function AdminAdminsPage() {
   const labelCls = 'block text-xs font-medium text-neutral-400 mb-1';
 
   return (
-    <div className="max-w-3xl">
-      <h1 className="text-3xl font-semibold">Admins</h1>
-      <p className="text-neutral-400 mt-1 mb-6 text-sm">
-        People who can sign in and manage this site. Anyone added here can log in with their
-        Google account using the email below.
-      </p>
+    <>
+      <AdminPageHeader
+        title="Admins"
+        subtitle="People who can sign in and manage this site. Anyone added here can log in with their Google account using the email below."
+      />
+      <div className="max-w-3xl">
 
       {/* ── Owners ── */}
       <h2 className="text-sm font-semibold text-neutral-300 uppercase tracking-wide mb-2">
@@ -340,6 +341,7 @@ export default async function AdminAdminsPage() {
         details[open] .details-chevron { transform: rotate(180deg); }
         details[open] { border-color: rgb(64 64 64 / 0.6); }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }

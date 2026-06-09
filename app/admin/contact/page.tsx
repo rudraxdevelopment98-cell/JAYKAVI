@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { saveContact } from './actions';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,12 +31,16 @@ export default async function ContactPage() {
   const labelCls = 'block text-sm font-medium text-neutral-300 mb-1';
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-3xl font-semibold mb-2">Contact & Social</h1>
-      <p className="text-neutral-400 mb-8 text-sm">
-        Public social links shown on the site and private contact details (admin-only).
-      </p>
-
+    <>
+      <AdminPageHeader
+        title={<>Contact & Social</>}
+        subtitle={
+          <>
+            Public social links shown on the site and private contact details (admin-only).
+          </>
+        }
+      />
+      <div className="max-w-2xl">
       <form action={saveContact} className="space-y-8">
         {/* Public social */}
         <section className="space-y-4">
@@ -142,5 +147,6 @@ export default async function ContactPage() {
         </div>
       </form>
     </div>
+    </>
   );
 }

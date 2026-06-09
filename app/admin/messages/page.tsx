@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,31 +36,33 @@ export default async function AdminMessagesPage() {
   const unreadCount = messages.filter((m) => !m.read).length;
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-semibold">Contact Messages</h1>
-          <p className="text-neutral-400 mt-1">
+    <>
+      <AdminPageHeader
+        title={<>Contact Messages</>}
+        subtitle={
+          <>
             {messages.length} message{messages.length !== 1 ? 's' : ''} total
             {unreadCount > 0 && (
               <span className="ml-2 px-2 py-0.5 bg-blue-900/60 text-blue-300 text-xs rounded-full">
                 {unreadCount} unread
               </span>
             )}
-          </p>
-        </div>
-        {unreadCount > 0 && (
-          <form action={markAllRead}>
-            <button
-              type="submit"
-              className="shrink-0 text-sm px-3 py-1.5 border border-neutral-700 rounded-md hover:bg-neutral-800 transition"
-            >
-              Mark all read
-            </button>
-          </form>
-        )}
-      </div>
-
+          </>
+        }
+        actions={
+          unreadCount > 0 ? (
+            <form action={markAllRead}>
+              <button
+                type="submit"
+                className="shrink-0 text-sm px-3 py-1.5 border border-neutral-700 rounded-md hover:bg-neutral-800 transition"
+              >
+                Mark all read
+              </button>
+            </form>
+          ) : undefined
+        }
+      />
+      <div className="max-w-4xl">
       {messages.length === 0 ? (
         <div className="px-5 py-10 bg-neutral-900/60 border border-neutral-800 rounded-xl text-center text-neutral-400">
           No messages yet.
@@ -117,6 +120,7 @@ export default async function AdminMessagesPage() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

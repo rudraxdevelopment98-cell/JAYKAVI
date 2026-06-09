@@ -1,10 +1,10 @@
 import { prisma } from '@/lib/prisma';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SingerForm from '../SingerForm';
 import DeleteButton from '../../_components/DeleteButton';
 import SongMultiSelect from '../../_components/SongMultiSelect';
 import { updateSinger, deleteSinger, setSingerSongs } from '../actions';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,14 +22,9 @@ export default async function EditSingerPage({ params }: { params: { id: string 
   if (!singer) notFound();
 
   return (
-    <div className="max-w-xl">
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/singers" className="text-sm text-neutral-400 hover:text-white flex-shrink-0">
-          ← Singers
-        </Link>
-        <h1 className="text-3xl font-semibold truncate min-w-0 flex-1">{singer.name}</h1>
-      </div>
-
+    <>
+      <AdminPageHeader title={singer.name} backHref="/admin/singers" backLabel="Singers" />
+      <div className="max-w-xl">
       <SingerForm
         initial={{
           name: singer.name,
@@ -62,6 +57,7 @@ export default async function EditSingerPage({ params }: { params: { id: string 
           confirmText={`Delete "${singer.name}" and remove from all songs?`}
         />
       </div>
-    </div>
+      </div>
+    </>
   );
 }

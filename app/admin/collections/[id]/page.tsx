@@ -1,10 +1,10 @@
 import { prisma } from '@/lib/prisma';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import CollectionForm from '../CollectionForm';
 import DeleteButton from '../../_components/DeleteButton';
 import SongMultiSelect from '../../_components/SongMultiSelect';
 import { updateCollection, deleteCollection, setCollectionSongs } from '../actions';
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,14 +22,9 @@ export default async function EditCollectionPage({ params }: { params: { id: str
   if (!c) notFound();
 
   return (
-    <div className="max-w-xl">
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/collections" className="text-sm text-neutral-400 hover:text-white">
-          ← Collections
-        </Link>
-        <h1 className="text-3xl font-semibold truncate">{c.title}</h1>
-      </div>
-
+    <>
+      <AdminPageHeader title={c.title} backHref="/admin/collections" backLabel="Collections" />
+      <div className="max-w-xl">
       <CollectionForm
         initial={{
           title: c.title,
@@ -64,6 +59,7 @@ export default async function EditCollectionPage({ params }: { params: { id: str
           confirmText={`Delete "${c.title}"? Songs will be detached (not deleted).`}
         />
       </div>
-    </div>
+      </div>
+    </>
   );
 }
