@@ -74,6 +74,28 @@ export default async function TraditionalSettingsPage() {
             defaultValue={s.heroBgVideo}
             note="Upload an MP4/WebM video for an animated background. Plays muted & looped with blur + gold gradient overlay."
           />
+
+          <div className="grid grid-cols-2 gap-4 pt-2 border-t border-neutral-800">
+            <div className="col-span-2 text-xs text-neutral-500 -mb-1">
+              Fine-tune how the background image/video looks. Only applies when one is set above.
+            </div>
+            <div>
+              <label className={labelCls}>Opacity ({s.heroBgOpacity}%)</label>
+              <input type="range" name="heroBgOpacity" min={0} max={100} step={1} defaultValue={s.heroBgOpacity} className="w-full" />
+            </div>
+            <div>
+              <label className={labelCls}>Blur ({s.heroBgBlur}px)</label>
+              <input type="range" name="heroBgBlur" min={0} max={20} step={1} defaultValue={s.heroBgBlur} className="w-full" />
+            </div>
+            <div>
+              <label className={labelCls}>Brightness ({s.heroBgBright}%)</label>
+              <input type="range" name="heroBgBright" min={30} max={150} step={1} defaultValue={s.heroBgBright} className="w-full" />
+            </div>
+            <div>
+              <label className={labelCls}>Dark Overlay ({s.heroOverlay}%)</label>
+              <input type="range" name="heroOverlay" min={0} max={100} step={1} defaultValue={s.heroOverlay} className="w-full" />
+            </div>
+          </div>
         </section>
 
         {/* ── Feature cards ── */}

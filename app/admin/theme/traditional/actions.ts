@@ -19,6 +19,11 @@ export async function saveTraditionalSettings(formData: FormData) {
       return p === 'https:' || p === 'http:' ? v : null;
     } catch { return null; }
   }
+  function num(key: string, fallback: number, min: number, max: number): number {
+    const v = Number(formData.get(key));
+    if (!Number.isFinite(v)) return fallback;
+    return Math.min(max, Math.max(min, Math.round(v)));
+  }
 
   const settings: TraditionalSettings = {
     mantra: str('mantra', '॥ જય શ્રી કૃષ્ણ ॥'),
@@ -26,6 +31,10 @@ export async function saveTraditionalSettings(formData: FormData) {
     heroDeity:    nullable('heroDeity'),
     heroBg:       nullable('heroBg'),
     heroBgVideo:  nullable('heroBgVideo'),
+    heroBgOpacity: num('heroBgOpacity', 100, 0, 100),
+    heroBgBlur:    num('heroBgBlur', 0, 0, 20),
+    heroBgBright:  num('heroBgBright', 100, 30, 150),
+    heroOverlay:   num('heroOverlay', 80, 0, 100),
     features: [
       { title: str('f1title', 'ભક્તિ'),    desc: str('f1desc', 'શુદ્ધ ભાવ અને શ્રદ્ધા') },
       { title: str('f2title', 'સંગીત'),    desc: str('f2desc', 'સુરોથી સર્જાયેલ ભક્તિ') },
