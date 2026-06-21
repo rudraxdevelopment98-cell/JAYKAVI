@@ -99,6 +99,9 @@ export default async function TraditionalHome({ settings }: { settings: Traditio
   const deityUrl     = safeUrl(settings.heroDeity);
   const heroBgUrl    = safeUrl(settings.heroBg);
   const heroBgVideo  = safeUrl(settings.heroBgVideo);
+  const bgFilter     = `blur(${settings.heroBgBlur}px) brightness(${settings.heroBgBright}%)`;
+  const bgOpacity    = settings.heroBgOpacity / 100;
+  const overlayAlpha = settings.heroOverlay / 100;
 
   const featureIcons = [<BookOpen key="book" />, <MusicNote key="music" />, <Scroll key="scroll" />, <Quill key="quill" />];
   const features = settings.features.map((f, i) => ({ icon: featureIcons[i], t: f.title, d: f.desc }));
@@ -113,32 +116,33 @@ export default async function TraditionalHome({ settings }: { settings: Traditio
     <div className="th-root">
 
       {/* ══════════════ HERO — Library title page ══════════════ */}
-      <header
-        className="th-hero"
-        style={!heroBgVideo && heroBgUrl ? {
-          backgroundImage: `linear-gradient(to bottom right, rgba(10,7,4,.85) 0%, rgba(8,6,3,.75) 100%), url(${heroBgUrl})`,
-          backgroundSize: 'cover', backgroundPosition: 'center',
-        } : undefined}
-      >
-        {heroBgVideo && (
-          <>
-            <video
-              src={heroBgVideo}
-              autoPlay
-              muted
-              loop
-              playsInline
-              style={{
-                position: 'absolute', inset: 0, width: '100%', height: '100%',
-                objectFit: 'cover', filter: 'blur(3px) brightness(0.45)',
-                transform: 'scale(1.05)',
-              }}
-            />
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(to bottom right, rgba(10,7,4,.6) 0%, rgba(30,15,0,.5) 60%, rgba(8,6,3,.7) 100%)',
-            }} />
-          </>
+      <header className="th-hero">
+        {heroBgVideo ? (
+          <video
+            src={heroBgVideo}
+            autoPlay
+            muted
+            loop
+            playsInline
+            style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%',
+              objectFit: 'cover', filter: bgFilter, opacity: bgOpacity,
+              transform: 'scale(1.05)',
+            }}
+          />
+        ) : heroBgUrl ? (
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: `url(${heroBgUrl})`,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            filter: bgFilter, opacity: bgOpacity,
+          }} />
+        ) : null}
+        {(heroBgVideo || heroBgUrl) && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: `linear-gradient(to bottom right, rgba(10,7,4,${overlayAlpha}) 0%, rgba(8,6,3,${overlayAlpha * 0.88}) 100%)`,
+          }} />
         )}
         <div className="th-hero-inner" style={{ position: 'relative', zIndex: 1 }}>
           <p className="th-mantra">{settings.mantra}</p>

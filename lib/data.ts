@@ -332,6 +332,10 @@ export interface TraditionalSettings {
   heroDeity: string | null;
   heroBg: string | null;
   heroBgVideo: string | null;
+  heroBgOpacity: number;
+  heroBgBlur: number;
+  heroBgBright: number;
+  heroOverlay: number;
   features: [
     { title: string; desc: string },
     { title: string; desc: string },
@@ -346,6 +350,10 @@ export const TRAD_DEFAULTS: TraditionalSettings = {
   heroDeity: null,
   heroBg: null,
   heroBgVideo: null,
+  heroBgOpacity: 100,
+  heroBgBlur: 0,
+  heroBgBright: 100,
+  heroOverlay: 80,
   features: [
     { title: 'ભક્તિ',    desc: 'શુદ્ધ ભાવ અને શ્રદ્ધા' },
     { title: 'સંગીત',    desc: 'સુરોથી સર્જાયેલ ભક્તિ' },
@@ -365,6 +373,10 @@ export async function getTraditionalSettings(): Promise<TraditionalSettings> {
       heroDeity:    row.tradHeroDeity     || null,
       heroBg:       row.tradHeroBg        || null,
       heroBgVideo:  row.tradHeroBgVideo   || null,
+      heroBgOpacity: row.tradHeroBgOpacity ?? d.heroBgOpacity,
+      heroBgBlur:    row.tradHeroBgBlur    ?? d.heroBgBlur,
+      heroBgBright:  row.tradHeroBgBright  ?? d.heroBgBright,
+      heroOverlay:   row.tradHeroOverlay   ?? d.heroOverlay,
       features: [
         { title: row.tradF1Title || d.features[0].title, desc: row.tradF1Desc || d.features[0].desc },
         { title: row.tradF2Title || d.features[1].title, desc: row.tradF2Desc || d.features[1].desc },
@@ -386,6 +398,10 @@ export async function setTraditionalSettings(s: TraditionalSettings): Promise<vo
       tradHeroDeity:     s.heroDeity     || null,
       tradHeroBg:        s.heroBg        || null,
       tradHeroBgVideo:   s.heroBgVideo   || null,
+      tradHeroBgOpacity: s.heroBgOpacity,
+      tradHeroBgBlur:    s.heroBgBlur,
+      tradHeroBgBright:  s.heroBgBright,
+      tradHeroOverlay:   s.heroOverlay,
       tradF1Title: s.features[0].title, tradF1Desc: s.features[0].desc,
       tradF2Title: s.features[1].title, tradF2Desc: s.features[1].desc,
       tradF3Title: s.features[2].title, tradF3Desc: s.features[2].desc,
@@ -398,6 +414,10 @@ export async function setTraditionalSettings(s: TraditionalSettings): Promise<vo
       tradHeroDeity:     s.heroDeity     || null,
       tradHeroBg:        s.heroBg        || null,
       tradHeroBgVideo:   s.heroBgVideo   || null,
+      tradHeroBgOpacity: s.heroBgOpacity,
+      tradHeroBgBlur:    s.heroBgBlur,
+      tradHeroBgBright:  s.heroBgBright,
+      tradHeroOverlay:   s.heroOverlay,
       tradF1Title: s.features[0].title, tradF1Desc: s.features[0].desc,
       tradF2Title: s.features[1].title, tradF2Desc: s.features[1].desc,
       tradF3Title: s.features[2].title, tradF3Desc: s.features[2].desc,
