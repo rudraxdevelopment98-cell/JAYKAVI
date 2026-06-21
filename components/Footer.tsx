@@ -119,6 +119,9 @@ export default async function Footer() {
       <p className="text-muted" style={{ fontSize: '.8rem', marginTop: 8, opacity: .7 }}>
         © {new Date().getFullYear()} · All lyrics © their respective rights holders.
       </p>
+      <p className="text-muted" style={{ fontSize: '.72rem', marginTop: 6, opacity: .5 }}>
+        Developed, designed &amp; managed by Kuldeep J @ RD - IT - Services © 2026
+      </p>
     </footer>
   );
 }
@@ -177,7 +180,7 @@ function TraditionalFooter({
 
       <div className="tf-bottom">
         <span>© {new Date().getFullYear()} {name}. All Rights Reserved.</span>
-        <span>Made with ♥ for devotional music</span>
+        <span>Developed, designed &amp; managed by Kuldeep J @ RD - IT - Services © 2026</span>
       </div>
 
       {/* CSS deity corner flourish */}
