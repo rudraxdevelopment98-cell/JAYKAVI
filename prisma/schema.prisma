@@ -287,6 +287,10 @@ model SiteSettings {
   tradHeroDeity     String? // right hero arch — deity image URL
   tradHeroBg        String? // optional full-bleed hero background image
   tradHeroBgVideo   String? // optional full-bleed hero background video
+  tradHeroBgOpacity Int     @default(100) // 0-100 — opacity of the bg image/video layer
+  tradHeroBgBlur    Int     @default(0)   // 0-20px — blur applied to the bg image/video
+  tradHeroBgBright  Int     @default(100) // 30-150% — brightness filter on the bg image/video
+  tradHeroOverlay   Int     @default(80)  // 0-100 — strength of the dark gradient overlay on top
   tradF1Title       String  @default("ભક્તિ")
   tradF1Desc        String  @default("શુદ્ધ ભાવ અને શ્રદ્ધા")
   tradF2Title       String  @default("સંગીત")
